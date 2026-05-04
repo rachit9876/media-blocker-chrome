@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediaBlock</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --off-bg: #0f0f11;
+      --off-card: #1a1a1f;
+      --off-border: #2a2a32;
+      --on-accent: #ff3b3b;
+      --on-glow: rgba(255,59,59,0.35);
+      --on-glow-soft: rgba(255,59,59,0.12);
+      --text-primary: #f0f0f5;
+      --text-secondary: #7a7a8a;
+      --text-dim: #3a3a4a;
+      --radius: 18px;
+      --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    body {
+      width: 300px;
+      background: var(--off-bg);
+      font-family: 'Space Mono', monospace;
+      color: var(--text-primary);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ── Background grain texture ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--off-card);
+      border: 1px solid var(--off-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .logo-mark svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .header-text .name {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-primary);
+    }
+
+    .header-text .tagline {
+      font-size: 10px;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      margin-top: 1px;
+    }
+
+    /* ── Status Card ── */
+    .status-card {
+      background: var(--off-card);
+      border: 1px solid var(--off-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .status-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, var(--on-glow-soft) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Status indicator */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .status-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--text-secondary);
+      transition: color 0.3s ease;
+      text-transform: uppercase;
+    }
+
+    /* ── Toggle Switch ── */
+    .toggle-wrapper {
+      position: relative;
+    }
+
+    .toggle-input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .toggle-track {
+      width: 72px;
+      height: 40px;
+      background: #1e1e26;
+      border: 2px solid var(--off-border);
+      border-radius: 100px;
+      position: relative;
+      transition: all var(--transition);
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-thumb svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0.4;
+      transition: opacity 0.3s ease;
+    }
+
+    /* ── Blocked count ── */
+    .blocked-count {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+      text-align: center;
+    }
+
+    /* ── Stats Row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-box {
+      background: var(--off-card);
+      border: 1px solid var(--off-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: border-color 0.3s ease;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      transition: color 0.3s ease;
+      line-height: 1;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+
+    /* ════════════════════════════════
+       ENABLED STATE
+    ════════════════════════════════ */
+    body.is-enabled .status-card {
+      border-color: var(--on-accent);
+      box-shadow: 0 0 24px var(--on-glow), 0 0 0 1px var(--on-accent) inset;
+    }
+
+    body.is-enabled .status-card::before {
+      opacity: 1;
+    }
+
+    body.is-enabled .status-dot {
+      background: var(--on-accent);
+      box-shadow: 0 0 8px var(--on-accent);
+      animation: pulse-dot 1.8s ease-in-out infinite;
+    }
+
+    body.is-enabled .status-label {
+      color: var(--on-accent);
+    }
+
+    body.is-enabled .toggle-track {
+      background: var(--on-accent);
+      border-color: var(--on-accent);
+      box-shadow: 0 0 12px var(--on-glow);
+    }
+
+    body.is-enabled .toggle-thumb {
+      left: calc(100% - 32px);
+      background: #fff;
+    }
+
+    body.is-enabled .toggle-thumb svg {
+      opacity: 1;
+    }
+
+    body.is-enabled .blocked-count {
+      color: var(--on-accent);
+    }
+
+    body.is-enabled .logo-mark {
+      border-color: var(--on-accent);
+      box-shadow: 0 0 10px var(--on-glow);
+    }
+
+    body.is-enabled .stat-box {
+      border-color: #2a1a1a;
+    }
+
+    body.is-enabled .stat-value {
+      color: var(--on-accent);
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--on-accent); }
+      50%       { opacity: 0.6; box-shadow: 0 0 12px var(--on-accent), 0 0 20px var(--on-accent); }
+    }
+
+    /* ── Click ripple ── */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,59,59,0.25);
+      transform: scale(0);
+      animation: ripple-out 0.5s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes ripple-out {
+      to { transform: scale(4); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="5" width="15" height="11" rx="2" stroke="#f0f0f5" stroke-width="1.8"/>
+          <path d="M17 9l5-3v9l-5-3" stroke="#f0f0f5" stroke-width="1.8" stroke-linejoin="round"/>
+          <line x1="2" y1="22" x2="22" y2="2" stroke="#ff3b3b" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="header-text">
+        <div class="name">MediaBlock</div>
+        <div class="tagline">Image &amp; Video Shield</div>
+      </div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="status-card" id="statusCard">
+      <div class="status-row">
+        <div class="status-dot"></div>
+        <div class="status-label" id="statusLabel">INACTIVE</div>
+      </div>
+
+      <div class="toggle-wrapper">
+        <input type="checkbox" class="toggle-input" id="toggle" />
+        <label class="toggle-label" for="toggle">
+          <div class="toggle-track">
+            <div class="toggle-thumb">
+              <!-- Power icon -->
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3v5" stroke="#E53E3E" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M18.36 5.64a9 9 0 1 1-12.73 0" stroke="#E53E3E" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <div class="blocked-count" id="blockedCount">BLOCKING INACTIVE</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-label">Images</div>
+        <div class="stat-value" id="imgCount">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Videos</div>
+        <div class="stat-value" id="vidCount">0</div>
+      </div>
+    </div>
+
+    <div class="footer">ACTIVE ON ALL WEBSITES</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
