@@ -1,111 +1,84 @@
-// MediaBlock — Background Service Worker
-// Manages blocking state, declarativeNetRequest rules, and coordinates content scripts
-
+// MediaBlock Pro — Background Service Worker
 const RULE_SET_ID = "block_media";
 const STORAGE_KEY = "mediaBlockEnabled";
-
-// ─── Initialization ──────────────────────────────────────────────────────────
+const INVERT_STORAGE_KEY = "mediaInvertEnabled";
+const BLUR_STORAGE_KEY = "mediaBlurEnabled";
 
 async function init() {
-  const { mediaBlockEnabled } = await chrome.storage.local.get(STORAGE_KEY);
-  const enabled = mediaBlockEnabled ?? false;
-  await applyBlockingState(enabled, false);
+  const data = await chrome.storage.local.get([STORAGE_KEY]);
+  await applyBlockingState(data[STORAGE_KEY] ?? false, false);
 }
-
 init();
 
-// ─── Core Blocking Logic ─────────────────────────────────────────────────────
-
 async function applyBlockingState(enabled, broadcast = true) {
-  // 1. Toggle declarativeNetRequest ruleset (blocks future network requests)
   await chrome.declarativeNetRequest.updateEnabledRulesets(
-    enabled
-      ? { enableRulesetIds: [RULE_SET_ID] }
-      : { disableRulesetIds: [RULE_SET_ID] }
+    enabled ? { enableRulesetIds: [RULE_SET_ID] } : { disableRulesetIds: [RULE_SET_ID] }
   );
-
-  // 2. Persist state
   await chrome.storage.local.set({ [STORAGE_KEY]: enabled });
-
-  // 3. Update badge
-  updateBadge(enabled);
-
-  // 4. Broadcast to all content scripts
-  if (broadcast) {
-    broadcastToAllTabs(enabled);
-  }
-}
-
-function updateBadge(enabled) {
+  
   if (enabled) {
     chrome.action.setBadgeText({ text: "ON" });
     chrome.action.setBadgeBackgroundColor({ color: "#E53E3E" });
   } else {
     chrome.action.setBadgeText({ text: "" });
   }
+
+  if (broadcast) broadcastState("MEDIA_BLOCK_TOGGLE", enabled);
 }
 
-async function broadcastToAllTabs(enabled) {
+async function broadcastState(type, enabled) {
   const tabs = await chrome.tabs.query({});
   for (const tab of tabs) {
-    if (!tab.id || !tab.url || tab.url.startsWith("chrome://") || tab.url.startsWith("chrome-extension://")) continue;
+    if (!tab.id || !tab.url || tab.url.startsWith("chrome")) continue;
     try {
-      await chrome.tabs.sendMessage(tab.id, {
-        type: "MEDIA_BLOCK_TOGGLE",
-        enabled
-      });
+      await chrome.tabs.sendMessage(tab.id, { type, enabled });
     } catch (_) {
-      // Tab may not have content script injected yet — inject it
+      // Inject content script if missing, avoiding duplicates via idempotency lock
       try {
         await chrome.scripting.executeScript({
           target: { tabId: tab.id, allFrames: true },
           files: ["content.js"]
         });
-        await chrome.tabs.sendMessage(tab.id, {
-          type: "MEDIA_BLOCK_TOGGLE",
-          enabled
-        });
-      } catch (_) {
-        // Silently ignore restricted pages
-      }
+        await chrome.tabs.sendMessage(tab.id, { type, enabled });
+      } catch (err) {}
     }
   }
 }
 
-// ─── Message Handling ─────────────────────────────────────────────────────────
-
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === "GET_STATE") {
-    chrome.storage.local.get(STORAGE_KEY).then(({ mediaBlockEnabled }) => {
-      sendResponse({ enabled: mediaBlockEnabled ?? false });
-    });
-    return true; // async response
-  }
+  const handleState = async (key, val, type, actionFn) => {
+    if (val !== undefined) {
+      await chrome.storage.local.set({ [key]: val });
+      if (actionFn) await actionFn(val);
+      else await broadcastState(type, val);
+      sendResponse({ success: true, enabled: val });
+    } else {
+      const data = await chrome.storage.local.get(key);
+      sendResponse({ enabled: data[key] ?? false });
+    }
+  };
 
-  if (message.type === "SET_STATE") {
-    applyBlockingState(message.enabled).then(() => {
-      sendResponse({ success: true, enabled: message.enabled });
-    });
+  if (message.type === "GET_STATE" || message.type === "SET_STATE") {
+    handleState(STORAGE_KEY, message.enabled, "MEDIA_BLOCK_TOGGLE", applyBlockingState);
+    return true;
+  }
+  if (message.type === "GET_INVERT" || message.type === "SET_INVERT") {
+    handleState(INVERT_STORAGE_KEY, message.enabled, "MEDIA_INVERT_TOGGLE");
+    return true;
+  }
+  if (message.type === "GET_BLUR" || message.type === "SET_BLUR") {
+    handleState(BLUR_STORAGE_KEY, message.enabled, "MEDIA_BLUR_TOGGLE");
     return true;
   }
 });
 
-// ─── Tab Updates ──────────────────────────────────────────────────────────────
-// When a new page loads, send the current blocking state to its content script
-
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.status !== "complete") return;
-  if (!tab.url || tab.url.startsWith("chrome://") || tab.url.startsWith("chrome-extension://")) return;
-
-  const { mediaBlockEnabled } = await chrome.storage.local.get(STORAGE_KEY);
-  if (!mediaBlockEnabled) return; // No need to message if disabled
-
+  if (changeInfo.status !== "complete" || !tab.url || tab.url.startsWith("chrome")) return;
+  const data = await chrome.storage.local.get([STORAGE_KEY, INVERT_STORAGE_KEY, BLUR_STORAGE_KEY]);
+  
   try {
-    await chrome.tabs.sendMessage(tabId, {
-      type: "MEDIA_BLOCK_TOGGLE",
-      enabled: true
-    });
-  } catch (_) {
-    // Content script not ready yet — it will read state on its own init
-  }
+    if (data[STORAGE_KEY]) chrome.tabs.sendMessage(tabId, { type: "MEDIA_BLOCK_TOGGLE", enabled: true });
+    if (data[INVERT_STORAGE_KEY]) chrome.tabs.sendMessage(tabId, { type: "MEDIA_INVERT_TOGGLE", enabled: true });
+    if (data[BLUR_STORAGE_KEY]) chrome.tabs.sendMessage(tabId, { type: "MEDIA_BLUR_TOGGLE", enabled: true });
+  } catch (_) {}
 });
