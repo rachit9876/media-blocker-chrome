@@ -1,6 +1,16 @@
 # MediaBlock Pro 🛡️
 
-[📥 Download the latest ZIP](https://github.com/rachit9876/media-blocker-chrome/archive/refs/heads/main.zip)
+[Download the latest ZIP](https://github.com/rachit9876/media-blocker-chrome/archive/refs/heads/main.zip)
+
+## See it in Action
+
+| Original (Extension Off) | Total Media Block |
+| :---: | :---: |
+| ![Original](https://dr-fast-upload.pages.dev/public/62554667fbf8.png) | ![Block ON](https://dr-fast-upload.pages.dev/public/e92c9ae53366.png) |
+| **Smart Blur Mode** | **Invert Mode (Privacy Filter)** |
+| ![Blur ON](https://dr-fast-upload.pages.dev/public/371bb5b70794.png) | ![Invert ON](https://dr-fast-upload.pages.dev/public/f57b0455a8c9.png) |
+
+---
 
 ## Why MediaBlock Pro?
 Want true privacy while browsing in public or at work? MediaBlock Pro is a lightweight, highly stable Chrome extension that instantly blocks all images, videos, and background media on every website you visit. Take back your screen and browse without unwanted visual distractions.
