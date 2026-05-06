@@ -8,11 +8,17 @@
   const INVERT_STORAGE_KEY = "mediaInvertEnabled";
   const BLUR_STORAGE_KEY = "mediaBlurEnabled";
   const HOVER_STORAGE_KEY = "mediaHoverEnabled";
+  
+  // PATCH: Unified storage keys to match background.js
+  const TARGET_IMG_KEY = "targetImgEnabled"; 
+  const TARGET_VID_KEY = "targetVidEnabled"; 
 
   const IMG_SELECTORS = 'img, picture, canvas, svg image, object[type^="image"], embed[type^="image"], [role="img"]';
   const BG_SELECTORS = '[style*="background-image"], [style*="url("]';
-  const VID_SELECTORS = 'video, iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"], object[type^="video"], embed[type^="video"]';
-
+  
+  // PATCH: Added Twitch, TikTok, Facebook, Instagram, and Twitter/X support
+  const VID_SELECTORS = 'video, iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"], iframe[src*="twitch"], iframe[src*="tiktok"], iframe[src*="facebook"], iframe[src*="instagram"], iframe[src*="twitter"], iframe[src*="x.com"], object[type^="video"], embed[type^="video"]';
+  
   const IMG_ALL = `${IMG_SELECTORS}, ${BG_SELECTORS}`;
   const VID_ALL = VID_SELECTORS;
 
@@ -25,31 +31,28 @@
       --mb-invert: 0;
       --mb-hue: 0deg;
     }
-    
     :root[data-mb-blur="true"] {
       --mb-blur: 25px;
       --mb-grayscale: 80%;
     }
-    
     :root[data-mb-invert="true"] {
       --mb-invert: 1;
       --mb-hue: 180deg;
     }
-
     /* Target: Images - Base Filters */
     ${prefix(':root[data-mb-target-img="true"][data-mb-blur="true"]', IMG_ALL)},
     ${prefix(':root[data-mb-target-img="true"][data-mb-invert="true"]', IMG_ALL)} {
       filter: blur(var(--mb-blur)) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important;
       transition: filter 0.3s ease !important;
     }
-
     /* Target: Videos - Base Filters */
     ${prefix(':root[data-mb-target-vid="true"][data-mb-blur="true"]', VID_ALL)},
     ${prefix(':root[data-mb-target-vid="true"][data-mb-invert="true"]', VID_ALL)} {
       filter: blur(var(--mb-blur)) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important;
       transition: filter 0.3s ease !important;
+      /* PATCH: Forces hardware acceleration/GPU rendering for stubborn videos */
+      transform: translateZ(0); 
     }
-
     /* Hover Reveal (Images) */
     ${prefix(':root[data-mb-target-img="true"][data-mb-blur="true"][data-mb-hover="true"]', IMG_ALL).split(',').map(s => `${s.trim()}:hover`).join(', ')} {
       --mb-blur: 0px;
@@ -58,7 +61,6 @@
     ${prefix(':root[data-mb-target-img="true"][data-mb-blur="true"][data-mb-hover="true"]', IMG_ALL)} {
       cursor: pointer !important;
     }
-
     /* Hover Reveal (Videos) */
     ${prefix(':root[data-mb-target-vid="true"][data-mb-blur="true"][data-mb-hover="true"]', VID_ALL).split(',').map(s => `${s.trim()}:hover`).join(', ')} {
       --mb-blur: 0px;
@@ -67,7 +69,6 @@
     ${prefix(':root[data-mb-target-vid="true"][data-mb-blur="true"][data-mb-hover="true"]', VID_ALL)} {
       cursor: pointer !important;
     }
-
     /* Block Module (Images) */
     ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', IMG_SELECTORS)} {
       visibility: hidden !important;
@@ -77,7 +78,6 @@
     ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', BG_SELECTORS)} {
       background-image: none !important;
     }
-
     /* Block Module (Videos) */
     ${prefix(':root[data-mb-target-vid="true"][data-mb-block="true"]', VID_SELECTORS)} {
       visibility: hidden !important;
@@ -91,7 +91,13 @@
     const style = document.createElement("style");
     style.id = "__mediablock_master_style__";
     style.textContent = MASTER_CSS;
-    (document.head || document.documentElement).appendChild(style);
+    
+    // PATCH: Insert at the absolute top of the head for maximum speed against race conditions
+    if (document.head) {
+      document.head.insertBefore(style, document.head.firstChild);
+    } else {
+      document.documentElement.appendChild(style);
+    }
   }
 
   function updateState(type, enabled) {
@@ -118,15 +124,15 @@
       [INVERT_STORAGE_KEY]: false,
       [BLUR_STORAGE_KEY]: false,
       [HOVER_STORAGE_KEY]: false,
-      "targetImgEnabled": true,
-      "targetVidEnabled": true
+      [TARGET_IMG_KEY]: true, 
+      [TARGET_VID_KEY]: true  
     }, (res) => {
       updateState("MEDIA_BLOCK_TOGGLE", res[STORAGE_KEY]);
       updateState("MEDIA_INVERT_TOGGLE", res[INVERT_STORAGE_KEY]);
       updateState("MEDIA_BLUR_TOGGLE", res[BLUR_STORAGE_KEY]);
       updateState("MEDIA_HOVER_TOGGLE", res[HOVER_STORAGE_KEY]);
-      updateState("MEDIA_TARGET_IMG_TOGGLE", res.targetImgEnabled);
-      updateState("MEDIA_TARGET_VID_TOGGLE", res.targetVidEnabled);
+      updateState("MEDIA_TARGET_IMG_TOGGLE", res[TARGET_IMG_KEY]);
+      updateState("MEDIA_TARGET_VID_TOGGLE", res[TARGET_VID_KEY]);
     });
   }
 

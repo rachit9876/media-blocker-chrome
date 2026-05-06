@@ -1,5 +1,4 @@
 // MediaBlock Pro - Background Service Worker
-
 const STORAGE_KEY = "mediaBlockEnabled";
 const INVERT_STORAGE_KEY = "mediaInvertEnabled";
 const BLUR_STORAGE_KEY = "mediaBlurEnabled";
@@ -13,13 +12,11 @@ async function init() {
     [TARGET_IMG_KEY]: true,
     [TARGET_VID_KEY]: true
   });
-  
   // Ensure defaults are cached immediately
   await chrome.storage.local.set({
     [TARGET_IMG_KEY]: data[TARGET_IMG_KEY],
     [TARGET_VID_KEY]: data[TARGET_VID_KEY]
   });
-
   await updateDNR();
 }
 init();
@@ -29,20 +26,20 @@ async function updateDNR() {
   const blockOn = data[STORAGE_KEY] ?? false;
   const imgOn = data[TARGET_IMG_KEY] ?? true;
   const vidOn = data[TARGET_VID_KEY] ?? true;
-
+  
   const enableRulesetIds = [];
   const disableRulesetIds = ["block_images", "block_videos"];
-
+  
   if (blockOn && imgOn) enableRulesetIds.push("block_images");
   if (blockOn && vidOn) enableRulesetIds.push("block_videos");
-
+  
   const finalDisable = disableRulesetIds.filter(id => !enableRulesetIds.includes(id));
-
+  
   await chrome.declarativeNetRequest.updateEnabledRulesets({
     enableRulesetIds,
     disableRulesetIds: finalDisable
   });
-
+  
   if (blockOn) {
     chrome.action.setBadgeText({ text: "ON" });
     chrome.action.setBadgeBackgroundColor({ color: "#E53E3E" });
@@ -101,7 +98,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status !== "complete" || !tab.url || tab.url.startsWith("chrome")) return;
-  
   const data = await chrome.storage.local.get({
     [STORAGE_KEY]: false,
     [INVERT_STORAGE_KEY]: false,
@@ -110,7 +106,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     [TARGET_IMG_KEY]: true,
     [TARGET_VID_KEY]: true
   });
-  
   if (data[STORAGE_KEY]) chrome.tabs.sendMessage(tabId, { type: "MEDIA_BLOCK_TOGGLE", enabled: true }).catch(() => {});
   if (data[INVERT_STORAGE_KEY]) chrome.tabs.sendMessage(tabId, { type: "MEDIA_INVERT_TOGGLE", enabled: true }).catch(() => {});
   if (data[BLUR_STORAGE_KEY]) chrome.tabs.sendMessage(tabId, { type: "MEDIA_BLUR_TOGGLE", enabled: true }).catch(() => {});
