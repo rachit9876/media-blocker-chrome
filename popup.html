@@ -11,7 +11,7 @@
     :root {
       --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
       --on-accent: #ff3b3b; --on-glow: rgba(255,59,59,0.35); --on-glow-soft: rgba(255,59,59,0.12);
-      --blur-accent: #3b82f6; --invert-accent: #a855f7; --hover-accent: #10b981;
+      --blur-accent: #3b82f6; --invert-accent: #a855f7; --hover-accent: #10b981; --uniform-accent: #f59e0b;
       --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
       --radius: 18px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -33,7 +33,6 @@
     .stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); }
     .stat-value { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; line-height: 1; transition: color 0.3s ease; }
     
-    /* Target Toggles mini styles */
     .small-toggle { position: relative; display: inline-block; width: 26px; height: 14px; }
     .small-toggle input { opacity: 0; width: 0; height: 0; }
     .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 1px solid var(--off-border); transition: .3s; border-radius: 14px; }
@@ -60,6 +59,7 @@
     .status-card.active-blur { border-color: var(--blur-accent); box-shadow: 0 0 15px rgba(59,130,246,0.25); }
     .status-card.active-hover { border-color: var(--hover-accent); box-shadow: 0 0 15px rgba(16,185,129,0.25); }
     .status-card.active-invert { border-color: var(--invert-accent); box-shadow: 0 0 15px rgba(168,85,247,0.25); }
+    .status-card.active-uniform { border-color: var(--uniform-accent); box-shadow: 0 0 15px rgba(245,158,11,0.25); }
   </style>
 </head>
 <body>
@@ -77,7 +77,6 @@
         <div class="tagline">Image &amp; Video Shield</div>
       </div>
     </div>
-
     <div class="stats-row">
       <div class="stat-box">
         <div class="target-header">
@@ -100,8 +99,7 @@
         <div class="stat-value" id="vidCount">0</div>
       </div>
     </div>
-
-    <!-- 4 Core Uniform Feature Toggles -->
+    
     <div class="status-card sub-card" id="blockCard">
       <div class="status-row">
         <div class="status-left">
@@ -116,7 +114,6 @@
         </div>
       </div>
     </div>
-
     <div class="status-card sub-card" id="blurCard">
       <div class="status-row">
         <div class="status-left">
@@ -131,22 +128,6 @@
         </div>
       </div>
     </div>
-
-    <div class="status-card sub-card" id="hoverCard">
-      <div class="status-row">
-        <div class="status-left">
-          <div class="status-dot" id="hoverDot"></div>
-          <div class="status-label" id="hoverLabel">HOVER REVEAL OFF</div>
-        </div>
-        <div class="toggle-wrapper">
-          <input type="checkbox" class="toggle-input" id="hoverToggle" />
-          <label class="toggle-label" for="hoverToggle">
-            <div class="toggle-track" id="hoverTrack"><div class="toggle-thumb" id="hoverThumb"></div></div>
-          </label>
-        </div>
-      </div>
-    </div>
-
     <div class="status-card sub-card" id="invertCard">
       <div class="status-row">
         <div class="status-left">
@@ -161,10 +142,36 @@
         </div>
       </div>
     </div>
-
+    <div class="status-card sub-card" id="uniformCard">
+      <div class="status-row">
+        <div class="status-left">
+          <div class="status-dot" id="uniformDot"></div>
+          <div class="status-label" id="uniformLabel">UNIFORM VISUALS OFF</div>
+        </div>
+        <div class="toggle-wrapper">
+          <input type="checkbox" class="toggle-input" id="uniformToggle" />
+          <label class="toggle-label" for="uniformToggle">
+            <div class="toggle-track" id="uniformTrack"><div class="toggle-thumb" id="uniformThumb"></div></div>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="status-card sub-card" id="hoverCard">
+      <div class="status-row">
+        <div class="status-left">
+          <div class="status-dot" id="hoverDot"></div>
+          <div class="status-label" id="hoverLabel">HOVER REVEAL OFF</div>
+        </div>
+        <div class="toggle-wrapper">
+          <input type="checkbox" class="toggle-input" id="hoverToggle" />
+          <label class="toggle-label" for="hoverToggle">
+            <div class="toggle-track" id="hoverTrack"><div class="toggle-thumb" id="hoverThumb"></div></div>
+          </label>
+        </div>
+      </div>
+    </div>
     <div class="footer">ACTIVE ON ALL WEBSITES</div>
   </div>
-
   <script src="popup.js"></script>
 </body>
 </html>

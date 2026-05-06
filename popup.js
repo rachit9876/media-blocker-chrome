@@ -7,6 +7,7 @@
     blur: { card: document.getElementById("blurCard"), toggle: document.getElementById("blurToggle"), label: document.getElementById("blurLabel"), dot: document.getElementById("blurDot"), track: document.getElementById("blurTrack"), thumb: document.getElementById("blurThumb"), color: "var(--blur-accent)" },
     hover: { card: document.getElementById("hoverCard"), toggle: document.getElementById("hoverToggle"), label: document.getElementById("hoverLabel"), dot: document.getElementById("hoverDot"), track: document.getElementById("hoverTrack"), thumb: document.getElementById("hoverThumb"), color: "var(--hover-accent)" },
     invert: { card: document.getElementById("invertCard"), toggle: document.getElementById("invertToggle"), label: document.getElementById("invertLabel"), dot: document.getElementById("invertDot"), track: document.getElementById("invertTrack"), thumb: document.getElementById("invertThumb"), color: "var(--invert-accent)" },
+    uniform: { card: document.getElementById("uniformCard"), toggle: document.getElementById("uniformToggle"), label: document.getElementById("uniformLabel"), dot: document.getElementById("uniformDot"), track: document.getElementById("uniformTrack"), thumb: document.getElementById("uniformThumb"), color: "var(--uniform-accent)" },
     targets: { img: document.getElementById("targetImgToggle"), vid: document.getElementById("targetVidToggle") },
     counts: { images: document.getElementById("imgCount"), videos: document.getElementById("vidCount") }
   };
@@ -17,6 +18,7 @@
     
     let labelPrefix = type.toUpperCase();
     if (type === 'hover') labelPrefix = "HOVER REVEAL";
+    if (type === 'uniform') labelPrefix = "UNIFORM VISUALS";
     
     config.label.textContent = enabled ? `${labelPrefix} ON` : `${labelPrefix} OFF`;
     config.dot.style.background = enabled ? config.color : "var(--text-dim)";
@@ -74,6 +76,11 @@
     await chrome.runtime.sendMessage({ type: "SET_INVERT", enabled: e.target.checked });
   });
 
+  UI.uniform.toggle.addEventListener("change", async (e) => {
+    updateSubUI('uniform', e.target.checked);
+    await chrome.runtime.sendMessage({ type: "SET_UNIFORM", enabled: e.target.checked });
+  });
+
   // Event Listeners for Targeting Attributes
   UI.targets.img.addEventListener("change", async (e) => {
     await chrome.runtime.sendMessage({ type: "SET_TARGET_IMG", enabled: e.target.checked });
@@ -85,11 +92,12 @@
 
   // Initialize Data
   async function init() {
-    const [state, blur, hover, invert, targetImg, targetVid] = await Promise.all([
+    const [state, blur, hover, invert, uniform, targetImg, targetVid] = await Promise.all([
       chrome.runtime.sendMessage({ type: "GET_STATE" }),
       chrome.runtime.sendMessage({ type: "GET_BLUR" }),
       chrome.runtime.sendMessage({ type: "GET_HOVER" }),
       chrome.runtime.sendMessage({ type: "GET_INVERT" }),
+      chrome.runtime.sendMessage({ type: "GET_UNIFORM" }),
       chrome.runtime.sendMessage({ type: "GET_TARGET_IMG" }),
       chrome.runtime.sendMessage({ type: "GET_TARGET_VID" })
     ]);
@@ -98,6 +106,7 @@
     updateSubUI('blur', blur?.enabled ?? false);
     updateSubUI('hover', hover?.enabled ?? false);
     updateSubUI('invert', invert?.enabled ?? false);
+    updateSubUI('uniform', uniform?.enabled ?? false);
     
     UI.targets.img.checked = targetImg?.enabled ?? true;
     UI.targets.vid.checked = targetVid?.enabled ?? true;
