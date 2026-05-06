@@ -6,9 +6,9 @@
 
 | Original (Extension Off) | Total Media Block |
 | :---: | :---: |
-| ![Original](https://dr-fast-upload.pages.dev/public/62554667fbf8.png) | ![Block ON](https://dr-fast-upload.pages.dev/public/e92c9ae53366.png) |
+| ![Original](https://dr-fast-upload.pages.dev/public/e2f0cc24193b.webp) | ![Block ON](https://dr-fast-upload.pages.dev/public/80fe8ced5f6a.webp) |
 | **Smart Blur Mode** | **Invert Mode (Privacy Filter)** |
-| ![Blur ON](https://dr-fast-upload.pages.dev/public/371bb5b70794.png) | ![Invert ON](https://dr-fast-upload.pages.dev/public/f57b0455a8c9.png) |
+| ![Blur ON](https://dr-fast-upload.pages.dev/public/8892ba4abd32.webp) | ![Invert ON](https://dr-fast-upload.pages.dev/public/2aab16d8eaae.webp) |
 
 ---
 
