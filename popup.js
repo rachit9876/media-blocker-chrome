@@ -1,10 +1,11 @@
-// MediaBlock Pro — Popup Script
+// MediaBlock Pro - Popup Script
 (function () {
   "use strict";
 
   const UI = {
     main: { toggle: document.getElementById("mainToggle"), label: document.getElementById("mainLabel"), dot: document.getElementById("mainDot") },
     blur: { toggle: document.getElementById("blurToggle"), label: document.getElementById("blurLabel"), dot: document.getElementById("blurDot"), track: document.getElementById("blurTrack"), thumb: document.getElementById("blurThumb"), color: "var(--blur-accent)" },
+    hover: { toggle: document.getElementById("hoverToggle"), label: document.getElementById("hoverLabel"), dot: document.getElementById("hoverDot"), track: document.getElementById("hoverTrack"), thumb: document.getElementById("hoverThumb"), color: "var(--hover-accent)" },
     invert: { toggle: document.getElementById("invertToggle"), label: document.getElementById("invertLabel"), dot: document.getElementById("invertDot"), track: document.getElementById("invertTrack"), thumb: document.getElementById("invertThumb"), color: "var(--invert-accent)" },
     counts: { images: document.getElementById("imgCount"), videos: document.getElementById("vidCount"), status: document.getElementById("blockedCount") }
   };
@@ -20,7 +21,12 @@
   function updateSubUI(type, enabled) {
     const config = UI[type];
     config.toggle.checked = enabled;
-    config.label.textContent = enabled ? `${type.toUpperCase()} ON` : `${type.toUpperCase()} OFF`;
+    
+    // Formatting the label based on the type
+    let labelPrefix = type.toUpperCase();
+    if (type === 'hover') labelPrefix = "HOVER REVEAL";
+    
+    config.label.textContent = enabled ? `${labelPrefix} ON` : `${labelPrefix} OFF`;
     config.dot.style.background = enabled ? config.color : "var(--text-dim)";
     config.dot.style.boxShadow = enabled ? `0 0 8px ${config.color}` : "none";
     config.track.style.background = enabled ? config.color : "#1e1e26";
@@ -33,7 +39,7 @@
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab?.url || tab.url.startsWith("chrome")) throw new Error("Restricted");
-
+      
       const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: () => ({
@@ -47,8 +53,8 @@
         UI.counts.videos.textContent = results[0].result.videos;
       }
     } catch (_) {
-      UI.counts.images.textContent = "—";
-      UI.counts.videos.textContent = "—";
+      UI.counts.images.textContent = "-";
+      UI.counts.videos.textContent = "-";
     }
   }
 
@@ -65,6 +71,11 @@
     await chrome.runtime.sendMessage({ type: "SET_BLUR", enabled: e.target.checked });
   });
 
+  UI.hover.toggle.addEventListener("change", async (e) => {
+    updateSubUI('hover', e.target.checked);
+    await chrome.runtime.sendMessage({ type: "SET_HOVER", enabled: e.target.checked });
+  });
+
   UI.invert.toggle.addEventListener("change", async (e) => {
     updateSubUI('invert', e.target.checked);
     await chrome.runtime.sendMessage({ type: "SET_INVERT", enabled: e.target.checked });
@@ -72,14 +83,16 @@
 
   // Init
   async function init() {
-    const [state, blur, invert] = await Promise.all([
+    const [state, blur, hover, invert] = await Promise.all([
       chrome.runtime.sendMessage({ type: "GET_STATE" }),
       chrome.runtime.sendMessage({ type: "GET_BLUR" }),
+      chrome.runtime.sendMessage({ type: "GET_HOVER" }),
       chrome.runtime.sendMessage({ type: "GET_INVERT" })
     ]);
     
     updateMainUI(state?.enabled ?? false);
     updateSubUI('blur', blur?.enabled ?? false);
+    updateSubUI('hover', hover?.enabled ?? false);
     updateSubUI('invert', invert?.enabled ?? false);
 
     if (state?.enabled) fetchMediaCounts();

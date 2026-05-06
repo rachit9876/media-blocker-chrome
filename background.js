@@ -1,8 +1,9 @@
-// MediaBlock Pro — Background Service Worker
+// MediaBlock Pro - Background Service Worker
 const RULE_SET_ID = "block_media";
 const STORAGE_KEY = "mediaBlockEnabled";
 const INVERT_STORAGE_KEY = "mediaInvertEnabled";
 const BLUR_STORAGE_KEY = "mediaBlurEnabled";
+const HOVER_STORAGE_KEY = "mediaHoverEnabled";
 
 async function init() {
   const data = await chrome.storage.local.get([STORAGE_KEY]);
@@ -22,7 +23,7 @@ async function applyBlockingState(enabled, broadcast = true) {
   } else {
     chrome.action.setBadgeText({ text: "" });
   }
-
+  
   if (broadcast) broadcastState("MEDIA_BLOCK_TOGGLE", enabled);
 }
 
@@ -33,7 +34,6 @@ async function broadcastState(type, enabled) {
     try {
       await chrome.tabs.sendMessage(tab.id, { type, enabled });
     } catch (_) {
-      // Inject content script if missing, avoiding duplicates via idempotency lock
       try {
         await chrome.scripting.executeScript({
           target: { tabId: tab.id, allFrames: true },
@@ -70,15 +70,19 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     handleState(BLUR_STORAGE_KEY, message.enabled, "MEDIA_BLUR_TOGGLE");
     return true;
   }
+  if (message.type === "GET_HOVER" || message.type === "SET_HOVER") {
+    handleState(HOVER_STORAGE_KEY, message.enabled, "MEDIA_HOVER_TOGGLE");
+    return true;
+  }
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status !== "complete" || !tab.url || tab.url.startsWith("chrome")) return;
-  const data = await chrome.storage.local.get([STORAGE_KEY, INVERT_STORAGE_KEY, BLUR_STORAGE_KEY]);
-  
+  const data = await chrome.storage.local.get([STORAGE_KEY, INVERT_STORAGE_KEY, BLUR_STORAGE_KEY, HOVER_STORAGE_KEY]);
   try {
     if (data[STORAGE_KEY]) chrome.tabs.sendMessage(tabId, { type: "MEDIA_BLOCK_TOGGLE", enabled: true });
     if (data[INVERT_STORAGE_KEY]) chrome.tabs.sendMessage(tabId, { type: "MEDIA_INVERT_TOGGLE", enabled: true });
     if (data[BLUR_STORAGE_KEY]) chrome.tabs.sendMessage(tabId, { type: "MEDIA_BLUR_TOGGLE", enabled: true });
+    if (data[HOVER_STORAGE_KEY]) chrome.tabs.sendMessage(tabId, { type: "MEDIA_HOVER_TOGGLE", enabled: true });
   } catch (_) {}
 });

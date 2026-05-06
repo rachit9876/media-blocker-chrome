@@ -7,15 +7,13 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Alata&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Alata', sans-serif !important; }
-
     :root {
       --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
       --on-accent: #ff3b3b; --on-glow: rgba(255,59,59,0.35); --on-glow-soft: rgba(255,59,59,0.12);
-      --blur-accent: #3b82f6; --invert-accent: #a855f7;
+      --blur-accent: #3b82f6; --invert-accent: #a855f7; --hover-accent: #10b981;
       --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
       --radius: 18px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-
     body { width: 300px; background: var(--off-bg); font-family: 'Space Mono', monospace; color: var(--text-primary); overflow: hidden; user-select: none; }
     body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
     
@@ -25,7 +23,6 @@
     .logo-mark svg { width: 18px; height: 18px; }
     .header-text .name { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
     .header-text .tagline { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 1px; }
-
     .status-card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 16px; transition: all 0.3s ease; position: relative; overflow: hidden; }
     .status-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, var(--on-glow-soft) 0%, transparent 70%); opacity: 0; transition: opacity 0.4s ease; }
     
@@ -33,28 +30,22 @@
     .status-left { display: flex; align-items: center; gap: 8px; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); transition: all 0.3s ease; }
     .status-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--text-secondary); transition: color 0.3s ease; text-transform: uppercase; }
-
     .toggle-wrapper { position: relative; }
     .toggle-input { position: absolute; opacity: 0; width: 0; height: 0; }
     .toggle-label { display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .toggle-track { width: 56px; height: 32px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; position: relative; transition: all var(--transition); }
     .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--text-dim); transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
     
-    /* Main Toggle Overrides */
     .main-toggle .toggle-track { width: 72px; height: 40px; }
     .main-toggle .toggle-thumb { top: 4px; left: 4px; width: 28px; height: 28px; }
     .main-toggle .toggle-thumb svg { width: 12px; height: 12px; opacity: 0.4; transition: opacity 0.3s ease; }
-
     .blocked-count { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.3s ease; text-align: center; width: 100%; }
-
     .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .stat-box { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; }
     .stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); }
     .stat-value { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; line-height: 1; transition: color 0.3s ease; }
-
     .footer { font-size: 10px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 4px; }
-
-    /* Active States */
+    
     body.is-enabled #mainCard { border-color: var(--on-accent); box-shadow: 0 0 24px var(--on-glow), 0 0 0 1px var(--on-accent) inset; }
     body.is-enabled #mainCard::before { opacity: 1; }
     body.is-enabled #mainDot { background: var(--on-accent); box-shadow: 0 0 8px var(--on-accent); animation: pulse-dot 1.8s ease-in-out infinite; }
@@ -63,10 +54,8 @@
     body.is-enabled #mainToggle:checked + .toggle-label .toggle-thumb { left: calc(100% - 32px); background: #fff; }
     body.is-enabled #mainToggle:checked + .toggle-label .toggle-thumb svg { opacity: 1; }
     body.is-enabled .logo-mark { border-color: var(--on-accent); box-shadow: 0 0 10px var(--on-glow); }
-
-    /* Sub-toggle active states handled via JS for dynamic colors */
+    
     .sub-card { padding: 12px 16px; }
-
     @keyframes pulse-dot { 0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--on-accent); } 50% { opacity: 0.6; box-shadow: 0 0 12px var(--on-accent), 0 0 20px var(--on-accent); } }
   </style>
 </head>
@@ -132,6 +121,22 @@
           <input type="checkbox" class="toggle-input" id="blurToggle" />
           <label class="toggle-label" for="blurToggle">
             <div class="toggle-track" id="blurTrack"><div class="toggle-thumb" id="blurThumb"></div></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hover Reveal Toggle -->
+    <div class="status-card sub-card">
+      <div class="status-row">
+        <div class="status-left">
+          <div class="status-dot" id="hoverDot"></div>
+          <div class="status-label" id="hoverLabel">HOVER REVEAL OFF</div>
+        </div>
+        <div class="toggle-wrapper">
+          <input type="checkbox" class="toggle-input" id="hoverToggle" />
+          <label class="toggle-label" for="hoverToggle">
+            <div class="toggle-track" id="hoverTrack"><div class="toggle-thumb" id="hoverThumb"></div></div>
           </label>
         </div>
       </div>
