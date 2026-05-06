@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MediaBlock Pro - Image & Video Shield",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Instantly block, blur, or invert all images and videos across every website. High performance and layout-safe.",
   "permissions": [
     "storage",
@@ -44,9 +44,14 @@
   "declarative_net_request": {
     "rule_resources": [
       {
-        "id": "block_media",
+        "id": "block_images",
         "enabled": false,
-        "path": "rules/block_media.json"
+        "path": "rules/block_images.json"
+      },
+      {
+        "id": "block_videos",
+        "enabled": false,
+        "path": "rules/block_videos.json"
       }
     ]
   }

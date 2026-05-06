@@ -3,26 +3,18 @@
   "use strict";
 
   const UI = {
-    main: { toggle: document.getElementById("mainToggle"), label: document.getElementById("mainLabel"), dot: document.getElementById("mainDot") },
-    blur: { toggle: document.getElementById("blurToggle"), label: document.getElementById("blurLabel"), dot: document.getElementById("blurDot"), track: document.getElementById("blurTrack"), thumb: document.getElementById("blurThumb"), color: "var(--blur-accent)" },
-    hover: { toggle: document.getElementById("hoverToggle"), label: document.getElementById("hoverLabel"), dot: document.getElementById("hoverDot"), track: document.getElementById("hoverTrack"), thumb: document.getElementById("hoverThumb"), color: "var(--hover-accent)" },
-    invert: { toggle: document.getElementById("invertToggle"), label: document.getElementById("invertLabel"), dot: document.getElementById("invertDot"), track: document.getElementById("invertTrack"), thumb: document.getElementById("invertThumb"), color: "var(--invert-accent)" },
-    counts: { images: document.getElementById("imgCount"), videos: document.getElementById("vidCount"), status: document.getElementById("blockedCount") }
+    block: { card: document.getElementById("blockCard"), toggle: document.getElementById("blockToggle"), label: document.getElementById("blockLabel"), dot: document.getElementById("blockDot"), track: document.getElementById("blockTrack"), thumb: document.getElementById("blockThumb"), color: "var(--on-accent)" },
+    blur: { card: document.getElementById("blurCard"), toggle: document.getElementById("blurToggle"), label: document.getElementById("blurLabel"), dot: document.getElementById("blurDot"), track: document.getElementById("blurTrack"), thumb: document.getElementById("blurThumb"), color: "var(--blur-accent)" },
+    hover: { card: document.getElementById("hoverCard"), toggle: document.getElementById("hoverToggle"), label: document.getElementById("hoverLabel"), dot: document.getElementById("hoverDot"), track: document.getElementById("hoverTrack"), thumb: document.getElementById("hoverThumb"), color: "var(--hover-accent)" },
+    invert: { card: document.getElementById("invertCard"), toggle: document.getElementById("invertToggle"), label: document.getElementById("invertLabel"), dot: document.getElementById("invertDot"), track: document.getElementById("invertTrack"), thumb: document.getElementById("invertThumb"), color: "var(--invert-accent)" },
+    targets: { img: document.getElementById("targetImgToggle"), vid: document.getElementById("targetVidToggle") },
+    counts: { images: document.getElementById("imgCount"), videos: document.getElementById("vidCount") }
   };
-
-  function updateMainUI(enabled) {
-    UI.main.toggle.checked = enabled;
-    document.body.classList.toggle("is-enabled", enabled);
-    UI.main.label.textContent = enabled ? "ACTIVE" : "INACTIVE";
-    UI.counts.status.textContent = enabled ? "ALL MEDIA BLOCKED" : "BLOCKING INACTIVE";
-    if (!enabled) { UI.counts.images.textContent = "0"; UI.counts.videos.textContent = "0"; }
-  }
 
   function updateSubUI(type, enabled) {
     const config = UI[type];
     config.toggle.checked = enabled;
     
-    // Formatting the label based on the type
     let labelPrefix = type.toUpperCase();
     if (type === 'hover') labelPrefix = "HOVER REVEAL";
     
@@ -33,6 +25,9 @@
     config.track.style.borderColor = enabled ? config.color : "var(--off-border)";
     config.thumb.style.left = enabled ? "calc(100% - 25px)" : "3px";
     config.thumb.style.background = enabled ? "#fff" : "var(--text-dim)";
+    
+    config.card.classList.toggle(`active-${type}`, enabled);
+    config.label.style.color = enabled ? config.color : "var(--text-secondary)";
   }
 
   async function fetchMediaCounts() {
@@ -58,12 +53,10 @@
     }
   }
 
-  // Event Listeners
-  UI.main.toggle.addEventListener("change", async (e) => {
-    const enabled = e.target.checked;
-    updateMainUI(enabled);
-    await chrome.runtime.sendMessage({ type: "SET_STATE", enabled });
-    if (enabled) setTimeout(fetchMediaCounts, 200);
+  // Event Listeners for Filters
+  UI.block.toggle.addEventListener("change", async (e) => {
+    updateSubUI('block', e.target.checked);
+    await chrome.runtime.sendMessage({ type: "SET_STATE", enabled: e.target.checked });
   });
 
   UI.blur.toggle.addEventListener("change", async (e) => {
@@ -81,21 +74,35 @@
     await chrome.runtime.sendMessage({ type: "SET_INVERT", enabled: e.target.checked });
   });
 
-  // Init
+  // Event Listeners for Targeting Attributes
+  UI.targets.img.addEventListener("change", async (e) => {
+    await chrome.runtime.sendMessage({ type: "SET_TARGET_IMG", enabled: e.target.checked });
+  });
+
+  UI.targets.vid.addEventListener("change", async (e) => {
+    await chrome.runtime.sendMessage({ type: "SET_TARGET_VID", enabled: e.target.checked });
+  });
+
+  // Initialize Data
   async function init() {
-    const [state, blur, hover, invert] = await Promise.all([
+    const [state, blur, hover, invert, targetImg, targetVid] = await Promise.all([
       chrome.runtime.sendMessage({ type: "GET_STATE" }),
       chrome.runtime.sendMessage({ type: "GET_BLUR" }),
       chrome.runtime.sendMessage({ type: "GET_HOVER" }),
-      chrome.runtime.sendMessage({ type: "GET_INVERT" })
+      chrome.runtime.sendMessage({ type: "GET_INVERT" }),
+      chrome.runtime.sendMessage({ type: "GET_TARGET_IMG" }),
+      chrome.runtime.sendMessage({ type: "GET_TARGET_VID" })
     ]);
     
-    updateMainUI(state?.enabled ?? false);
+    updateSubUI('block', state?.enabled ?? false);
     updateSubUI('blur', blur?.enabled ?? false);
     updateSubUI('hover', hover?.enabled ?? false);
     updateSubUI('invert', invert?.enabled ?? false);
+    
+    UI.targets.img.checked = targetImg?.enabled ?? true;
+    UI.targets.vid.checked = targetVid?.enabled ?? true;
 
-    if (state?.enabled) fetchMediaCounts();
+    fetchMediaCounts();
   }
 
   init();
