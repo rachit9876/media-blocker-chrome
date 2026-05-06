@@ -1,7 +1,6 @@
 // MediaBlock Pro - Content Script
 (function () {
   "use strict";
-
   if (window.__MB_LOADED) return;
   window.__MB_LOADED = true;
 
@@ -16,10 +15,9 @@
   const IMG_SELECTORS = 'img, picture, canvas, svg image, object[type^="image"], embed[type^="image"], [role="img"]';
   const BG_SELECTORS = '[style*="background-image"], [style*="url("]';
   const VID_SELECTORS = 'video, iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"], iframe[src*="twitch"], iframe[src*="tiktok"], iframe[src*="facebook"], iframe[src*="instagram"], iframe[src*="twitter"], iframe[src*="x.com"], object[type^="video"], embed[type^="video"]';
-  
   const IMG_ALL = `${IMG_SELECTORS}, ${BG_SELECTORS}`;
   const VID_ALL = VID_SELECTORS;
-
+  
   const prefix = (parent, selectors) => selectors.split(',').map(s => `${parent} ${s.trim()}`).join(', ');
 
   const MASTER_CSS = `
@@ -29,7 +27,6 @@
       --mb-invert: 0;
       --mb-hue: 0deg;
     }
-
     /* Base Effects */
     :root[data-mb-blur="true"] {
       --mb-blur: 25px;

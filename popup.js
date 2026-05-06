@@ -110,7 +110,6 @@
     
     UI.targets.img.checked = targetImg?.enabled ?? true;
     UI.targets.vid.checked = targetVid?.enabled ?? true;
-
     fetchMediaCounts();
   }
 
