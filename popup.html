@@ -27,18 +27,19 @@
     .header-text .tagline { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 1px; }
     
     .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .stat-box { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 0; }
+    .stat-box { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
     
-    .target-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 6px; }
+    .target-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 2px; }
     .stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); }
     .stat-value { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; line-height: 1; transition: color 0.3s ease; }
     
-    .small-toggle { position: relative; display: inline-block; width: 26px; height: 14px; }
+    /* Updated Small Toggle CSS to match large toggle size & shape */
+    .small-toggle { position: relative; display: inline-block; width: 56px; height: 32px; flex-shrink: 0; }
     .small-toggle input { opacity: 0; width: 0; height: 0; }
-    .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 1px solid var(--off-border); transition: .3s; border-radius: 14px; }
-    .small-toggle-slider:before { position: absolute; content: ""; height: 8px; width: 8px; left: 2px; bottom: 2px; background-color: var(--text-dim); transition: .3s; border-radius: 50%; }
-    .small-toggle input:checked + .small-toggle-slider { background-color: var(--on-accent); border-color: var(--on-accent); }
-    .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(12px); background-color: #fff; }
+    .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 2px solid var(--off-border); transition: all var(--transition); border-radius: 100px; }
+    .small-toggle-slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: var(--text-dim); transition: all var(--transition); border-radius: 50%; }
+    .small-toggle input:checked + .small-toggle-slider { background-color: var(--text-primary); border-color: var(--text-primary); }
+    .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(24px); background-color: var(--off-bg); }
     
     .status-card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: var(--radius); padding: 12px 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; transition: all 0.3s ease; position: relative; overflow: hidden; }
     .status-row { display: flex; align-items: center; gap: 8px; position: relative; width: 100%; justify-content: space-between; }
@@ -52,7 +53,7 @@
     .toggle-track { width: 56px; height: 32px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; position: relative; transition: all var(--transition); }
     .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--text-dim); transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
     
-    .footer { font-size: 10px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 4px; }
+    .footer { font-size: 10px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 4px; display: flex; justify-content: center; gap: 6px; }
     
     /* Uniform Activated Card Glow States */
     .status-card.active-block { border-color: var(--on-accent); box-shadow: 0 0 15px var(--on-glow); }
@@ -77,6 +78,7 @@
         <div class="tagline">Image &amp; Video Shield</div>
       </div>
     </div>
+    
     <div class="stats-row">
       <div class="stat-box">
         <div class="target-header">
@@ -170,7 +172,8 @@
         </div>
       </div>
     </div>
-    <div class="footer">ACTIVE ON ALL WEBSITES</div>
+    
+    <div class="footer"><span id="appVersion"></span> <span>•</span> <span>ACTIVE ON ALL WEBSITES</span></div>
   </div>
   <script src="popup.js"></script>
 </body>

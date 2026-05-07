@@ -92,6 +92,9 @@
 
   // Initialize Data
   async function init() {
+    // Populate the version string dynamically
+    document.getElementById("appVersion").textContent = `v${chrome.runtime.getManifest().version}`;
+
     const [state, blur, hover, invert, uniform, targetImg, targetVid] = await Promise.all([
       chrome.runtime.sendMessage({ type: "GET_STATE" }),
       chrome.runtime.sendMessage({ type: "GET_BLUR" }),
