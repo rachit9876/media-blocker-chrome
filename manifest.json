@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "MediaBlock Pro - Image & Video Shield",
-  "version": "3.0.0",
-  "description": "Instantly block, blur, or invert all images and videos across every website. High performance and layout-safe.",
+  "version": "4.2.0",
+  "description": "Instantly block, blur, or invert all images and videos. High performance and layout-safe.",
   "permissions": [
     "storage",
     "declarativeNetRequest",
@@ -35,11 +35,17 @@
     },
     "default_title": "MediaBlock Pro"
   },
-  "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "commands": {
+    "custom-shortcut": {
+      "suggested_key": {
+        "default": "Alt+S"
+      },
+      "description": "Customizable MediaBlock Shortcut"
+    }
   },
   "declarative_net_request": {
     "rule_resources": [

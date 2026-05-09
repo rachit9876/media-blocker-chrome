@@ -10,30 +10,32 @@
     
     :root {
       --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
-      --on-accent: #ff3b3b; --on-glow: rgba(255,59,59,0.35); --on-glow-soft: rgba(255,59,59,0.12);
+      --on-accent: #ff3b3b; --on-glow: rgba(255,59,59,0.35);
       --blur-accent: #3b82f6; --invert-accent: #a855f7; --hover-accent: #10b981; --uniform-accent: #f59e0b;
       --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
       --radius: 18px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     
-    body { width: 300px; background: var(--off-bg); font-family: 'Space Mono', monospace; color: var(--text-primary); overflow: hidden; user-select: none; }
+    body { width: 300px; background: var(--off-bg); color: var(--text-primary); overflow: hidden; user-select: none; }
     body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
     
     .container { position: relative; z-index: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-    .header { display: flex; align-items: center; gap: 12px; }
-    .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: var(--off-card); border: 1px solid var(--off-border); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+    .header { display: flex; align-items: center; justify-content: space-between; }
+    .brand-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: var(--off-card); border: 1px solid var(--off-border); display: flex; align-items: center; justify-content: center; }
     .logo-mark svg { width: 18px; height: 18px; }
-    .header-text .name { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+    .header-text .name { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
     .header-text .tagline { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 1px; }
     
+    .settings-btn { background: var(--off-card); border: 1px solid var(--off-border); color: var(--text-secondary); width: 32px; height: 32px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .settings-btn:hover { background: #2a2a32; color: var(--text-primary); }
+
     .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .stat-box { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
-    
     .target-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 2px; }
     .stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); }
-    .stat-value { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; line-height: 1; transition: color 0.3s ease; }
+    .stat-value { font-size: 20px; font-weight: 800; line-height: 1; }
     
-    /* Updated Small Toggle CSS to match large toggle size & shape */
     .small-toggle { position: relative; display: inline-block; width: 56px; height: 32px; flex-shrink: 0; }
     .small-toggle input { opacity: 0; width: 0; height: 0; }
     .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 2px solid var(--off-border); transition: all var(--transition); border-radius: 100px; }
@@ -42,7 +44,7 @@
     .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(24px); background-color: var(--off-bg); }
     
     .status-card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: var(--radius); padding: 12px 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; transition: all 0.3s ease; position: relative; overflow: hidden; }
-    .status-row { display: flex; align-items: center; gap: 8px; position: relative; width: 100%; justify-content: space-between; }
+    .status-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
     .status-left { display: flex; align-items: center; gap: 8px; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); transition: all 0.3s ease; }
     .status-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--text-secondary); transition: color 0.3s ease; text-transform: uppercase; }
@@ -55,28 +57,32 @@
     
     .footer { font-size: 10px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 4px; display: flex; justify-content: center; gap: 6px; }
     
-    /* Uniform Activated Card Glow States */
-    .status-card.active-block { border-color: var(--on-accent); box-shadow: 0 0 15px var(--on-glow); }
-    .status-card.active-blur { border-color: var(--blur-accent); box-shadow: 0 0 15px rgba(59,130,246,0.25); }
-    .status-card.active-hover { border-color: var(--hover-accent); box-shadow: 0 0 15px rgba(16,185,129,0.25); }
-    .status-card.active-invert { border-color: var(--invert-accent); box-shadow: 0 0 15px rgba(168,85,247,0.25); }
-    .status-card.active-uniform { border-color: var(--uniform-accent); box-shadow: 0 0 15px rgba(245,158,11,0.25); }
+    .status-card.active-mediaBlockEnabled { border-color: var(--on-accent); box-shadow: 0 0 15px var(--on-glow); }
+    .status-card.active-mediaBlurEnabled { border-color: var(--blur-accent); box-shadow: 0 0 15px rgba(59,130,246,0.25); }
+    .status-card.active-mediaHoverEnabled { border-color: var(--hover-accent); box-shadow: 0 0 15px rgba(16,185,129,0.25); }
+    .status-card.active-mediaInvertEnabled { border-color: var(--invert-accent); box-shadow: 0 0 15px rgba(168,85,247,0.25); }
+    .status-card.active-mediaUniformEnabled { border-color: var(--uniform-accent); box-shadow: 0 0 15px rgba(245,158,11,0.25); }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo-mark">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="5" width="15" height="11" rx="2" stroke="#f0f0f5" stroke-width="1.8"/>
-          <path d="M17 9l5-3v9l-5-3" stroke="#f0f0f5" stroke-width="1.8" stroke-linejoin="round"/>
-          <line x1="2" y1="22" x2="22" y2="2" stroke="#ff3b3b" stroke-width="2" stroke-linecap="round"/>
-        </svg>
+      <div class="brand-wrap">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="5" width="15" height="11" rx="2" stroke="#f0f0f5" stroke-width="1.8"/>
+            <path d="M17 9l5-3v9l-5-3" stroke="#f0f0f5" stroke-width="1.8" stroke-linejoin="round"/>
+            <line x1="2" y1="22" x2="22" y2="2" stroke="#ff3b3b" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="header-text">
+          <div class="name">MediaBlock Pro</div>
+          <div class="tagline">Image &amp; Video Shield</div>
+        </div>
       </div>
-      <div class="header-text">
-        <div class="name">MediaBlock Pro</div>
-        <div class="tagline">Image &amp; Video Shield</div>
-      </div>
+      <button class="settings-btn" id="settingsBtn" title="Advanced Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
     </div>
     
     <div class="stats-row">
@@ -84,7 +90,7 @@
         <div class="target-header">
           <div class="stat-label">Images</div>
           <label class="small-toggle">
-            <input type="checkbox" id="targetImgToggle" />
+            <input type="checkbox" id="targetImgEnabled" />
             <span class="small-toggle-slider"></span>
           </label>
         </div>
@@ -94,7 +100,7 @@
         <div class="target-header">
           <div class="stat-label">Videos</div>
           <label class="small-toggle">
-            <input type="checkbox" id="targetVidToggle" />
+            <input type="checkbox" id="targetVidEnabled" />
             <span class="small-toggle-slider"></span>
           </label>
         </div>
@@ -102,74 +108,34 @@
       </div>
     </div>
     
-    <div class="status-card sub-card" id="blockCard">
+    <div class="status-card" id="mediaBlockEnabledCard">
       <div class="status-row">
-        <div class="status-left">
-          <div class="status-dot" id="blockDot"></div>
-          <div class="status-label" id="blockLabel">BLOCK OFF</div>
-        </div>
-        <div class="toggle-wrapper">
-          <input type="checkbox" class="toggle-input" id="blockToggle" />
-          <label class="toggle-label" for="blockToggle">
-            <div class="toggle-track" id="blockTrack"><div class="toggle-thumb" id="blockThumb"></div></div>
-          </label>
-        </div>
+        <div class="status-left"><div class="status-dot" id="mediaBlockEnabledDot"></div><div class="status-label" id="mediaBlockEnabledLabel">BLOCK OFF</div></div>
+        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaBlockEnabled" /><label class="toggle-label" for="mediaBlockEnabled"><div class="toggle-track" id="mediaBlockEnabledTrack"><div class="toggle-thumb" id="mediaBlockEnabledThumb"></div></div></label></div>
       </div>
     </div>
-    <div class="status-card sub-card" id="blurCard">
+    <div class="status-card" id="mediaBlurEnabledCard">
       <div class="status-row">
-        <div class="status-left">
-          <div class="status-dot" id="blurDot"></div>
-          <div class="status-label" id="blurLabel">BLUR OFF</div>
-        </div>
-        <div class="toggle-wrapper">
-          <input type="checkbox" class="toggle-input" id="blurToggle" />
-          <label class="toggle-label" for="blurToggle">
-            <div class="toggle-track" id="blurTrack"><div class="toggle-thumb" id="blurThumb"></div></div>
-          </label>
-        </div>
+        <div class="status-left"><div class="status-dot" id="mediaBlurEnabledDot"></div><div class="status-label" id="mediaBlurEnabledLabel">BLUR OFF</div></div>
+        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaBlurEnabled" /><label class="toggle-label" for="mediaBlurEnabled"><div class="toggle-track" id="mediaBlurEnabledTrack"><div class="toggle-thumb" id="mediaBlurEnabledThumb"></div></div></label></div>
       </div>
     </div>
-    <div class="status-card sub-card" id="invertCard">
+    <div class="status-card" id="mediaInvertEnabledCard">
       <div class="status-row">
-        <div class="status-left">
-          <div class="status-dot" id="invertDot"></div>
-          <div class="status-label" id="invertLabel">INVERT OFF</div>
-        </div>
-        <div class="toggle-wrapper">
-          <input type="checkbox" class="toggle-input" id="invertToggle" />
-          <label class="toggle-label" for="invertToggle">
-            <div class="toggle-track" id="invertTrack"><div class="toggle-thumb" id="invertThumb"></div></div>
-          </label>
-        </div>
+        <div class="status-left"><div class="status-dot" id="mediaInvertEnabledDot"></div><div class="status-label" id="mediaInvertEnabledLabel">INVERT OFF</div></div>
+        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaInvertEnabled" /><label class="toggle-label" for="mediaInvertEnabled"><div class="toggle-track" id="mediaInvertEnabledTrack"><div class="toggle-thumb" id="mediaInvertEnabledThumb"></div></div></label></div>
       </div>
     </div>
-    <div class="status-card sub-card" id="uniformCard">
+    <div class="status-card" id="mediaUniformEnabledCard">
       <div class="status-row">
-        <div class="status-left">
-          <div class="status-dot" id="uniformDot"></div>
-          <div class="status-label" id="uniformLabel">UNIFORM VISUALS OFF</div>
-        </div>
-        <div class="toggle-wrapper">
-          <input type="checkbox" class="toggle-input" id="uniformToggle" />
-          <label class="toggle-label" for="uniformToggle">
-            <div class="toggle-track" id="uniformTrack"><div class="toggle-thumb" id="uniformThumb"></div></div>
-          </label>
-        </div>
+        <div class="status-left"><div class="status-dot" id="mediaUniformEnabledDot"></div><div class="status-label" id="mediaUniformEnabledLabel">UNIFORM VISUALS OFF</div></div>
+        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaUniformEnabled" /><label class="toggle-label" for="mediaUniformEnabled"><div class="toggle-track" id="mediaUniformEnabledTrack"><div class="toggle-thumb" id="mediaUniformEnabledThumb"></div></div></label></div>
       </div>
     </div>
-    <div class="status-card sub-card" id="hoverCard">
+    <div class="status-card" id="mediaHoverEnabledCard">
       <div class="status-row">
-        <div class="status-left">
-          <div class="status-dot" id="hoverDot"></div>
-          <div class="status-label" id="hoverLabel">HOVER REVEAL OFF</div>
-        </div>
-        <div class="toggle-wrapper">
-          <input type="checkbox" class="toggle-input" id="hoverToggle" />
-          <label class="toggle-label" for="hoverToggle">
-            <div class="toggle-track" id="hoverTrack"><div class="toggle-thumb" id="hoverThumb"></div></div>
-          </label>
-        </div>
+        <div class="status-left"><div class="status-dot" id="mediaHoverEnabledDot"></div><div class="status-label" id="mediaHoverEnabledLabel">HOVER REVEAL OFF</div></div>
+        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaHoverEnabled" /><label class="toggle-label" for="mediaHoverEnabled"><div class="toggle-track" id="mediaHoverEnabledTrack"><div class="toggle-thumb" id="mediaHoverEnabledThumb"></div></div></label></div>
       </div>
     </div>
     

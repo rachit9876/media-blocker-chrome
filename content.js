@@ -4,97 +4,66 @@
   if (window.__MB_LOADED) return;
   window.__MB_LOADED = true;
 
-  const STORAGE_KEY = "mediaBlockEnabled";
-  const INVERT_STORAGE_KEY = "mediaInvertEnabled";
-  const BLUR_STORAGE_KEY = "mediaBlurEnabled";
-  const HOVER_STORAGE_KEY = "mediaHoverEnabled";
-  const UNIFORM_STORAGE_KEY = "mediaUniformEnabled";
-  const TARGET_IMG_KEY = "targetImgEnabled"; 
-  const TARGET_VID_KEY = "targetVidEnabled"; 
-
   const IMG_SELECTORS = 'img, picture, canvas, svg image, object[type^="image"], embed[type^="image"], [role="img"]';
   const BG_SELECTORS = '[style*="background-image"], [style*="url("]';
   const VID_SELECTORS = 'video, iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"], iframe[src*="twitch"], iframe[src*="tiktok"], iframe[src*="facebook"], iframe[src*="instagram"], iframe[src*="twitter"], iframe[src*="x.com"], object[type^="video"], embed[type^="video"]';
   const IMG_ALL = `${IMG_SELECTORS}, ${BG_SELECTORS}`;
-  const VID_ALL = VID_SELECTORS;
   
   const prefix = (parent, selectors) => selectors.split(',').map(s => `${parent} ${s.trim()}`).join(', ');
 
   const MASTER_CSS = `
     :root {
+      --mb-blur-val: 25px;
       --mb-blur: 0px;
       --mb-grayscale: 0%;
       --mb-invert: 0;
       --mb-hue: 0deg;
-    }
-    /* Base Effects */
-    :root[data-mb-blur="true"] {
-      --mb-blur: 25px;
-    }
-    :root[data-mb-invert="true"] {
-      --mb-invert: 1;
-      --mb-hue: 180deg;
+      --mb-opacity: 1;
     }
     
-    /* Uniform Visuals now sets 100% grayscale */
-    :root[data-mb-uniform="true"] {
-      --mb-grayscale: 100%;
+    /* Toggle Variables */
+    :root[data-mb-blur="true"] { --mb-blur: var(--mb-blur-val); }
+    :root[data-mb-invert="true"] { --mb-invert: 1; --mb-hue: 180deg; }
+    :root[data-mb-uniform="true"] { --mb-grayscale: 100%; }
+    :root[data-mb-block="true"] { --mb-opacity: 0; }
+
+    /* BASE TARGET RULES
+      We keep the filters and transition applied permanently so long as Targeting is ON.
+      This allows variables to smoothly animate back to 0 when an effect is turned OFF.
+    */
+    ${prefix(':root[data-mb-target-img="true"]', IMG_ALL)} {
+      filter: blur(var(--mb-blur)) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important;
+      opacity: var(--mb-opacity) !important;
+      transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease !important;
     }
 
-    /* Target: Images - Base Filters (Now includes Uniform as a trigger) */
-    ${prefix(':root[data-mb-target-img="true"][data-mb-blur="true"]', IMG_ALL)},
-    ${prefix(':root[data-mb-target-img="true"][data-mb-invert="true"]', IMG_ALL)},
-    ${prefix(':root[data-mb-target-img="true"][data-mb-uniform="true"]', IMG_ALL)} {
+    ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} {
       filter: blur(var(--mb-blur)) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important;
-      transition: filter 0.3s ease !important;
-    }
-
-    /* Target: Videos - Base Filters (Now includes Uniform as a trigger) */
-    ${prefix(':root[data-mb-target-vid="true"][data-mb-blur="true"]', VID_ALL)},
-    ${prefix(':root[data-mb-target-vid="true"][data-mb-invert="true"]', VID_ALL)},
-    ${prefix(':root[data-mb-target-vid="true"][data-mb-uniform="true"]', VID_ALL)} {
-      filter: blur(var(--mb-blur)) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important;
-      transition: filter 0.3s ease !important;
+      opacity: var(--mb-opacity) !important;
+      transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease !important;
       transform: translateZ(0); 
     }
 
-    /* Hover Reveal (Images) */
+    /* Hover Reveal (Smoothly overrides variables back to default on mouse hover) */
     ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL).split(',').map(s => `${s.trim()}:hover`).join(', ')} {
-      --mb-blur: 0px !important;
-      --mb-grayscale: 0% !important;
-      --mb-invert: 0 !important;
-      --mb-hue: 0deg !important;
+      --mb-blur: 0px !important; --mb-grayscale: 0% !important; --mb-invert: 0 !important; --mb-hue: 0deg !important; --mb-opacity: 1 !important;
     }
-    ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL)} {
-      cursor: pointer !important;
-    }
+    ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL)} { cursor: pointer !important; }
 
-    /* Hover Reveal (Videos) */
-    ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_ALL).split(',').map(s => `${s.trim()}:hover`).join(', ')} {
-      --mb-blur: 0px !important;
-      --mb-grayscale: 0% !important;
-      --mb-invert: 0 !important;
-      --mb-hue: 0deg !important;
+    ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS).split(',').map(s => `${s.trim()}:hover`).join(', ')} {
+      --mb-blur: 0px !important; --mb-grayscale: 0% !important; --mb-invert: 0 !important; --mb-hue: 0deg !important; --mb-opacity: 1 !important;
     }
-    ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_ALL)} {
-      cursor: pointer !important;
-    }
+    ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS)} { cursor: pointer !important; }
 
-    /* Block Module (Images) */
-    ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', IMG_SELECTORS)} {
-      visibility: hidden !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
-    ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', BG_SELECTORS)} {
-      background-image: none !important;
-    }
-
-    /* Block Module (Videos) */
+    /* Extra Block Module Safety: Disable pointer events so invisible elements can't be clicked */
+    ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', IMG_SELECTORS)},
     ${prefix(':root[data-mb-target-vid="true"][data-mb-block="true"]', VID_SELECTORS)} {
-      visibility: hidden !important;
-      opacity: 0 !important;
       pointer-events: none !important;
+    }
+    
+    /* Background images must be manually detached when fully blocked */
+    ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', BG_SELECTORS)} { 
+      background-image: none !important; 
     }
   `;
 
@@ -103,58 +72,40 @@
     const style = document.createElement("style");
     style.id = "__mediablock_master_style__";
     style.textContent = MASTER_CSS;
-    
-    if (document.head) {
-      document.head.insertBefore(style, document.head.firstChild);
-    } else {
-      document.documentElement.appendChild(style);
-    }
+    (document.head || document.documentElement).appendChild(style);
   }
 
-  function updateState(type, enabled) {
+  const STATE_MAP = {
+    mediaBlockEnabled: "data-mb-block",
+    mediaInvertEnabled: "data-mb-invert",
+    mediaBlurEnabled: "data-mb-blur",
+    mediaHoverEnabled: "data-mb-hover",
+    mediaUniformEnabled: "data-mb-uniform",
+    targetImgEnabled: "data-mb-target-img",
+    targetVidEnabled: "data-mb-target-vid"
+  };
+
+  function applyState(key, value) {
     const root = document.documentElement;
-    if (type === "MEDIA_BLOCK_TOGGLE") {
-      enabled ? root.setAttribute("data-mb-block", "true") : root.removeAttribute("data-mb-block");
-    } else if (type === "MEDIA_INVERT_TOGGLE") {
-      enabled ? root.setAttribute("data-mb-invert", "true") : root.removeAttribute("data-mb-invert");
-    } else if (type === "MEDIA_BLUR_TOGGLE") {
-      enabled ? root.setAttribute("data-mb-blur", "true") : root.removeAttribute("data-mb-blur");
-    } else if (type === "MEDIA_HOVER_TOGGLE") {
-      enabled ? root.setAttribute("data-mb-hover", "true") : root.removeAttribute("data-mb-hover");
-    } else if (type === "MEDIA_UNIFORM_TOGGLE") {
-      enabled ? root.setAttribute("data-mb-uniform", "true") : root.removeAttribute("data-mb-uniform");
-    } else if (type === "MEDIA_TARGET_IMG_TOGGLE") {
-      enabled ? root.setAttribute("data-mb-target-img", "true") : root.removeAttribute("data-mb-target-img");
-    } else if (type === "MEDIA_TARGET_VID_TOGGLE") {
-      enabled ? root.setAttribute("data-mb-target-vid", "true") : root.removeAttribute("data-mb-target-vid");
+    if (key === "blurIntensity") {
+      root.style.setProperty("--mb-blur-val", `${value}px`);
+    } else if (STATE_MAP[key]) {
+      value ? root.setAttribute(STATE_MAP[key], "true") : root.removeAttribute(STATE_MAP[key]);
     }
   }
 
   function init() {
     injectMasterStyle();
-    
-    chrome.storage.local.get({
-      [STORAGE_KEY]: false,
-      [INVERT_STORAGE_KEY]: false,
-      [BLUR_STORAGE_KEY]: false,
-      [HOVER_STORAGE_KEY]: false,
-      [UNIFORM_STORAGE_KEY]: false,
-      [TARGET_IMG_KEY]: true, 
-      [TARGET_VID_KEY]: true
-    }, (res) => {
-      updateState("MEDIA_BLOCK_TOGGLE", res[STORAGE_KEY]);
-      updateState("MEDIA_INVERT_TOGGLE", res[INVERT_STORAGE_KEY]);
-      updateState("MEDIA_BLUR_TOGGLE", res[BLUR_STORAGE_KEY]);
-      updateState("MEDIA_HOVER_TOGGLE", res[HOVER_STORAGE_KEY]);
-      updateState("MEDIA_UNIFORM_TOGGLE", res[UNIFORM_STORAGE_KEY]);
-      updateState("MEDIA_TARGET_IMG_TOGGLE", res[TARGET_IMG_KEY]);
-      updateState("MEDIA_TARGET_VID_TOGGLE", res[TARGET_VID_KEY]);
+    chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
+      if(!state) return;
+      Object.keys(state).forEach(key => applyState(key, state[key]));
     });
   }
 
   init();
 
-  chrome.runtime.onMessage.addListener((message) => {
-    updateState(message.type, message.enabled);
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === "SYNC_SETTING") applyState(msg.key, msg.value);
+    if (msg.type === "SYNC_ALL") Object.keys(msg).forEach(k => applyState(k, msg[k]));
   });
 })();
