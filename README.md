@@ -13,13 +13,28 @@
 ---
 
 ## Why MediaBlock Pro?
-Want true privacy while browsing in public or at work? MediaBlock Pro is a lightweight, highly stable Chrome extension that instantly blocks all images, videos, and background media on every website you visit. Take back your screen and browse without unwanted visual distractions.
+Want true privacy while browsing in public or at work? MediaBlock Pro is a lightweight, highly stable Chrome extension that instantly filters or blocks images, videos, and background media on every website you visit. 
 
-## Core Features
-*   **Total Media Block:** Completely hides all images and videos with zero layout breakage.
-*   **Invert Mode (Privacy Filter):** Still need to know what a picture is without fully exposing it to anyone looking at your screen? Toggle Invert Mode to flip the colors, allowing you to see the media's outline and context discreetly.
-*   **Smart Blur:** Applies a heavy, grayscale blur to all media. Just hover your mouse over a specific image or video to temporarily reveal it.
-*   **Lightning Fast:** Uses pure CSS overrides instead of heavy DOM monitoring, ensuring zero CPU spikes or lag.
+More than just a visual blocker, MediaBlock Pro now includes advanced productivity utilities—like a native audio normalizer and a force-right-click tool—to help you take back your screen, ears, and browser.
+
+## 🌟 Core Features
+
+### 👁️ Visual Privacy & Shields
+* **Total Media Block:** Completely hides all images and videos. Uses Chrome's highly efficient `declarativeNetRequest` API to block media at the network level, saving bandwidth and preventing layout breakage.
+* **Smart Blur:** Applies a heavy blur to all media. You can adjust the exact blur intensity in the Options page (default is 25px).
+* **Invert Mode (Privacy Filter):** Need to know what a picture is without fully exposing it to anyone looking at your screen? Toggle Invert Mode to flip the colors, allowing you to see the media's outline discreetly.
+* **Uniform Visuals (Grayscale):** Turns all media entirely black and white, stripping away eye-catching colors for distraction-free reading.
+
+### ⚡ Interactive Control
+* **Hover Reveal:** When enabled alongside Blur or Invert, simply hover your mouse over a specific image or video to temporarily reveal it in its original state.
+* **Granular Targeting:** Choose whether the extension affects *just* images, *just* videos, or both.
+* **Live Media Counters:** Open the popup to instantly see exactly how many images and videos are present on your current tab.
+* **Custom Shortcut (Alt+S):** Instantly toggle your preferred filter (Block, Blur, Invert) or open settings without clicking the extension icon.
+
+### 🛠️ Advanced Web Utilities
+* **Force Right-Click & Copy:** Annoyed by websites that disable your right-click menu or prevent text selection? Toggle this on to strip away their restrictions and regain control of your mouse and clipboard.
+* **Stable Volume (Audio Normalizer):** Uses the Web Audio API to apply dynamic range compression to HTML5 videos and audio. It squashes ear-piercing loud noises and boosts quiet whispers, protecting your speakers and your hearing.
+* **Lightning Fast:** Uses pure CSS overrides and Manifest V3 network rules instead of heavy DOM monitoring, ensuring zero CPU spikes or lag.
 
 ---
 
