@@ -1,0 +1,14 @@
+# Auto-generated Chrome Extension metadata
+_metadata/
+
+# Build artifacts and packed extensions
+*.zip
+*.crx
+*.pem
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# If you ever add npm packages later
+node_modules/
