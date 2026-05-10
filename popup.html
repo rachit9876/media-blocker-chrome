@@ -12,56 +12,71 @@
       --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
       --on-accent: #ff3b3b; --on-glow: rgba(255,59,59,0.35);
       --blur-accent: #3b82f6; --invert-accent: #a855f7; --hover-accent: #10b981; --uniform-accent: #f59e0b;
+      --frc-accent: #14b8a6; --vol-accent: #ec4899;
       --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
-      --radius: 18px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      --radius: 16px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     
-    body { width: 300px; background: var(--off-bg); color: var(--text-primary); overflow: hidden; user-select: none; }
+    /* Widened the body to 460px to perfectly fit 3 columns */
+    body { width: 460px; background: var(--off-bg); color: var(--text-primary); overflow-y: auto; overflow-x: hidden; user-select: none; }
     body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
     
     .container { position: relative; z-index: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-    .header { display: flex; align-items: center; justify-content: space-between; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .brand-wrap { display: flex; align-items: center; gap: 12px; }
     .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: var(--off-card); border: 1px solid var(--off-border); display: flex; align-items: center; justify-content: center; }
     .logo-mark svg { width: 18px; height: 18px; }
-    .header-text .name { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
-    .header-text .tagline { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 1px; }
-    
-    .settings-btn { background: var(--off-card); border: 1px solid var(--off-border); color: var(--text-secondary); width: 32px; height: 32px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-    .settings-btn:hover { background: #2a2a32; color: var(--text-primary); }
+    .header-text .name { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+    .header-text .tagline { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 1px; }
 
-    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    /* 3-Column Layouts */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
     .stat-box { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
     .target-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 2px; }
     .stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); }
     .stat-value { font-size: 20px; font-weight: 800; line-height: 1; }
     
-    .small-toggle { position: relative; display: inline-block; width: 56px; height: 32px; flex-shrink: 0; }
+    /* Dedicated Settings Card Styles */
+    .settings-box { cursor: pointer; transition: all 0.2s; justify-content: center; }
+    .settings-box:hover { background: #2a2a32; border-color: var(--text-primary); }
+    .settings-box:hover .settings-icon { stroke: var(--text-primary); transform: rotate(90deg); }
+    .settings-icon { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s; }
+    
+    /* Shrunk small toggles slightly to fit perfectly in 3 cols */
+    .small-toggle { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
     .small-toggle input { opacity: 0; width: 0; height: 0; }
     .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 2px solid var(--off-border); transition: all var(--transition); border-radius: 100px; }
-    .small-toggle-slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: var(--text-dim); transition: all var(--transition); border-radius: 50%; }
+    .small-toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: var(--text-dim); transition: all var(--transition); border-radius: 50%; }
     .small-toggle input:checked + .small-toggle-slider { background-color: var(--text-primary); border-color: var(--text-primary); }
-    .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(24px); background-color: var(--off-bg); }
+    .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(18px); background-color: var(--off-bg); }
     
-    .status-card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: var(--radius); padding: 12px 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; transition: all 0.3s ease; position: relative; overflow: hidden; }
-    .status-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-    .status-left { display: flex; align-items: center; gap: 8px; }
+    .status-card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: var(--radius); padding: 16px 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 14px; transition: all 0.3s ease; position: relative; text-align: center; }
+    .status-header { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; min-height: 32px; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); transition: all 0.3s ease; }
-    .status-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--text-secondary); transition: color 0.3s ease; text-transform: uppercase; }
+    .status-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-secondary); transition: color 0.3s ease; text-transform: uppercase; line-height: 1.3; }
     
     .toggle-wrapper { position: relative; }
     .toggle-input { position: absolute; opacity: 0; width: 0; height: 0; }
     .toggle-label { display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .toggle-track { width: 56px; height: 32px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; position: relative; transition: all var(--transition); }
     .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--text-dim); transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
+
+    /* Wide Bottom Banner format for Stable Volume */
+    #stableVolumeEnabledCard { grid-column: span 3; flex-direction: row; padding: 14px 20px; align-items: center; justify-content: space-between; }
+    #stableVolumeEnabledCard .status-header { flex-direction: row; min-height: auto; gap: 12px; justify-content: flex-start; flex-grow: 1; }
     
     .footer { font-size: 10px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 4px; display: flex; justify-content: center; gap: 6px; }
     
+    /* Active States */
     .status-card.active-mediaBlockEnabled { border-color: var(--on-accent); box-shadow: 0 0 15px var(--on-glow); }
     .status-card.active-mediaBlurEnabled { border-color: var(--blur-accent); box-shadow: 0 0 15px rgba(59,130,246,0.25); }
     .status-card.active-mediaHoverEnabled { border-color: var(--hover-accent); box-shadow: 0 0 15px rgba(16,185,129,0.25); }
     .status-card.active-mediaInvertEnabled { border-color: var(--invert-accent); box-shadow: 0 0 15px rgba(168,85,247,0.25); }
     .status-card.active-mediaUniformEnabled { border-color: var(--uniform-accent); box-shadow: 0 0 15px rgba(245,158,11,0.25); }
+    .status-card.active-forceRightClickEnabled { border-color: var(--frc-accent); box-shadow: 0 0 15px rgba(20,184,166,0.25); }
+    .status-card.active-stableVolumeEnabled { border-color: var(--vol-accent); box-shadow: 0 0 15px rgba(236,72,153,0.25); }
   </style>
 </head>
 <body>
@@ -80,62 +95,90 @@
           <div class="tagline">Image &amp; Video Shield</div>
         </div>
       </div>
-      <button class="settings-btn" id="settingsBtn" title="Advanced Settings">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-      </button>
     </div>
     
     <div class="stats-row">
       <div class="stat-box">
         <div class="target-header">
           <div class="stat-label">Images</div>
-          <label class="small-toggle">
-            <input type="checkbox" id="targetImgEnabled" />
-            <span class="small-toggle-slider"></span>
-          </label>
+          <label class="small-toggle"><input type="checkbox" id="targetImgEnabled" /><span class="small-toggle-slider"></span></label>
         </div>
         <div class="stat-value" id="imgCount">0</div>
       </div>
+      
       <div class="stat-box">
         <div class="target-header">
           <div class="stat-label">Videos</div>
-          <label class="small-toggle">
-            <input type="checkbox" id="targetVidEnabled" />
-            <span class="small-toggle-slider"></span>
-          </label>
+          <label class="small-toggle"><input type="checkbox" id="targetVidEnabled" /><span class="small-toggle-slider"></span></label>
         </div>
         <div class="stat-value" id="vidCount">0</div>
       </div>
+
+      <div class="stat-box settings-box" id="settingsBtn">
+        <div class="target-header" style="justify-content: center;">
+          <div class="stat-label">Settings</div>
+        </div>
+        <div class="stat-value" style="display:flex; justify-content:center; align-items:center; margin-top: 6px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="settings-icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+      </div>
     </div>
     
-    <div class="status-card" id="mediaBlockEnabledCard">
-      <div class="status-row">
-        <div class="status-left"><div class="status-dot" id="mediaBlockEnabledDot"></div><div class="status-label" id="mediaBlockEnabledLabel">BLOCK OFF</div></div>
+    <div class="features-grid">
+      <div class="status-card" id="mediaBlockEnabledCard">
+        <div class="status-header">
+          <div class="status-dot" id="mediaBlockEnabledDot"></div>
+          <div class="status-label" id="mediaBlockEnabledLabel">BLOCK OFF</div>
+        </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaBlockEnabled" /><label class="toggle-label" for="mediaBlockEnabled"><div class="toggle-track" id="mediaBlockEnabledTrack"><div class="toggle-thumb" id="mediaBlockEnabledThumb"></div></div></label></div>
       </div>
-    </div>
-    <div class="status-card" id="mediaBlurEnabledCard">
-      <div class="status-row">
-        <div class="status-left"><div class="status-dot" id="mediaBlurEnabledDot"></div><div class="status-label" id="mediaBlurEnabledLabel">BLUR OFF</div></div>
+
+      <div class="status-card" id="mediaBlurEnabledCard">
+        <div class="status-header">
+          <div class="status-dot" id="mediaBlurEnabledDot"></div>
+          <div class="status-label" id="mediaBlurEnabledLabel">BLUR OFF</div>
+        </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaBlurEnabled" /><label class="toggle-label" for="mediaBlurEnabled"><div class="toggle-track" id="mediaBlurEnabledTrack"><div class="toggle-thumb" id="mediaBlurEnabledThumb"></div></div></label></div>
       </div>
-    </div>
-    <div class="status-card" id="mediaInvertEnabledCard">
-      <div class="status-row">
-        <div class="status-left"><div class="status-dot" id="mediaInvertEnabledDot"></div><div class="status-label" id="mediaInvertEnabledLabel">INVERT OFF</div></div>
+
+      <div class="status-card" id="mediaInvertEnabledCard">
+        <div class="status-header">
+          <div class="status-dot" id="mediaInvertEnabledDot"></div>
+          <div class="status-label" id="mediaInvertEnabledLabel">INVERT OFF</div>
+        </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaInvertEnabled" /><label class="toggle-label" for="mediaInvertEnabled"><div class="toggle-track" id="mediaInvertEnabledTrack"><div class="toggle-thumb" id="mediaInvertEnabledThumb"></div></div></label></div>
       </div>
-    </div>
-    <div class="status-card" id="mediaUniformEnabledCard">
-      <div class="status-row">
-        <div class="status-left"><div class="status-dot" id="mediaUniformEnabledDot"></div><div class="status-label" id="mediaUniformEnabledLabel">UNIFORM VISUALS OFF</div></div>
+
+      <div class="status-card" id="mediaUniformEnabledCard">
+        <div class="status-header">
+          <div class="status-dot" id="mediaUniformEnabledDot"></div>
+          <div class="status-label" id="mediaUniformEnabledLabel">UNIFORM OFF</div>
+        </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaUniformEnabled" /><label class="toggle-label" for="mediaUniformEnabled"><div class="toggle-track" id="mediaUniformEnabledTrack"><div class="toggle-thumb" id="mediaUniformEnabledThumb"></div></div></label></div>
       </div>
-    </div>
-    <div class="status-card" id="mediaHoverEnabledCard">
-      <div class="status-row">
-        <div class="status-left"><div class="status-dot" id="mediaHoverEnabledDot"></div><div class="status-label" id="mediaHoverEnabledLabel">HOVER REVEAL OFF</div></div>
+
+      <div class="status-card" id="mediaHoverEnabledCard">
+        <div class="status-header">
+          <div class="status-dot" id="mediaHoverEnabledDot"></div>
+          <div class="status-label" id="mediaHoverEnabledLabel">HOVER OFF</div>
+        </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaHoverEnabled" /><label class="toggle-label" for="mediaHoverEnabled"><div class="toggle-track" id="mediaHoverEnabledTrack"><div class="toggle-thumb" id="mediaHoverEnabledThumb"></div></div></label></div>
+      </div>
+
+      <div class="status-card" id="forceRightClickEnabledCard">
+        <div class="status-header">
+          <div class="status-dot" id="forceRightClickEnabledDot"></div>
+          <div class="status-label" id="forceRightClickEnabledLabel">RIGHT-CLICK OFF</div>
+        </div>
+        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="forceRightClickEnabled" /><label class="toggle-label" for="forceRightClickEnabled"><div class="toggle-track" id="forceRightClickEnabledTrack"><div class="toggle-thumb" id="forceRightClickEnabledThumb"></div></div></label></div>
+      </div>
+
+      <div class="status-card" id="stableVolumeEnabledCard">
+        <div class="status-header">
+          <div class="status-dot" id="stableVolumeEnabledDot"></div>
+          <div class="status-label" id="stableVolumeEnabledLabel">STABLE VOL OFF</div>
+        </div>
+        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="stableVolumeEnabled" /><label class="toggle-label" for="stableVolumeEnabled"><div class="toggle-track" id="stableVolumeEnabledTrack"><div class="toggle-thumb" id="stableVolumeEnabledThumb"></div></div></label></div>
       </div>
     </div>
     

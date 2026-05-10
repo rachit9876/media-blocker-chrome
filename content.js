@@ -27,10 +27,6 @@
     :root[data-mb-uniform="true"] { --mb-grayscale: 100%; }
     :root[data-mb-block="true"] { --mb-opacity: 0; }
 
-    /* BASE TARGET RULES
-      We keep the filters and transition applied permanently so long as Targeting is ON.
-      This allows variables to smoothly animate back to 0 when an effect is turned OFF.
-    */
     ${prefix(':root[data-mb-target-img="true"]', IMG_ALL)} {
       filter: blur(var(--mb-blur)) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important;
       opacity: var(--mb-opacity) !important;
@@ -44,7 +40,6 @@
       transform: translateZ(0); 
     }
 
-    /* Hover Reveal (Smoothly overrides variables back to default on mouse hover) */
     ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL).split(',').map(s => `${s.trim()}:hover`).join(', ')} {
       --mb-blur: 0px !important; --mb-grayscale: 0% !important; --mb-invert: 0 !important; --mb-hue: 0deg !important; --mb-opacity: 1 !important;
     }
@@ -55,13 +50,11 @@
     }
     ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS)} { cursor: pointer !important; }
 
-    /* Extra Block Module Safety: Disable pointer events so invisible elements can't be clicked */
     ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', IMG_SELECTORS)},
     ${prefix(':root[data-mb-target-vid="true"][data-mb-block="true"]', VID_SELECTORS)} {
       pointer-events: none !important;
     }
     
-    /* Background images must be manually detached when fully blocked */
     ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', BG_SELECTORS)} { 
       background-image: none !important; 
     }
@@ -74,6 +67,129 @@
     style.textContent = MASTER_CSS;
     (document.head || document.documentElement).appendChild(style);
   }
+
+  // --- FORCE RIGHT CLICK LOGIC ---
+  let isForceRightClickOn = false;
+
+  const blockedEvents = ['contextmenu', 'copy', 'paste', 'selectstart', 'dragstart', 'mousedown', 'mouseup'];
+  blockedEvents.forEach(eventName => {
+      window.addEventListener(eventName, function(e) {
+          if (isForceRightClickOn) { e.stopPropagation(); }
+      }, true);
+  });
+
+  const clearInlineHandlers = () => {
+      const allElements = document.querySelectorAll('*');
+      for (let el of allElements) {
+          if (el.oncontextmenu !== null) el.oncontextmenu = null;
+          if (el.onselectstart !== null) el.onselectstart = null;
+          if (el.ondragstart !== null) el.ondragstart = null;
+      }
+  };
+
+  function toggleForceRightClickStyle(enabled) {
+      const styleId = "__mb_frc_style__";
+      let styleEl = document.getElementById(styleId);
+      
+      if (enabled) {
+          if (!styleEl) {
+              styleEl = document.createElement('style');
+              styleEl.id = styleId;
+              styleEl.innerHTML = `
+                  * {
+                      -webkit-user-select: text !important;
+                      -moz-user-select: text !important;
+                      -ms-user-select: text !important;
+                      user-select: text !important;
+                      pointer-events: auto !important;
+                  }
+              `;
+              (document.head || document.documentElement).appendChild(styleEl);
+          }
+          clearInlineHandlers();
+      } else {
+          if (styleEl) styleEl.remove();
+      }
+  }
+
+  // --- STABLE VOLUME LOGIC (FIXED: Improved AGC + Makeup Gain) ---
+  let isStableVolumeOn = false;
+  let audioCtx = null;
+  const processedMedia = new WeakMap();
+
+  function attachStableVolume(mediaEl) {
+    if (processedMedia.has(mediaEl)) return;
+    
+    try {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      const source = audioCtx.createMediaElementSource(mediaEl);
+      const compressor = audioCtx.createDynamicsCompressor();
+      
+      // Much more natural compression settings
+      compressor.threshold.value = -20; // Catch peaks starting at -20dB
+      compressor.knee.value = 20;       // Smooth transition
+      compressor.ratio.value = 4;       // Medium compression (squashes peaks gently)
+      compressor.attack.value = 0.005;  // Fast reaction to spikes
+      compressor.release.value = 0.1;   // Faster release so volume recovers quickly
+      
+      // NEW: Makeup Gain node to restore overall loudness after compressing
+      const makeupGain = audioCtx.createGain();
+      makeupGain.gain.value = 2.5; // +8dB volume boost to make quiet sounds loud and clear
+
+      const effectGain = audioCtx.createGain();
+      effectGain.gain.value = isStableVolumeOn ? 1 : 0;
+      
+      const bypassGain = audioCtx.createGain();
+      bypassGain.gain.value = isStableVolumeOn ? 0 : 1;
+
+      // Routing with makeup gain: Source -> Compressor -> Makeup -> EffectOut
+      source.connect(compressor);
+      compressor.connect(makeupGain);
+      makeupGain.connect(effectGain);
+      effectGain.connect(audioCtx.destination);
+
+      // Bypass route remains uncompressed
+      source.connect(bypassGain);
+      bypassGain.connect(audioCtx.destination);
+
+      processedMedia.set(mediaEl, { effectGain, bypassGain });
+    } catch (e) {
+      console.warn("MediaBlock Pro: Could not attach volume stabilizer.", e);
+    }
+  }
+
+  function toggleStableVolumeLive(enabled) {
+    isStableVolumeOn = enabled;
+    const mediaEls = document.querySelectorAll('video, audio');
+    
+    mediaEls.forEach(attachStableVolume);
+
+    mediaEls.forEach(el => {
+      const nodes = processedMedia.get(el);
+      if (nodes) {
+        // Crossfade to avoid audio popping
+        nodes.effectGain.gain.setTargetAtTime(enabled ? 1 : 0, audioCtx.currentTime, 0.05);
+        nodes.bypassGain.gain.setTargetAtTime(enabled ? 0 : 1, audioCtx.currentTime, 0.05);
+      }
+    });
+
+    if (enabled && audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  document.addEventListener('play', (e) => {
+    if (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') {
+      attachStableVolume(e.target);
+      if (isStableVolumeOn && audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+  }, true);
+  // ------------------------------------------
 
   const STATE_MAP = {
     mediaBlockEnabled: "data-mb-block",
@@ -89,6 +205,11 @@
     const root = document.documentElement;
     if (key === "blurIntensity") {
       root.style.setProperty("--mb-blur-val", `${value}px`);
+    } else if (key === "forceRightClickEnabled") {
+      isForceRightClickOn = value;
+      toggleForceRightClickStyle(value);
+    } else if (key === "stableVolumeEnabled") {
+      toggleStableVolumeLive(value);
     } else if (STATE_MAP[key]) {
       value ? root.setAttribute(STATE_MAP[key], "true") : root.removeAttribute(STATE_MAP[key]);
     }

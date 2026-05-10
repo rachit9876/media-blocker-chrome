@@ -5,15 +5,17 @@ const DEFAULTS = {
   mediaBlurEnabled: false,
   mediaHoverEnabled: false,
   mediaUniformEnabled: false,
+  forceRightClickEnabled: false,
+  stableVolumeEnabled: false, // NEW FEATURE DEFAULT
   targetImgEnabled: true,
   targetVidEnabled: true,
   blurIntensity: 25,
-  shortcutAction: "toggle_blur" // Default is now Toggle Smart Blur
+  shortcutAction: "toggle_blur"
 };
 
 async function init() {
   const data = await chrome.storage.local.get(DEFAULTS);
-  await chrome.storage.local.set(data); // Ensure defaults are cached immediately
+  await chrome.storage.local.set(data);
   await updateDNR();
 }
 
@@ -74,7 +76,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 });
 
-// Dynamic Keyboard Shortcut Listener
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === "custom-shortcut") {
     const data = await chrome.storage.local.get(DEFAULTS);

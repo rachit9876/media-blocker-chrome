@@ -7,7 +7,9 @@
     mediaBlurEnabled: { color: "var(--blur-accent)", labelPrefix: "BLUR" },
     mediaInvertEnabled: { color: "var(--invert-accent)", labelPrefix: "INVERT" },
     mediaUniformEnabled: { color: "var(--uniform-accent)", labelPrefix: "UNIFORM VISUALS" },
-    mediaHoverEnabled: { color: "var(--hover-accent)", labelPrefix: "HOVER REVEAL" }
+    mediaHoverEnabled: { color: "var(--hover-accent)", labelPrefix: "HOVER REVEAL" },
+    forceRightClickEnabled: { color: "var(--frc-accent)", labelPrefix: "FORCE RIGHT-CLICK" },
+    stableVolumeEnabled: { color: "var(--vol-accent)", labelPrefix: "STABLE VOL" }
   };
 
   function updateSubUI(key, enabled) {
@@ -70,7 +72,6 @@
 
     fetchMediaCounts();
 
-    // Bind event listeners
     Object.keys(configMap).concat(['targetImgEnabled', 'targetVidEnabled']).forEach(key => {
       document.getElementById(key).addEventListener('change', (e) => {
         updateSubUI(key, e.target.checked);
@@ -85,7 +86,6 @@
 
   init();
 
-  // Listen for background syncs (e.g. keyboard shortcut toggles)
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.type === "SYNC_SETTING") {
       updateSubUI(msg.key, msg.value);
