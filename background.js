@@ -6,7 +6,7 @@ const DEFAULTS = {
   mediaHoverEnabled: false,
   mediaUniformEnabled: false,
   forceRightClickEnabled: false,
-  stableVolumeEnabled: false, // NEW FEATURE DEFAULT
+  stableVolumeEnabled: false,
   targetImgEnabled: true,
   targetVidEnabled: true,
   blurIntensity: 25,
@@ -35,7 +35,7 @@ async function updateDNR() {
   
   if (blockOn) {
     chrome.action.setBadgeText({ text: "ON" });
-    chrome.action.setBadgeBackgroundColor({ color: "#E53E3E" });
+    chrome.action.setBadgeBackgroundColor({ color: "#E53E3E" }); // Red
   } else {
     chrome.action.setBadgeText({ text: "" });
   }
@@ -99,3 +99,88 @@ chrome.commands.onCommand.addListener(async (command) => {
     }
   }
 });
+
+// --- SMART CONTEXT MENUS (RIGHT CLICK) ---
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: "shorten_page",
+    title: "Copy Short URL (Current Page)",
+    contexts: ["page"]
+  });
+
+  chrome.contextMenus.create({
+    id: "shorten_media",
+    title: "Copy Short URL (This Media)",
+    contexts: ["image", "video", "audio"]
+  });
+
+  chrome.contextMenus.create({
+    id: "shorten_link",
+    title: "Copy Short URL (This Link)",
+    contexts: ["link"]
+  });
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  let targetUrl = "";
+
+  if (info.menuItemId === "shorten_page") {
+    targetUrl = info.pageUrl;
+  } else if (info.menuItemId === "shorten_media") {
+    targetUrl = info.srcUrl; 
+  } else if (info.menuItemId === "shorten_link") {
+    targetUrl = info.linkUrl; 
+  }
+
+  if (targetUrl) {
+    if (targetUrl.startsWith('data:') || targetUrl.startsWith('blob:')) {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => {
+          alert("MediaBlock Pro: Cannot shorten this image. It is embedded directly as code (Data URI) and does not have a public web link.");
+        }
+      });
+      return; 
+    }
+    generateAndCopyShortUrl(targetUrl, tab.id);
+  }
+});
+
+async function generateAndCopyShortUrl(longUrl, tabId) {
+  // NEW: Show loading badge on the extension icon
+  chrome.action.setBadgeText({ text: "..." });
+  chrome.action.setBadgeBackgroundColor({ color: "#F59E0B" }); // Amber/Orange warning color
+
+  try {
+    const apiKey = 'fcdc158ebe36c6c0408bcb6c7e9a2fde';
+    const params = new URLSearchParams({
+      key: apiKey,
+      url: longUrl,
+      analytics: 'true',
+      filterbots: 'false'
+    });
+
+    const response = await fetch(`https://xgd.io/V1/shorten?${params.toString()}`);
+    const data = await response.json();
+
+    if (data.status === 200) {
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        func: (shortenedText) => {
+          navigator.clipboard.writeText(shortenedText).then(() => {
+            console.log("MediaBlock Pro: Short URL copied to clipboard ->", shortenedText);
+          }).catch(err => console.error("MediaBlock Pro: Clipboard copy failed.", err));
+        },
+        args: [data.shorturl]
+      });
+    } else {
+      console.error(`MediaBlock Pro API Error ${data.status}: ${data.message}`);
+    }
+  } catch (error) {
+    console.error('MediaBlock Pro Fetch Error:', error);
+  } finally {
+    // NEW: Restore the badge to its proper state (Block ON/OFF) once done processing
+    updateDNR();
+  }
+}

@@ -9,7 +9,9 @@
     "declarativeNetRequestWithHostAccess",
     "scripting",
     "tabs",
-    "activeTab"
+    "activeTab",
+    "clipboardWrite",
+    "contextMenus"
   ],
   "host_permissions": [
     "<all_urls>"

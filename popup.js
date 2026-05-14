@@ -63,6 +63,60 @@
     }
   }
 
+  async function initUrlShortener() {
+    const btn = document.getElementById('shortenUrlBtn');
+    const statusText = document.getElementById('shortenStatus');
+
+    btn.addEventListener('click', async () => {
+      if (statusText.textContent === 'GENERATING...') return;
+
+      try {
+        statusText.textContent = 'GENERATING...';
+        statusText.style.color = 'var(--text-secondary)';
+
+        // Only gets the URL when the user explicitly clicks the button
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        
+        if (!tab?.url || tab.url.startsWith("chrome://")) {
+            statusText.textContent = 'CANNOT SHORTEN BROWSER PAGES';
+            statusText.style.color = '#ff3b3b';
+            setTimeout(() => { statusText.textContent = 'CLICK TO COPY'; statusText.style.color = 'var(--text-secondary)'; }, 3000);
+            return;
+        }
+
+        const apiKey = 'fcdc158ebe36c6c0408bcb6c7e9a2fde';
+        const params = new URLSearchParams({
+          key: apiKey,
+          url: tab.url,
+          analytics: 'true',
+          filterbots: 'false'
+        });
+
+        const response = await fetch(`https://xgd.io/V1/shorten?${params.toString()}`);
+        const data = await response.json();
+
+        if (data.status === 200) {
+          // Requires "clipboardWrite" permission in Manifest V3
+          await navigator.clipboard.writeText(data.shorturl);
+          statusText.textContent = 'COPIED TO CLIPBOARD!';
+          statusText.style.color = '#10b981'; // Success Green
+        } else {
+          statusText.textContent = `ERROR ${data.status}`;
+          statusText.style.color = '#ff3b3b'; // Error Red
+        }
+      } catch (err) {
+        statusText.textContent = 'NETWORK ERROR';
+        statusText.style.color = '#ff3b3b';
+      }
+
+      // Reset the text after 3 seconds
+      setTimeout(() => {
+        statusText.textContent = 'CLICK TO COPY';
+        statusText.style.color = 'var(--text-secondary)';
+      }, 3000);
+    });
+  }
+
   async function init() {
     document.getElementById("appVersion").textContent = `v${chrome.runtime.getManifest().version}`;
     
@@ -71,6 +125,7 @@
     });
 
     fetchMediaCounts();
+    initUrlShortener(); // Initialize the new shortener module
 
     Object.keys(configMap).concat(['targetImgEnabled', 'targetVidEnabled']).forEach(key => {
       document.getElementById(key).addEventListener('change', (e) => {

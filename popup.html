@@ -12,12 +12,11 @@
       --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
       --on-accent: #ff3b3b; --on-glow: rgba(255,59,59,0.35);
       --blur-accent: #3b82f6; --invert-accent: #a855f7; --hover-accent: #10b981; --uniform-accent: #f59e0b;
-      --frc-accent: #14b8a6; --vol-accent: #ec4899;
+      --frc-accent: #14b8a6; --vol-accent: #ec4899; --short-accent: #8b5cf6;
       --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
       --radius: 16px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     
-    /* Widened the body to 460px to perfectly fit 3 columns */
     body { width: 460px; background: var(--off-bg); color: var(--text-primary); overflow-y: auto; overflow-x: hidden; user-select: none; }
     body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
     
@@ -29,7 +28,6 @@
     .header-text .name { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
     .header-text .tagline { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 1px; }
 
-    /* 3-Column Layouts */
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 
@@ -38,13 +36,11 @@
     .stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); }
     .stat-value { font-size: 20px; font-weight: 800; line-height: 1; }
     
-    /* Dedicated Settings Card Styles */
     .settings-box { cursor: pointer; transition: all 0.2s; justify-content: center; }
     .settings-box:hover { background: #2a2a32; border-color: var(--text-primary); }
     .settings-box:hover .settings-icon { stroke: var(--text-primary); transform: rotate(90deg); }
     .settings-icon { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s; }
     
-    /* Shrunk small toggles slightly to fit perfectly in 3 cols */
     .small-toggle { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
     .small-toggle input { opacity: 0; width: 0; height: 0; }
     .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 2px solid var(--off-border); transition: all var(--transition); border-radius: 100px; }
@@ -63,10 +59,16 @@
     .toggle-track { width: 56px; height: 32px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; position: relative; transition: all var(--transition); }
     .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--text-dim); transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
 
-    /* Wide Bottom Banner format for Stable Volume */
     #stableVolumeEnabledCard { grid-column: span 3; flex-direction: row; padding: 14px 20px; align-items: center; justify-content: space-between; }
     #stableVolumeEnabledCard .status-header { flex-direction: row; min-height: auto; gap: 12px; justify-content: flex-start; flex-grow: 1; }
     
+    /* NEW: Action Card for URL Shortener */
+    .action-card { grid-column: span 3; flex-direction: row; padding: 14px 20px; align-items: center; justify-content: space-between; cursor: pointer; border-color: var(--off-border); }
+    .action-card:hover { border-color: var(--short-accent); box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); background: #201b2a; }
+    .action-card .status-header { flex-direction: row; min-height: auto; gap: 12px; justify-content: flex-start; flex-grow: 1; }
+    .action-card .status-dot { background: var(--short-accent); box-shadow: 0 0 8px var(--short-accent); }
+    .action-card .status-label { color: var(--text-primary); }
+
     .footer { font-size: 10px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 4px; display: flex; justify-content: center; gap: 6px; }
     
     /* Active States */
@@ -105,7 +107,6 @@
         </div>
         <div class="stat-value" id="imgCount">0</div>
       </div>
-      
       <div class="stat-box">
         <div class="target-header">
           <div class="stat-label">Videos</div>
@@ -113,7 +114,6 @@
         </div>
         <div class="stat-value" id="vidCount">0</div>
       </div>
-
       <div class="stat-box settings-box" id="settingsBtn">
         <div class="target-header" style="justify-content: center;">
           <div class="stat-label">Settings</div>
@@ -179,6 +179,14 @@
           <div class="status-label" id="stableVolumeEnabledLabel">STABLE VOL OFF</div>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="stableVolumeEnabled" /><label class="toggle-label" for="stableVolumeEnabled"><div class="toggle-track" id="stableVolumeEnabledTrack"><div class="toggle-thumb" id="stableVolumeEnabledThumb"></div></div></label></div>
+      </div>
+
+      <div class="status-card action-card" id="shortenUrlBtn">
+        <div class="status-header">
+          <div class="status-dot"></div>
+          <div class="status-label">SHORTEN CURRENT URL</div>
+        </div>
+        <div id="shortenStatus" style="font-size: 11px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase;">Click to copy</div>
       </div>
     </div>
     
