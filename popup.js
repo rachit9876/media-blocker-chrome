@@ -74,7 +74,6 @@
         statusText.textContent = 'GENERATING...';
         statusText.style.color = 'var(--text-secondary)';
 
-        // Only gets the URL when the user explicitly clicks the button
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         
         if (!tab?.url || tab.url.startsWith("chrome://")) {
@@ -96,20 +95,18 @@
         const data = await response.json();
 
         if (data.status === 200) {
-          // Requires "clipboardWrite" permission in Manifest V3
           await navigator.clipboard.writeText(data.shorturl);
           statusText.textContent = 'COPIED TO CLIPBOARD!';
-          statusText.style.color = '#10b981'; // Success Green
+          statusText.style.color = '#10b981';
         } else {
           statusText.textContent = `ERROR ${data.status}`;
-          statusText.style.color = '#ff3b3b'; // Error Red
+          statusText.style.color = '#ff3b3b';
         }
       } catch (err) {
         statusText.textContent = 'NETWORK ERROR';
         statusText.style.color = '#ff3b3b';
       }
 
-      // Reset the text after 3 seconds
       setTimeout(() => {
         statusText.textContent = 'CLICK TO COPY';
         statusText.style.color = 'var(--text-secondary)';
@@ -125,7 +122,7 @@
     });
 
     fetchMediaCounts();
-    initUrlShortener(); // Initialize the new shortener module
+    initUrlShortener();
 
     Object.keys(configMap).concat(['targetImgEnabled', 'targetVidEnabled']).forEach(key => {
       document.getElementById(key).addEventListener('change', (e) => {
