@@ -29,7 +29,7 @@
     .header-text .tagline { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 1px; }
 
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 
     .stat-box { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
     .target-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 2px; }
@@ -59,14 +59,16 @@
     .toggle-track { width: 56px; height: 32px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; position: relative; transition: all var(--transition); }
     .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--text-dim); transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
 
-    #stableVolumeEnabledCard { grid-column: span 3; flex-direction: row; padding: 14px 20px; align-items: center; justify-content: space-between; }
-    #stableVolumeEnabledCard .status-header { flex-direction: row; min-height: auto; gap: 12px; justify-content: flex-start; flex-grow: 1; }
+    /* New Shorten URL Square Card Layout */
+    .action-card-square { cursor: pointer; border-color: var(--off-border); }
+    .action-card-square:hover { border-color: var(--short-accent); box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); background: #201b2a; }
+    .action-card-square .status-dot { background: var(--short-accent); box-shadow: 0 0 8px var(--short-accent); }
+    .action-card-square .status-label { color: var(--text-primary); transition: color 0.3s; }
     
-    .action-card { grid-column: span 3; flex-direction: row; padding: 14px 20px; align-items: center; justify-content: space-between; cursor: pointer; border-color: var(--off-border); }
-    .action-card:hover { border-color: var(--short-accent); box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); background: #201b2a; }
-    .action-card .status-header { flex-direction: row; min-height: auto; gap: 12px; justify-content: flex-start; flex-grow: 1; }
-    .action-card .status-dot { background: var(--short-accent); box-shadow: 0 0 8px var(--short-accent); }
-    .action-card .status-label { color: var(--text-primary); }
+    .action-icon-btn { width: 56px; height: 32px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+    .action-icon-btn svg { stroke: var(--text-secondary); transition: stroke 0.3s; }
+    .action-card-square:hover .action-icon-btn { border-color: var(--short-accent); }
+    .action-card-square:hover .action-icon-btn svg { stroke: var(--short-accent); }
 
     .footer { font-size: 10px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 4px; display: flex; justify-content: center; gap: 6px; }
     
@@ -186,7 +188,7 @@
       <div class="status-card" id="forceRightClickEnabledCard">
         <div class="status-header">
           <div class="status-dot" id="forceRightClickEnabledDot"></div>
-          <div class="status-label" id="forceRightClickEnabledLabel">RIGHT-CLICK OFF</div>
+          <div class="status-label" id="forceRightClickEnabledLabel">RIGHT-CLICK</div>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="forceRightClickEnabled" /><label class="toggle-label" for="forceRightClickEnabled"><div class="toggle-track" id="forceRightClickEnabledTrack"><div class="toggle-thumb" id="forceRightClickEnabledThumb"></div></div></label></div>
       </div>
@@ -194,17 +196,22 @@
       <div class="status-card" id="stableVolumeEnabledCard">
         <div class="status-header">
           <div class="status-dot" id="stableVolumeEnabledDot"></div>
-          <div class="status-label" id="stableVolumeEnabledLabel">STABLE VOL OFF</div>
+          <div class="status-label" id="stableVolumeEnabledLabel">STABLE VOL</div>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="stableVolumeEnabled" /><label class="toggle-label" for="stableVolumeEnabled"><div class="toggle-track" id="stableVolumeEnabledTrack"><div class="toggle-thumb" id="stableVolumeEnabledThumb"></div></div></label></div>
       </div>
 
-      <div class="status-card action-card" id="shortenUrlBtn">
+      <div class="status-card action-card-square" id="shortenUrlBtn">
         <div class="status-header">
           <div class="status-dot"></div>
-          <div class="status-label">SHORTEN CURRENT URL</div>
+          <div class="status-label" id="shortenStatusLabel">SHORTEN URL</div>
         </div>
-        <div id="shortenStatus" style="font-size: 11px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase;">Click to copy</div>
+        <div class="action-icon-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </div>
       </div>
     </div>
     

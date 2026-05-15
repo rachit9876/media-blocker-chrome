@@ -15,6 +15,15 @@ const DEFAULTS = {
   browserLockPassword: ""
 };
 
+// Security: Hash password before storing it
+async function hashPassword(password) {
+  if (!password) return "";
+  const msgBuffer = new TextEncoder().encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 async function init() {
   const data = await chrome.storage.local.get(DEFAULTS);
   await chrome.storage.local.set(data);
@@ -24,29 +33,34 @@ async function init() {
 init();
 
 async function updateDNR() {
-  const data = await chrome.storage.local.get(['mediaBlockEnabled', 'targetImgEnabled', 'targetVidEnabled']);
-  const blockOn = data.mediaBlockEnabled;
-  
-  const enableRulesetIds = [];
-  if (blockOn && data.targetImgEnabled) enableRulesetIds.push("block_images");
-  if (blockOn && data.targetVidEnabled) enableRulesetIds.push("block_videos");
-  
-  const disableRulesetIds = ["block_images", "block_videos"].filter(id => !enableRulesetIds.includes(id));
-  
-  await chrome.declarativeNetRequest.updateEnabledRulesets({ enableRulesetIds, disableRulesetIds });
-  
-  if (blockOn) {
-    chrome.action.setBadgeText({ text: "ON" });
-    chrome.action.setBadgeBackgroundColor({ color: "#E53E3E" }); // Red
-  } else {
-    chrome.action.setBadgeText({ text: "" });
+  try {
+    const data = await chrome.storage.local.get(['mediaBlockEnabled', 'targetImgEnabled', 'targetVidEnabled']);
+    const blockOn = data.mediaBlockEnabled;
+    
+    const enableRulesetIds = [];
+    if (blockOn && data.targetImgEnabled) enableRulesetIds.push("block_images");
+    if (blockOn && data.targetVidEnabled) enableRulesetIds.push("block_videos");
+    
+    const disableRulesetIds = ["block_images", "block_videos"].filter(id => !enableRulesetIds.includes(id));
+    
+    await chrome.declarativeNetRequest.updateEnabledRulesets({ enableRulesetIds, disableRulesetIds });
+    
+    if (blockOn) {
+      chrome.action.setBadgeText({ text: "ON" });
+      chrome.action.setBadgeBackgroundColor({ color: "#E53E3E" }); // Red
+    } else {
+      chrome.action.setBadgeText({ text: "" });
+    }
+  } catch (error) {
+    console.error("MediaBlock Pro: DNR Update Failed", error);
   }
 }
 
 async function broadcastState(type, payload) {
   const tabs = await chrome.tabs.query({});
   for (const tab of tabs) {
-    if (!tab.id || !tab.url || tab.url.startsWith("chrome")) continue;
+    // OPTIMIZATION: Only inject into active web pages, ignoring all browser-specific pages
+    if (!tab.id || !tab.url || !tab.url.startsWith("http")) continue;
     chrome.tabs.sendMessage(tab.id, { type, ...payload }).catch(() => {});
   }
 }
@@ -58,6 +72,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.type === "UPDATE_SETTING") {
+    if (message.key === 'browserLockPassword') {
+      hashPassword(message.value).then(hashed => {
+        chrome.storage.local.set({ browserLockPassword: hashed }).then(() => {
+          // We don't broadcast passwords to tabs
+          sendResponse({ success: true });
+        });
+      });
+      return true;
+    }
+
     chrome.storage.local.set({ [message.key]: message.value }).then(() => {
       if (['mediaBlockEnabled', 'targetImgEnabled', 'targetVidEnabled'].includes(message.key)) {
         updateDNR();
@@ -90,8 +114,11 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.type === "UNLOCK_ATTEMPT") {
-    chrome.storage.local.get(['browserLockPassword']).then((local) => {
-      if (message.password === local.browserLockPassword) {
+    Promise.all([
+      hashPassword(message.password),
+      chrome.storage.local.get(['browserLockPassword'])
+    ]).then(([hashedInput, local]) => {
+      if (hashedInput === local.browserLockPassword && local.browserLockPassword !== "") {
         chrome.storage.local.set({ browserLockEnabled: false }).then(() => {
           broadcastState("SYNC_SETTING", { key: "browserLockEnabled", value: false });
           sendResponse({ success: true });
@@ -189,9 +216,8 @@ async function shortenUrlAPI(longUrl) {
 }
 
 async function generateAndCopyShortUrl(longUrl, tabId) {
-  // NEW: Show loading badge on the extension icon
   chrome.action.setBadgeText({ text: "..." });
-  chrome.action.setBadgeBackgroundColor({ color: "#F59E0B" }); // Amber/Orange warning color
+  chrome.action.setBadgeBackgroundColor({ color: "#F59E0B" });
 
   try {
     const data = await shortenUrlAPI(longUrl);
@@ -208,7 +234,7 @@ async function generateAndCopyShortUrl(longUrl, tabId) {
           args: [data.shorturl]
         });
       } catch (scriptErr) {
-        console.warn("MediaBlock Pro: Could not inject script to copy to clipboard (likely restricted page).", scriptErr);
+        console.warn("MediaBlock Pro: Could not inject script to copy to clipboard.", scriptErr);
       }
     } else {
       console.error(`MediaBlock Pro API Error ${data.status}: ${data.message}`);
@@ -216,7 +242,6 @@ async function generateAndCopyShortUrl(longUrl, tabId) {
   } catch (error) {
     console.error('MediaBlock Pro Fetch Error:', error);
   } finally {
-    // NEW: Restore the badge to its proper state (Block ON/OFF) once done processing
     updateDNR();
   }
 }

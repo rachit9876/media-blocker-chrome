@@ -10,22 +10,28 @@
     :root {
       --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
       --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
-      --accent: #3b82f6; --danger: #ff3b3b;
+      --accent: #3b82f6; --accent-hover: #2563eb; --danger: #ff3b3b; --danger-hover: #dc2626;
       --radius: 18px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    body { background: var(--off-bg); color: var(--text-primary); padding: 40px 20px; display: flex; justify-content: center; }
+    body { background: var(--off-bg); color: var(--text-primary); padding: 40px 20px; display: flex; justify-content: center; min-height: 100vh; }
     body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
     
-    .container { position: relative; z-index: 1; max-width: 600px; width: 100%; display: flex; flex-direction: column; gap: 24px; }
+    .container { position: relative; z-index: 1; max-width: 900px; width: 100%; display: flex; flex-direction: column; gap: 24px; }
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .column-group { display: flex; flex-direction: column; gap: 24px; }
     
+    @media (max-width: 768px) {
+      .grid-layout { grid-template-columns: 1fr; }
+    }
+
     h1 { font-weight: 800; font-size: 28px; color: var(--text-primary); letter-spacing: -0.5px; margin-bottom: 8px; }
-    h2 { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); margin-left: 4px; }
+    h2 { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); margin-left: 4px; margin-bottom: 8px; }
     
     .card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
-    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--off-border); }
+    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--off-border); gap: 16px; }
     .list-item:last-child { border-bottom: none; }
-    .list-item-text { display: flex; flex-direction: column; flex-grow: 1; margin-right: 16px; }
+    .list-item-text { display: flex; flex-direction: column; flex-grow: 1; }
     .item-title { font-size: 16px; font-weight: 400; color: var(--text-primary); }
     .item-desc { font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
     
@@ -38,110 +44,140 @@
     .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(24px); background-color: var(--off-bg); }
 
     /* Range Slider */
-    input[type=range] { -webkit-appearance: none; width: 150px; background: transparent; }
+    input[type=range] { -webkit-appearance: none; width: 130px; background: transparent; }
     input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--text-primary); cursor: pointer; margin-top: -7px; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: var(--off-border); border-radius: 2px; }
 
-    /* Dropdown */
-    select { padding: 10px 14px; font-size: 14px; border: 2px solid var(--off-border); border-radius: 10px; background: #1e1e26; color: var(--text-primary); cursor: pointer; outline: none; transition: all 0.2s; }
-    select:focus { border-color: var(--text-primary); }
+    /* Inputs & Dropdowns */
+    select, input[type=password] { padding: 10px 14px; font-size: 14px; border: 2px solid var(--off-border); border-radius: 10px; background: #1e1e26; color: var(--text-primary); outline: none; transition: all 0.2s; }
+    select { cursor: pointer; width: 180px; }
+    select:focus, input[type=password]:focus { border-color: var(--text-primary); }
 
-    /* Button */
+    /* Buttons */
     .btn { padding: 10px 24px; font-size: 14px; font-weight: 500; color: var(--danger); background: transparent; border: 2px solid var(--off-border); border-radius: 10px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .btn:hover { border-color: var(--danger); background: rgba(255, 59, 59, 0.1); box-shadow: 0 0 15px rgba(255, 59, 59, 0.2); }
+    
+    .btn-save { padding: 10px 18px; font-size: 14px; font-weight: 700; color: #fff; background: var(--accent); border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; white-space: nowrap; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+    .btn-save:hover { background: var(--accent-hover); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); transform: translateY(-1px); }
+    .btn-save:active { transform: translateY(1px); }
+
+    .btn-delete { display: flex; align-items: center; justify-content: center; padding: 10px 14px; color: #fff; background: var(--danger); border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 59, 59, 0.3); }
+    .btn-delete:hover { background: var(--danger-hover); box-shadow: 0 6px 16px rgba(255, 59, 59, 0.4); transform: translateY(-1px); }
+    .btn-delete:active { transform: translateY(1px); }
   </style>
 </head>
 <body>
+
+  <div id="mb-options-lock-screen" style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15, 15, 17, 0.95) !important; backdrop-filter: blur(8px); z-index: 2147483647 !important; flex-direction: column !important; align-items: center !important; justify-content: center !important;">
+    <div style="background: #1a1a1f; padding: 40px; border-radius: 16px; border: 1px solid #2a2a32; text-align: center; width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ff3b3b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <h2 style="margin: 0 0 8px 0; font-size: 22px; color: #f0f0f5; font-weight: 800;">Settings Locked</h2>
+      <p style="margin: 0; font-size: 14px; color: #7a7a8a; line-height: 1.5;">Browser lock is active. Please click the extension icon to unlock the browser before changing settings.</p>
+    </div>
+  </div>
+
   <div class="container">
     <h1>Settings</h1>
 
-    <div>
-      <h2>Targeting Details</h2>
-      <div class="card">
-        <div class="list-item">
-          <div class="list-item-text">
-            <span class="item-title">Apply to Images</span>
-            <span class="item-desc">Affect all picture, canvas, and background images.</span>
+    <div class="grid-layout">
+      <div class="column-group">
+        <div>
+          <h2>Targeting Details</h2>
+          <div class="card">
+            <div class="list-item">
+              <div class="list-item-text">
+                <span class="item-title">Apply to Images</span>
+                <span class="item-desc">Affect all picture, canvas, and background images.</span>
+              </div>
+              <label class="small-toggle"><input type="checkbox" id="targetImgEnabled"><span class="small-toggle-slider"></span></label>
+            </div>
+            <div class="list-item">
+              <div class="list-item-text">
+                <span class="item-title">Apply to Videos</span>
+                <span class="item-desc">Affect standard videos and embeds (YouTube, Vimeo, etc).</span>
+              </div>
+              <label class="small-toggle"><input type="checkbox" id="targetVidEnabled"><span class="small-toggle-slider"></span></label>
+            </div>
           </div>
-          <label class="small-toggle"><input type="checkbox" id="targetImgEnabled"><span class="small-toggle-slider"></span></label>
         </div>
-        <div class="list-item">
-          <div class="list-item-text">
-            <span class="item-title">Apply to Videos</span>
-            <span class="item-desc">Affect standard videos and embeds (YouTube, Vimeo, etc).</span>
+
+        <div>
+          <h2>Advanced Features</h2>
+          <div class="card">
+            <div class="list-item">
+              <div class="list-item-text">
+                <span class="item-title">Force Right-Click & Copy</span>
+                <span class="item-desc">Unlock context menus, selection, and copying on restrictive sites.</span>
+              </div>
+              <label class="small-toggle"><input type="checkbox" id="forceRightClickEnabled"><span class="small-toggle-slider"></span></label>
+            </div>
+            <div class="list-item">
+              <div class="list-item-text">
+                <span class="item-title">Stable Volume (-12dB)</span>
+                <span class="item-desc">Prevent speaker degradation by squashing loud, sharp noises.</span>
+              </div>
+              <label class="small-toggle"><input type="checkbox" id="stableVolumeEnabled"><span class="small-toggle-slider"></span></label>
+            </div>
           </div>
-          <label class="small-toggle"><input type="checkbox" id="targetVidEnabled"><span class="small-toggle-slider"></span></label>
         </div>
       </div>
-    </div>
 
-    <div>
-      <h2>Security</h2>
-      <div class="card">
-        <div class="list-item" id="passwordRow" style="background: #1e1e26;">
-          <div class="list-item-text">
-            <span class="item-title">Universal Password</span>
-            <span class="item-desc">Set a password to lock and unlock your browser from the popup.</span>
+      <div class="column-group">
+        <div>
+          <h2>Security</h2>
+          <div class="card">
+            <div class="list-item" style="background: #1e1e26; flex-direction: column; align-items: flex-start; gap: 12px;">
+              <div class="list-item-text">
+                <span class="item-title">Universal Password</span>
+                <span class="item-desc">Set a password to lock and unlock your browser from the popup.</span>
+              </div>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <input type="password" id="browserLockPassword" placeholder="Enter password..." style="flex-grow: 1;">
+                <button id="savePasswordBtn" class="btn-save">Save</button>
+                <button id="deletePasswordBtn" class="btn-delete" style="display: none;" title="Remove Password">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                </button>
+              </div>
+            </div>
           </div>
-          <input type="password" id="browserLockPassword" placeholder="Enter password..." style="padding: 10px 14px; border-radius: 8px; border: 2px solid var(--off-border); background: var(--off-bg); color: var(--text-primary); font-size: 14px; outline: none; width: 200px;">
         </div>
-      </div>
-    </div>
 
-    <div>
-      <h2>Advanced Features</h2>
-      <div class="card">
-        <div class="list-item">
-          <div class="list-item-text">
-            <span class="item-title">Force Right-Click & Copy</span>
-            <span class="item-desc">Unlock context menus, selection, and copying on restrictive sites.</span>
+        <div>
+          <h2>Visual Adjustments</h2>
+          <div class="card">
+            <div class="list-item">
+              <div class="list-item-text">
+                <span class="item-title">Blur Intensity</span>
+                <span class="item-desc">Adjust the strength of the blur effect (Default is 25px).</span>
+              </div>
+              <input type="range" id="blurIntensity" min="5" max="50" step="1">
+            </div>
           </div>
-          <label class="small-toggle"><input type="checkbox" id="forceRightClickEnabled"><span class="small-toggle-slider"></span></label>
         </div>
-        <div class="list-item">
-          <div class="list-item-text">
-            <span class="item-title">Stable Volume (-12dB)</span>
-            <span class="item-desc">Prevent speaker degradation by squashing loud, sharp noises and normalizing audio.</span>
-          </div>
-          <label class="small-toggle"><input type="checkbox" id="stableVolumeEnabled"><span class="small-toggle-slider"></span></label>
-        </div>
-      </div>
-    </div>
 
-    <div>
-      <h2>Visual Adjustments</h2>
-      <div class="card">
-        <div class="list-item">
-          <div class="list-item-text">
-            <span class="item-title">Blur Intensity</span>
-            <span class="item-desc">Adjust the strength of the blur effect (Default is 25px).</span>
+        <div>
+          <h2>Shortcuts & Data</h2>
+          <div class="card">
+            <div class="list-item">
+              <div class="list-item-text">
+                <span class="item-title">Alt + S Shortcut Action</span>
+                <span class="item-desc">Choose what happens when you press the shortcut keys.</span>
+              </div>
+              <select id="shortcutAction">
+                <option value="toggle_blur">Toggle Smart Blur</option>
+                <option value="open_settings">Open Settings Page</option>
+                <option value="toggle_block">Toggle Media Block</option>
+                <option value="toggle_invert">Toggle Invert Colors</option>
+              </select>
+            </div>
+            <div class="list-item">
+              <div class="list-item-text">
+                <span class="item-title">Factory Reset</span>
+                <span class="item-desc">Restore all preferences and clear any saved passwords.</span>
+              </div>
+              <button class="btn" id="resetBtn">Reset Extension</button>
+            </div>
           </div>
-          <input type="range" id="blurIntensity" min="5" max="50" step="1">
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <h2>Shortcuts & Data</h2>
-      <div class="card">
-        <div class="list-item">
-          <div class="list-item-text">
-            <span class="item-title">Alt + S Shortcut Action</span>
-            <span class="item-desc">Choose what happens when you press the shortcut keys.</span>
-          </div>
-          <select id="shortcutAction">
-            <option value="toggle_blur">Toggle Smart Blur</option>
-            <option value="open_settings">Open Settings Page</option>
-            <option value="toggle_block">Toggle Media Block</option>
-            <option value="toggle_invert">Toggle Invert Colors</option>
-          </select>
-        </div>
-        <div class="list-item">
-          <div class="list-item-text">
-            <span class="item-title">Reset Extension</span>
-            <span class="item-desc">Restore all preferences to their factory default values.</span>
-          </div>
-          <button class="btn" id="resetBtn">Reset Defaults</button>
         </div>
       </div>
     </div>

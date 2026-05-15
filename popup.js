@@ -21,13 +21,19 @@
     }
 
     const config = configMap[key];
-    document.getElementById(key).checked = enabled;
+    const toggleEl = document.getElementById(key);
+    if(toggleEl) toggleEl.checked = enabled;
     
     const card = document.getElementById(`${key}Card`);
     const label = document.getElementById(`${key}Label`);
     const dot = document.getElementById(`${key}Dot`);
     const track = document.getElementById(`${key}Track`);
     const thumb = document.getElementById(`${key}Thumb`);
+
+    // Ensure we don't overwrite the special "SET PASSWORD" label if disabled
+    if (key === 'browserLockEnabled' && toggleEl && toggleEl.disabled) {
+       return; 
+    }
 
     label.textContent = enabled ? `${config.labelPrefix} ON` : `${config.labelPrefix} OFF`;
     dot.style.background = enabled ? config.color : "var(--text-dim)";
@@ -66,7 +72,7 @@
 
   async function initUrlShortener() {
     const btn = document.getElementById('shortenUrlBtn');
-    const statusText = document.getElementById('shortenStatus');
+    const statusText = document.getElementById('shortenStatusLabel');
 
     btn.addEventListener('click', async () => {
       if (statusText.textContent === 'GENERATING...') return;
@@ -80,7 +86,7 @@
         if (!tab?.url || tab.url.startsWith("chrome://")) {
             statusText.textContent = 'CANNOT SHORTEN BROWSER PAGES';
             statusText.style.color = '#ff3b3b';
-            setTimeout(() => { statusText.textContent = 'CLICK TO COPY'; statusText.style.color = 'var(--text-secondary)'; }, 3000);
+            setTimeout(() => { statusText.textContent = 'SHORTEN URL'; statusText.style.color = 'var(--text-secondary)'; }, 3000);
             return;
         }
 
@@ -106,7 +112,7 @@
       }
 
       setTimeout(() => {
-        statusText.textContent = 'CLICK TO COPY';
+        statusText.textContent = 'SHORTEN URL';
         statusText.style.color = 'var(--text-secondary)';
       }, 3000);
     });
@@ -117,12 +123,16 @@
     const lockErr = document.getElementById('popupLockErr');
     const lockScreen = document.getElementById('popupLockScreen');
     
+    // Track context: Did they click toggle off, or was it already locked when opened?
+    let isTogglingOff = false; 
+    
     const submitUnlock = () => {
       chrome.runtime.sendMessage({ type: "UNLOCK_ATTEMPT", password: lockPw.value }, (res) => {
         if (res && res.success) {
           lockScreen.style.display = 'none';
           lockPw.value = '';
           lockErr.style.display = 'none';
+          isTogglingOff = false;
         } else {
           lockErr.style.display = 'block';
           lockPw.value = '';
@@ -132,18 +142,49 @@
     };
     
     document.getElementById('popupLockBtn').addEventListener('click', submitUnlock);
+    
     document.getElementById('popupLockCancel').addEventListener('click', () => {
-      lockScreen.style.display = 'none';
-      lockPw.value = '';
-      lockErr.style.display = 'none';
-      updateSubUI('browserLockEnabled', true);
+      if (isTogglingOff) {
+        // They were trying to toggle off, cancel reverts toggle visually
+        lockScreen.style.display = 'none';
+        lockPw.value = '';
+        lockErr.style.display = 'none';
+        updateSubUI('browserLockEnabled', true);
+        isTogglingOff = false;
+      } else {
+        // They opened the popup while fully locked, cancel means close popup
+        window.close();
+      }
     });
+
     lockPw.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitUnlock(); });
 
     document.getElementById("appVersion").textContent = `v${chrome.runtime.getManifest().version}`;
     
     chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
       if(!state) return;
+      
+      // SECURITY PATCH: Enforce popup lock screen immediately if globally locked
+      if (state.browserLockEnabled) {
+        lockScreen.style.display = 'flex';
+        isTogglingOff = false; 
+        setTimeout(() => lockPw.focus(), 100);
+      }
+
+      const lockToggle = document.getElementById('browserLockEnabled');
+      const lockLabel = document.getElementById('browserLockEnabledLabel');
+      
+      if (!state.browserLockPassword) {
+        if(lockToggle) {
+           lockToggle.disabled = true;
+           lockToggle.parentElement.style.cursor = 'not-allowed';
+           document.getElementById('browserLockEnabledTrack').style.opacity = '0.4';
+           document.getElementById('browserLockEnabledCard').style.opacity = '0.6';
+           lockLabel.textContent = "SET PASSWORD FIRST";
+           lockLabel.style.color = "var(--text-secondary)";
+        }
+      }
+
       Object.keys(state).forEach(key => updateSubUI(key, state[key]));
     });
 
@@ -153,23 +194,21 @@
     const lockToggle = document.getElementById('browserLockEnabled');
     if (lockToggle) {
       lockToggle.addEventListener('change', (e) => {
+        if(lockToggle.disabled) {
+           e.preventDefault();
+           return;
+        }
+
         const isTurningOn = e.target.checked;
         updateSubUI('browserLockEnabled', isTurningOn);
         
-        chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
-          if (isTurningOn) {
-            if (!state.browserLockPassword) {
-              alert("Please set a Universal Password in Settings before enabling the Browser Lock.");
-              updateSubUI('browserLockEnabled', false);
-              chrome.runtime.openOptionsPage();
-            } else {
-              chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key: "browserLockEnabled", value: true });
-            }
-          } else {
-            lockScreen.style.display = 'flex';
-            setTimeout(() => lockPw.focus(), 100);
-          }
-        });
+        if (isTurningOn) {
+           chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key: "browserLockEnabled", value: true });
+        } else {
+           isTogglingOff = true;
+           lockScreen.style.display = 'flex';
+           setTimeout(() => lockPw.focus(), 100);
+        }
       });
     }
 

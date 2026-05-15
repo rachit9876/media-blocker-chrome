@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const lockScreen = document.getElementById('mb-options-lock-screen');
+
   const inputs = {
     targetImgEnabled: document.getElementById('targetImgEnabled'),
     targetVidEnabled: document.getElementById('targetVidEnabled'),
@@ -8,17 +10,34 @@ document.addEventListener('DOMContentLoaded', () => {
     shortcutAction: document.getElementById('shortcutAction'),
     browserLockPassword: document.getElementById('browserLockPassword')
   };
+  
+  const savePasswordBtn = document.getElementById('savePasswordBtn');
+  const deletePasswordBtn = document.getElementById('deletePasswordBtn');
 
   // Load settings
   function loadSettings() {
     chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
+      if (!state) return;
+
+      // SECURITY PATCH: Enforce lock screen visibility
+      lockScreen.style.display = state.browserLockEnabled ? 'flex' : 'none';
+
       inputs.targetImgEnabled.checked = state.targetImgEnabled;
       inputs.targetVidEnabled.checked = state.targetVidEnabled;
       inputs.forceRightClickEnabled.checked = state.forceRightClickEnabled;
       inputs.stableVolumeEnabled.checked = state.stableVolumeEnabled;
       inputs.blurIntensity.value = state.blurIntensity;
       inputs.shortcutAction.value = state.shortcutAction;
-      inputs.browserLockPassword.value = state.browserLockPassword;
+      
+      // Do not show the hashed password back to the user
+      inputs.browserLockPassword.value = "";
+      if (state.browserLockPassword && state.browserLockPassword !== "") {
+        inputs.browserLockPassword.placeholder = "******** (Set new password)";
+        deletePasswordBtn.style.display = "flex";
+      } else {
+        inputs.browserLockPassword.placeholder = "Enter password...";
+        deletePasswordBtn.style.display = "none";
+      }
     });
   }
 
@@ -35,18 +54,46 @@ document.addEventListener('DOMContentLoaded', () => {
   inputs.stableVolumeEnabled.addEventListener('change', (e) => updateSetting('stableVolumeEnabled', e.target.checked));
   inputs.shortcutAction.addEventListener('change', (e) => updateSetting('shortcutAction', e.target.value));
   
-  inputs.browserLockPassword.addEventListener('input', (e) => {
-    updateSetting('browserLockPassword', e.target.value);
-  });
-  
   // Real-time slider update
   inputs.blurIntensity.addEventListener('input', (e) => {
     updateSetting('blurIntensity', parseInt(e.target.value));
   });
 
+  // Explicit Save button for password
+  savePasswordBtn.addEventListener('click', () => {
+    const pw = inputs.browserLockPassword.value;
+    if (!pw) return; // Prevent empty saves via the save button
+    
+    updateSetting('browserLockPassword', pw);
+    
+    // Visual feedback
+    savePasswordBtn.textContent = "Saved!";
+    savePasswordBtn.style.background = "#10b981"; // Success Green
+    inputs.browserLockPassword.value = "";
+    inputs.browserLockPassword.placeholder = "******** (Set new password)";
+    deletePasswordBtn.style.display = "flex";
+    
+    setTimeout(() => {
+      savePasswordBtn.textContent = "Save";
+      savePasswordBtn.style.background = "var(--accent)";
+    }, 2000);
+  });
+
+  // Delete Password button listener
+  deletePasswordBtn.addEventListener('click', () => {
+    if (confirm("Remove your password? This will also turn off the Browser Lock.")) {
+      updateSetting('browserLockPassword', "");
+      updateSetting('browserLockEnabled', false); // Important: Force unlock
+      
+      inputs.browserLockPassword.value = "";
+      inputs.browserLockPassword.placeholder = "Enter password...";
+      deletePasswordBtn.style.display = "none";
+    }
+  });
+
   // Reset logic
   document.getElementById('resetBtn').addEventListener('click', () => {
-    if (confirm("Are you sure you want to reset all settings to defaults?")) {
+    if (confirm("Factory Reset: Are you sure you want to reset all settings and remove your password?")) {
       chrome.runtime.sendMessage({ type: "RESET_DEFAULTS" }, () => {
         loadSettings();
       });
@@ -55,11 +102,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Listen for sync from other tabs/popup
   chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.type === "SYNC_SETTING" && inputs[msg.key]) {
-      if (msg.key === 'blurIntensity' || msg.key === 'shortcutAction' || msg.key === 'browserLockPassword') {
-        inputs[msg.key].value = msg.value;
-      } else {
-        inputs[msg.key].checked = msg.value;
+    if (msg.type === "SYNC_SETTING") {
+      // SECURITY PATCH: Real-time settings block
+      if (msg.key === 'browserLockEnabled') {
+         lockScreen.style.display = msg.value ? 'flex' : 'none';
+      }
+      
+      if (inputs[msg.key]) {
+        if (msg.key === 'blurIntensity' || msg.key === 'shortcutAction') {
+          inputs[msg.key].value = msg.value;
+        } else if (msg.key === 'browserLockPassword') {
+          if (msg.value && msg.value !== "") {
+            inputs.browserLockPassword.placeholder = "******** (Set new password)";
+            deletePasswordBtn.style.display = "flex";
+          } else {
+            inputs.browserLockPassword.placeholder = "Enter password...";
+            deletePasswordBtn.style.display = "none";
+          }
+          inputs.browserLockPassword.value = "";
+        } else {
+          inputs[msg.key].checked = msg.value;
+        }
       }
     } else if (msg.type === "SYNC_ALL") {
        loadSettings();

@@ -27,28 +27,32 @@
     :root[data-mb-uniform="true"] { --mb-grayscale: 100%; }
     :root[data-mb-block="true"] { --mb-opacity: 0; }
 
-    ${prefix(':root[data-mb-target-img="true"]', IMG_ALL)} {
+    /* CSS Memory Optimization: Shared Base Properties */
+    ${prefix(':root', IMG_ALL)},
+    ${prefix(':root', VID_SELECTORS)} {
+      will-change: filter, opacity;
+    }
+
+    ${prefix(':root[data-mb-target-img="true"]', IMG_ALL)},
+    ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} {
       filter: blur(var(--mb-blur)) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important;
       opacity: var(--mb-opacity) !important;
       transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease !important;
     }
 
     ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} {
-      filter: blur(var(--mb-blur)) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important;
-      opacity: var(--mb-opacity) !important;
-      transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease !important;
       transform: translateZ(0); 
     }
 
-    ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL).split(',').map(s => `${s.trim()}:hover`).join(', ')} {
-      --mb-blur: 0px !important; --mb-grayscale: 0% !important; --mb-invert: 0 !important; --mb-hue: 0deg !important; --mb-opacity: 1 !important;
-    }
-    ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL)} { cursor: pointer !important; }
-
+    ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL).split(',').map(s => `${s.trim()}:hover`).join(', ')},
     ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS).split(',').map(s => `${s.trim()}:hover`).join(', ')} {
       --mb-blur: 0px !important; --mb-grayscale: 0% !important; --mb-invert: 0 !important; --mb-hue: 0deg !important; --mb-opacity: 1 !important;
     }
-    ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS)} { cursor: pointer !important; }
+
+    ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL)},
+    ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS)} { 
+      cursor: pointer !important; 
+    }
 
     ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', IMG_SELECTORS)},
     ${prefix(':root[data-mb-target-vid="true"][data-mb-block="true"]', VID_SELECTORS)} {
@@ -118,16 +122,14 @@
       const source = audioCtx.createMediaElementSource(mediaEl);
       const compressor = audioCtx.createDynamicsCompressor();
       
-      // Much more natural compression settings
-      compressor.threshold.value = -20; // Catch peaks starting at -20dB
-      compressor.knee.value = 20;       // Smooth transition
-      compressor.ratio.value = 4;       // Medium compression (squashes peaks gently)
-      compressor.attack.value = 0.005;  // Fast reaction to spikes
-      compressor.release.value = 0.1;   // Faster release so volume recovers quickly
+      compressor.threshold.value = -20;
+      compressor.knee.value = 20;       
+      compressor.ratio.value = 4;       
+      compressor.attack.value = 0.005;  
+      compressor.release.value = 0.1;   
       
-      // NEW: Makeup Gain node to restore overall loudness after compressing
       const makeupGain = audioCtx.createGain();
-      makeupGain.gain.value = 2.5; // +8dB volume boost to make quiet sounds loud and clear
+      makeupGain.gain.value = 2.5; 
 
       const effectGain = audioCtx.createGain();
       effectGain.gain.value = isStableVolumeOn ? 1 : 0;
@@ -135,13 +137,11 @@
       const bypassGain = audioCtx.createGain();
       bypassGain.gain.value = isStableVolumeOn ? 0 : 1;
 
-      // Routing with makeup gain: Source -> Compressor -> Makeup -> EffectOut
       source.connect(compressor);
       compressor.connect(makeupGain);
       makeupGain.connect(effectGain);
       effectGain.connect(audioCtx.destination);
 
-      // Bypass route remains uncompressed
       source.connect(bypassGain);
       bypassGain.connect(audioCtx.destination);
 
@@ -160,7 +160,6 @@
     mediaEls.forEach(el => {
       const nodes = processedMedia.get(el);
       if (nodes) {
-        // Crossfade to avoid audio popping
         nodes.effectGain.gain.setTargetAtTime(enabled ? 1 : 0, audioCtx.currentTime, 0.05);
         nodes.bypassGain.gain.setTargetAtTime(enabled ? 0 : 1, audioCtx.currentTime, 0.05);
       }
