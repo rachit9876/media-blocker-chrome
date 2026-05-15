@@ -29,7 +29,7 @@
     .header-text .tagline { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 1px; }
 
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
 
     .stat-box { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
     .target-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 2px; }
@@ -80,7 +80,19 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div id="popupLockScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,15,17,0.9); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+    <div style="background: var(--off-card); border: 1px solid var(--off-border); padding: 20px; border-radius: 12px; width: 100%;">
+      <h2 style="font-size: 18px; margin-bottom: 8px;">Unlock Browser</h2>
+      <input type="password" id="popupLockPw" placeholder="Password" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--off-border); background: var(--off-bg); color: var(--text-primary); font-size: 14px; margin-bottom: 12px; outline: none;">
+      <div style="display: flex; gap: 8px;">
+        <button id="popupLockCancel" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--off-border); background: transparent; color: var(--text-secondary); cursor: pointer;">Cancel</button>
+        <button id="popupLockBtn" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: var(--on-accent); color: #fff; font-weight: bold; cursor: pointer;">Unlock</button>
+      </div>
+      <div id="popupLockErr" style="color: var(--on-accent); font-size: 11px; margin-top: 12px; display: none;">Incorrect Password</div>
+    </div>
+  </div>
+
+  <div class="container" id="mainContainer">
     <div class="header">
       <div class="brand-wrap">
         <div class="logo-mark">
@@ -123,6 +135,14 @@
     </div>
     
     <div class="features-grid">
+      <div class="status-card" id="browserLockEnabledCard">
+        <div class="status-header">
+          <div class="status-dot" id="browserLockEnabledDot"></div>
+          <div class="status-label" id="browserLockEnabledLabel">LOCK OFF</div>
+        </div>
+        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="browserLockEnabled" /><label class="toggle-label" for="browserLockEnabled"><div class="toggle-track" id="browserLockEnabledTrack"><div class="toggle-thumb" id="browserLockEnabledThumb"></div></div></label></div>
+      </div>
+
       <div class="status-card" id="mediaBlockEnabledCard">
         <div class="status-header">
           <div class="status-dot" id="mediaBlockEnabledDot"></div>

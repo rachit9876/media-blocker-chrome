@@ -78,15 +78,6 @@
       }, true);
   });
 
-  const clearInlineHandlers = () => {
-      const allElements = document.querySelectorAll('*');
-      for (let el of allElements) {
-          if (el.oncontextmenu !== null) el.oncontextmenu = null;
-          if (el.onselectstart !== null) el.onselectstart = null;
-          if (el.ondragstart !== null) el.ondragstart = null;
-      }
-  };
-
   function toggleForceRightClickStyle(enabled) {
       const styleId = "__mb_frc_style__";
       let styleEl = document.getElementById(styleId);
@@ -106,7 +97,6 @@
               `;
               (document.head || document.documentElement).appendChild(styleEl);
           }
-          clearInlineHandlers();
       } else {
           if (styleEl) styleEl.remove();
       }
@@ -210,12 +200,69 @@
       toggleForceRightClickStyle(value);
     } else if (key === "stableVolumeEnabled") {
       toggleStableVolumeLive(value);
+    } else if (key === "browserLockEnabled") {
+      if (value) {
+        showLockScreen();
+      } else {
+        const lock = document.getElementById('mb-lock-screen');
+        if (lock) lock.remove();
+      }
     } else if (STATE_MAP[key]) {
       value ? root.setAttribute(STATE_MAP[key], "true") : root.removeAttribute(STATE_MAP[key]);
     }
   }
 
+  function checkBrowserLock() {
+    chrome.runtime.sendMessage({ type: "CHECK_LOCK" }, (response) => {
+      if (response && response.locked) {
+        showLockScreen();
+      }
+    });
+  }
+
+  function showLockScreen() {
+    if (document.getElementById('mb-lock-screen')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'mb-lock-screen';
+    overlay.style.cssText = `
+      position: fixed !important; top: 0 !important; left: 0 !important; 
+      width: 100vw !important; height: 100vh !important;
+      background: #0f0f11 !important; z-index: 2147483647 !important;
+      display: flex !important; flex-direction: column !important; 
+      align-items: center !important; justify-content: center !important;
+      font-family: sans-serif !important; color: #f0f0f5 !important;
+      margin: 0 !important; padding: 0 !important; box-sizing: border-box !important;
+    `;
+    
+    overlay.innerHTML = `
+      <div style="background: #1a1a1f; padding: 40px; border-radius: 16px; border: 1px solid #2a2a32; text-align: center; width: 340px;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ff3b3b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <h2 style="margin: 0 0 8px 0; font-size: 22px;">Browser Locked</h2>
+        <p style="margin: 0; font-size: 14px; color: #7a7a8a;">You are currently offline. Please unlock from the extension popup.</p>
+      </div>
+    `;
+
+    const appendOverlay = () => {
+      const parent = document.body || document.documentElement;
+      if (parent && !document.getElementById('mb-lock-screen')) {
+        parent.appendChild(overlay);
+      }
+    };
+
+    appendOverlay();
+    if (!document.body) {
+      window.addEventListener('DOMContentLoaded', appendOverlay);
+    }
+
+    const stopIt = (e) => e.stopPropagation();
+    ['click', 'mousedown', 'mouseup', 'keydown', 'keyup', 'keypress', 'wheel', 'contextmenu'].forEach(evt => {
+      overlay.addEventListener(evt, stopIt, true);
+    });
+  }
+
   function init() {
+    checkBrowserLock();
     injectMasterStyle();
     chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
       if(!state) return;

@@ -9,7 +9,8 @@
     mediaUniformEnabled: { color: "var(--uniform-accent)", labelPrefix: "UNIFORM VISUALS" },
     mediaHoverEnabled: { color: "var(--hover-accent)", labelPrefix: "HOVER REVEAL" },
     forceRightClickEnabled: { color: "var(--frc-accent)", labelPrefix: "FORCE RIGHT-CLICK" },
-    stableVolumeEnabled: { color: "var(--vol-accent)", labelPrefix: "STABLE VOL" }
+    stableVolumeEnabled: { color: "var(--vol-accent)", labelPrefix: "STABLE VOL" },
+    browserLockEnabled: { color: "var(--on-accent)", labelPrefix: "LOCK" }
   };
 
   function updateSubUI(key, enabled) {
@@ -83,25 +84,22 @@
             return;
         }
 
-        const apiKey = 'fcdc158ebe36c6c0408bcb6c7e9a2fde';
-        const params = new URLSearchParams({
-          key: apiKey,
-          url: tab.url,
-          analytics: 'true',
-          filterbots: 'false'
+        chrome.runtime.sendMessage({ type: "SHORTEN_URL", url: tab.url }, async (data) => {
+          if (chrome.runtime.lastError || !data) {
+            statusText.textContent = 'NETWORK ERROR';
+            statusText.style.color = '#ff3b3b';
+            return;
+          }
+
+          if (data.status === 200) {
+            await navigator.clipboard.writeText(data.shorturl);
+            statusText.textContent = 'COPIED TO CLIPBOARD!';
+            statusText.style.color = '#10b981';
+          } else {
+            statusText.textContent = `ERROR ${data.status}`;
+            statusText.style.color = '#ff3b3b';
+          }
         });
-
-        const response = await fetch(`https://xgd.io/V1/shorten?${params.toString()}`);
-        const data = await response.json();
-
-        if (data.status === 200) {
-          await navigator.clipboard.writeText(data.shorturl);
-          statusText.textContent = 'COPIED TO CLIPBOARD!';
-          statusText.style.color = '#10b981';
-        } else {
-          statusText.textContent = `ERROR ${data.status}`;
-          statusText.style.color = '#ff3b3b';
-        }
       } catch (err) {
         statusText.textContent = 'NETWORK ERROR';
         statusText.style.color = '#ff3b3b';
@@ -115,20 +113,75 @@
   }
 
   async function init() {
+    const lockPw = document.getElementById('popupLockPw');
+    const lockErr = document.getElementById('popupLockErr');
+    const lockScreen = document.getElementById('popupLockScreen');
+    
+    const submitUnlock = () => {
+      chrome.runtime.sendMessage({ type: "UNLOCK_ATTEMPT", password: lockPw.value }, (res) => {
+        if (res && res.success) {
+          lockScreen.style.display = 'none';
+          lockPw.value = '';
+          lockErr.style.display = 'none';
+        } else {
+          lockErr.style.display = 'block';
+          lockPw.value = '';
+          lockPw.focus();
+        }
+      });
+    };
+    
+    document.getElementById('popupLockBtn').addEventListener('click', submitUnlock);
+    document.getElementById('popupLockCancel').addEventListener('click', () => {
+      lockScreen.style.display = 'none';
+      lockPw.value = '';
+      lockErr.style.display = 'none';
+      updateSubUI('browserLockEnabled', true);
+    });
+    lockPw.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitUnlock(); });
+
     document.getElementById("appVersion").textContent = `v${chrome.runtime.getManifest().version}`;
     
     chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
+      if(!state) return;
       Object.keys(state).forEach(key => updateSubUI(key, state[key]));
     });
 
     fetchMediaCounts();
     initUrlShortener();
 
-    Object.keys(configMap).concat(['targetImgEnabled', 'targetVidEnabled']).forEach(key => {
-      document.getElementById(key).addEventListener('change', (e) => {
-        updateSubUI(key, e.target.checked);
-        chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value: e.target.checked });
+    const lockToggle = document.getElementById('browserLockEnabled');
+    if (lockToggle) {
+      lockToggle.addEventListener('change', (e) => {
+        const isTurningOn = e.target.checked;
+        updateSubUI('browserLockEnabled', isTurningOn);
+        
+        chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
+          if (isTurningOn) {
+            if (!state.browserLockPassword) {
+              alert("Please set a Universal Password in Settings before enabling the Browser Lock.");
+              updateSubUI('browserLockEnabled', false);
+              chrome.runtime.openOptionsPage();
+            } else {
+              chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key: "browserLockEnabled", value: true });
+            }
+          } else {
+            lockScreen.style.display = 'flex';
+            setTimeout(() => lockPw.focus(), 100);
+          }
+        });
       });
+    }
+
+    Object.keys(configMap).concat(['targetImgEnabled', 'targetVidEnabled']).forEach(key => {
+      if (key === 'browserLockEnabled') return;
+      const el = document.getElementById(key);
+      if(el) {
+        el.addEventListener('change', (e) => {
+          updateSubUI(key, e.target.checked);
+          chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value: e.target.checked });
+        });
+      }
     });
 
     document.getElementById('settingsBtn').addEventListener('click', () => {

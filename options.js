@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     forceRightClickEnabled: document.getElementById('forceRightClickEnabled'),
     stableVolumeEnabled: document.getElementById('stableVolumeEnabled'),
     blurIntensity: document.getElementById('blurIntensity'),
-    shortcutAction: document.getElementById('shortcutAction')
+    shortcutAction: document.getElementById('shortcutAction'),
+    browserLockPassword: document.getElementById('browserLockPassword')
   };
 
   // Load settings
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
       inputs.stableVolumeEnabled.checked = state.stableVolumeEnabled;
       inputs.blurIntensity.value = state.blurIntensity;
       inputs.shortcutAction.value = state.shortcutAction;
+      inputs.browserLockPassword.value = state.browserLockPassword;
     });
   }
 
@@ -32,6 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
   inputs.forceRightClickEnabled.addEventListener('change', (e) => updateSetting('forceRightClickEnabled', e.target.checked));
   inputs.stableVolumeEnabled.addEventListener('change', (e) => updateSetting('stableVolumeEnabled', e.target.checked));
   inputs.shortcutAction.addEventListener('change', (e) => updateSetting('shortcutAction', e.target.value));
+  
+  inputs.browserLockPassword.addEventListener('input', (e) => {
+    updateSetting('browserLockPassword', e.target.value);
+  });
   
   // Real-time slider update
   inputs.blurIntensity.addEventListener('input', (e) => {
@@ -50,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Listen for sync from other tabs/popup
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.type === "SYNC_SETTING" && inputs[msg.key]) {
-      if (msg.key === 'blurIntensity' || msg.key === 'shortcutAction') {
+      if (msg.key === 'blurIntensity' || msg.key === 'shortcutAction' || msg.key === 'browserLockPassword') {
         inputs[msg.key].value = msg.value;
       } else {
         inputs[msg.key].checked = msg.value;

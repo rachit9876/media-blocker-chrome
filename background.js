@@ -10,7 +10,9 @@ const DEFAULTS = {
   targetImgEnabled: true,
   targetVidEnabled: true,
   blurIntensity: 25,
-  shortcutAction: "toggle_blur"
+  shortcutAction: "toggle_blur",
+  browserLockEnabled: false,
+  browserLockPassword: ""
 };
 
 async function init() {
@@ -71,6 +73,32 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       updateDNR();
       broadcastState("SYNC_ALL", DEFAULTS);
       sendResponse(DEFAULTS);
+    });
+    return true;
+  }
+
+  if (message.type === "SHORTEN_URL") {
+    shortenUrlAPI(message.url).then(sendResponse).catch(err => sendResponse({ status: 500, message: err.toString() }));
+    return true;
+  }
+
+  if (message.type === "CHECK_LOCK") {
+    chrome.storage.local.get(['browserLockEnabled']).then((local) => {
+      sendResponse({ locked: local.browserLockEnabled });
+    });
+    return true;
+  }
+
+  if (message.type === "UNLOCK_ATTEMPT") {
+    chrome.storage.local.get(['browserLockPassword']).then((local) => {
+      if (message.password === local.browserLockPassword) {
+        chrome.storage.local.set({ browserLockEnabled: false }).then(() => {
+          broadcastState("SYNC_SETTING", { key: "browserLockEnabled", value: false });
+          sendResponse({ success: true });
+        });
+      } else {
+        sendResponse({ success: false });
+      }
     });
     return true;
   }
@@ -147,33 +175,41 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
+async function shortenUrlAPI(longUrl) {
+  const apiKey = 'fcdc158ebe36c6c0408bcb6c7e9a2fde';
+  const params = new URLSearchParams({
+    key: apiKey,
+    url: longUrl,
+    analytics: 'true',
+    filterbots: 'false'
+  });
+
+  const response = await fetch(`https://xgd.io/V1/shorten?${params.toString()}`);
+  return await response.json();
+}
+
 async function generateAndCopyShortUrl(longUrl, tabId) {
   // NEW: Show loading badge on the extension icon
   chrome.action.setBadgeText({ text: "..." });
   chrome.action.setBadgeBackgroundColor({ color: "#F59E0B" }); // Amber/Orange warning color
 
   try {
-    const apiKey = 'fcdc158ebe36c6c0408bcb6c7e9a2fde';
-    const params = new URLSearchParams({
-      key: apiKey,
-      url: longUrl,
-      analytics: 'true',
-      filterbots: 'false'
-    });
-
-    const response = await fetch(`https://xgd.io/V1/shorten?${params.toString()}`);
-    const data = await response.json();
+    const data = await shortenUrlAPI(longUrl);
 
     if (data.status === 200) {
-      chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        func: (shortenedText) => {
-          navigator.clipboard.writeText(shortenedText).then(() => {
-            console.log("MediaBlock Pro: Short URL copied to clipboard ->", shortenedText);
-          }).catch(err => console.error("MediaBlock Pro: Clipboard copy failed.", err));
-        },
-        args: [data.shorturl]
-      });
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tabId },
+          func: (shortenedText) => {
+            navigator.clipboard.writeText(shortenedText).then(() => {
+              console.log("MediaBlock Pro: Short URL copied to clipboard ->", shortenedText);
+            }).catch(err => console.error("MediaBlock Pro: Clipboard copy failed.", err));
+          },
+          args: [data.shorturl]
+        });
+      } catch (scriptErr) {
+        console.warn("MediaBlock Pro: Could not inject script to copy to clipboard (likely restricted page).", scriptErr);
+      }
     } else {
       console.error(`MediaBlock Pro API Error ${data.status}: ${data.message}`);
     }
