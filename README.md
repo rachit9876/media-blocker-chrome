@@ -17,6 +17,12 @@ Want true privacy while browsing in public or at work? MediaBlock Pro is a light
 
 More than just a visual blocker, MediaBlock Pro now includes advanced productivity utilities—like a native audio normalizer and a force-right-click tool—to help you take back your screen, ears, and browser.
 
+## 🚀 What's New in the Latest Stable Release
+* **Real-Time Global Sync:** Settings updated in the popup, options page, or via keyboard shortcuts now apply instantly across all open tabs using native storage listeners—zero lag.
+* **Hardened Browser Lock:** The password lock screen now fully blocks background scrolling, keyboard bypasses, and mouse-wheel events.
+* **Aggressive Right-Click Unblocker:** Upgraded the force-right-click engine to completely hijack restrictive website scripts, guaranteeing text selection and copy-paste freedom anywhere.
+* **Smarter URL Shortener:** Added strict protocol validation to prevent shortener crashes on local files or restricted `chrome://` pages.
+
 ## 🌟 Core Features
 
 ### 👁️ Visual Privacy & Shields
