@@ -11,52 +11,63 @@
       --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
       --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
       --accent: #3b82f6; --accent-hover: #2563eb; --danger: #ff3b3b; --danger-hover: #dc2626;
-      --radius: 18px; --transition: 0.3s ease;
+      --radius: 14px; --transition: 0.3s ease;
     }
 
-    body { background: var(--off-bg); color: var(--text-primary); padding: 40px 20px; display: flex; justify-content: center; min-height: 100vh; }
-    .container { position: relative; z-index: 1; max-width: 900px; width: 100%; display: flex; flex-direction: column; gap: 24px; }
-    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
-    .column-group { display: flex; flex-direction: column; gap: 24px; }
+    /* Widened container and reduced body padding */
+    body { background: var(--off-bg); color: var(--text-primary); padding: 30px 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { position: relative; z-index: 1; max-width: 1040px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
     
-    @media (max-width: 768px) { .grid-layout { grid-template-columns: 1fr; } }
+    /* Widened gap between columns */
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; }
+    /* Reduced vertical gap between cards */
+    .column-group { display: flex; flex-direction: column; gap: 16px; }
+    
+    @media (max-width: 850px) { .grid-layout { grid-template-columns: 1fr; } }
 
-    h1 { font-weight: 800; font-size: 28px; margin-bottom: 8px; }
-    h2 { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); margin-left: 4px; margin-bottom: 8px; }
+    h1 { font-weight: 800; font-size: 26px; margin-bottom: 4px; }
+    h2 { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-left: 4px; margin-bottom: 6px; }
     
     .card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
-    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--off-border); gap: 16px; }
+    
+    /* Compacted list item padding */
+    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--off-border); gap: 16px; }
     .list-item:last-child { border-bottom: none; }
     .list-item-text { display: flex; flex-direction: column; flex-grow: 1; }
-    .item-title { font-size: 16px; font-weight: 400; color: var(--text-primary); }
-    .item-desc { font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
     
-    .small-toggle { position: relative; display: inline-block; width: 56px; height: 32px; flex-shrink: 0; }
+    /* Adjusted font sizes */
+    .item-title { font-size: 15px; font-weight: 400; color: var(--text-primary); }
+    .item-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; line-height: 1.3; }
+    
+    /* Compacted toggle to match popup */
+    .small-toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
     .small-toggle input { opacity: 0; width: 0; height: 0; }
     .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 2px solid var(--off-border); transition: all var(--transition); border-radius: 100px; }
-    .small-toggle-slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: var(--text-dim); transition: all var(--transition); border-radius: 50%; }
+    .small-toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: var(--text-dim); transition: all var(--transition); border-radius: 50%; }
     .small-toggle input:checked + .small-toggle-slider { background-color: var(--text-primary); border-color: var(--text-primary); }
-    .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(24px); background-color: var(--off-bg); }
+    .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(20px); background-color: var(--off-bg); }
 
-    input[type=range] { -webkit-appearance: none; width: 130px; background: transparent; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--text-primary); cursor: pointer; margin-top: -7px; }
+    input[type=range] { -webkit-appearance: none; width: 120px; background: transparent; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--text-primary); cursor: pointer; margin-top: -6px; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: var(--off-border); border-radius: 2px; }
 
-    select, input[type=password] { padding: 10px 14px; font-size: 14px; border: 2px solid var(--off-border); border-radius: 10px; background: #1e1e26; color: var(--text-primary); outline: none; transition: all 0.2s; width: 180px;}
+    /* Compacted inputs and selects */
+    select, input[type=password] { padding: 8px 12px; font-size: 13px; border: 2px solid var(--off-border); border-radius: 8px; background: #1e1e26; color: var(--text-primary); outline: none; transition: all 0.2s; width: 160px; }
     select:focus, input[type=password]:focus { border-color: var(--text-primary); }
 
-    .btn { padding: 10px 24px; font-size: 14px; font-weight: 500; color: var(--danger); background: transparent; border: 2px solid var(--off-border); border-radius: 10px; cursor: pointer; transition: 0.2s; }
+    .btn { padding: 8px 20px; font-size: 13px; font-weight: 500; color: var(--danger); background: transparent; border: 2px solid var(--off-border); border-radius: 8px; cursor: pointer; transition: 0.2s; }
     .btn:hover { border-color: var(--danger); background: rgba(255, 59, 59, 0.1); }
-    .btn-save { padding: 10px 18px; font-weight: 700; color: #fff; background: var(--accent); border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+    .btn-save { padding: 8px 16px; font-weight: 700; color: #fff; background: var(--accent); border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; }
     
-    .history-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--off-border); gap: 16px; background: #1e1e26;}
+    /* Compacted history items */
+    .history-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; border-bottom: 1px solid var(--off-border); gap: 14px; background: #1e1e26; }
     .history-item:last-child { border-bottom: none; }
-    .qr-box { width: 48px; height: 48px; border-radius: 6px; background: #fff; padding: 2px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s; }
+    .qr-box { width: 40px; height: 40px; border-radius: 6px; background: #fff; padding: 2px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s; }
     .qr-box:hover { transform: scale(1.05); }
     .qr-box img { width: 100%; height: 100%; border-radius: 4px; }
     .link-info { flex-grow: 1; overflow: hidden; }
-    .link-short { font-size: 15px; color: var(--accent); font-weight: 600; text-decoration: none; display: block;}
-    .link-original { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-top: 2px;}
+    .link-short { font-size: 14px; color: var(--accent); font-weight: 600; text-decoration: none; display: block; margin-bottom: 1px;}
+    .link-original { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;}
   </style>
 </head>
 <body>
@@ -68,7 +79,7 @@
         <div>
           <h2>Targeting Details</h2>
           <div class="card">
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Apply to Images</span><span class="item-desc">Affect all picture, canvas, and background images. (Alt-text injected if blocked).</span></div><label class="small-toggle"><input type="checkbox" id="targetImgEnabled"><span class="small-toggle-slider"></span></label></div>
+            <div class="list-item"><div class="list-item-text"><span class="item-title">Apply to Images</span><span class="item-desc">Affect all picture, canvas, and background images.</span></div><label class="small-toggle"><input type="checkbox" id="targetImgEnabled"><span class="small-toggle-slider"></span></label></div>
             <div class="list-item"><div class="list-item-text"><span class="item-title">Apply to Videos</span><span class="item-desc">Affect standard videos and embeds.</span></div><label class="small-toggle"><input type="checkbox" id="targetVidEnabled"><span class="small-toggle-slider"></span></label></div>
           </div>
         </div>
@@ -76,7 +87,7 @@
         <div>
           <h2>Media Behavior</h2>
           <div class="card">
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Prevent Auto-Play</span><span class="item-desc">Stop videos from playing automatically on page load.</span></div><label class="small-toggle"><input type="checkbox" id="videoAutoplayPreventEnabled"><span class="small-toggle-slider"></span></label></div>
+            <div class="list-item"><div class="list-item-text"><span class="item-title">Prevent Auto-Play</span><span class="item-desc">Stop videos from playing automatically.</span></div><label class="small-toggle"><input type="checkbox" id="videoAutoplayPreventEnabled"><span class="small-toggle-slider"></span></label></div>
             <div class="list-item"><div class="list-item-text"><span class="item-title">Auto-Mute Background</span><span class="item-desc">Force all loaded media to start muted.</span></div><label class="small-toggle"><input type="checkbox" id="videoAutoMuteEnabled"><span class="small-toggle-slider"></span></label></div>
             <div class="list-item"><div class="list-item-text"><span class="item-title">Force Right-Click & Copy</span><span class="item-desc">Unlock context menus on restrictive sites.</span></div><label class="small-toggle"><input type="checkbox" id="forceRightClickEnabled"><span class="small-toggle-slider"></span></label></div>
           </div>
@@ -85,11 +96,11 @@
         <div>
           <h2>Shortened Links History</h2>
           <div class="card">
-            <div class="list-item" style="padding: 10px 20px;">
+            <div class="list-item" style="padding: 10px 18px;">
               <span class="item-desc" style="margin:0;">Recent URLs & QR Codes</span>
               <button id="clearHistoryBtn" style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:12px;">Clear All</button>
             </div>
-            <div id="historyContainer" style="max-height: 250px; overflow-y: auto;">
+            <div id="historyContainer" style="max-height: 200px; overflow-y: auto;">
             </div>
           </div>
         </div>
@@ -100,7 +111,7 @@
           <h2>Visual Adjustments</h2>
           <div class="card">
             <div class="list-item">
-              <div class="list-item-text"><span class="item-title">Blur Style</span><span class="item-desc">Switch to Pixelation for better performance on low-end devices.</span></div>
+              <div class="list-item-text"><span class="item-title">Blur Style</span><span class="item-desc">Switch to Pixelation on low-end devices.</span></div>
               <select id="blurMode">
                 <option value="blur">Smooth Blur</option>
                 <option value="pixelate">Pixelation Filter</option>
@@ -116,7 +127,7 @@
         <div>
           <h2>Audio EQ Engine</h2>
           <div class="card">
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Stable Volume Engine</span><span class="item-desc">Enable dynamic range compression to squash loud noises.</span></div><label class="small-toggle"><input type="checkbox" id="stableVolumeEnabled"><span class="small-toggle-slider"></span></label></div>
+            <div class="list-item"><div class="list-item-text"><span class="item-title">Stable Volume Engine</span><span class="item-desc">Dynamic range compression to squash loud noises.</span></div><label class="small-toggle"><input type="checkbox" id="stableVolumeEnabled"><span class="small-toggle-slider"></span></label></div>
             <div class="list-item">
               <div class="list-item-text"><span class="item-title">Audio Profile</span><span class="item-desc">Tune specific frequencies.</span></div>
               <select id="audioEqMode">
@@ -131,12 +142,12 @@
         <div>
           <h2>Security & Shortcuts</h2>
           <div class="card">
-             <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+             <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
               <div class="list-item-text"><span class="item-title">Universal Password</span><span class="item-desc">Lock your browser from the popup.</span></div>
               <div style="display: flex; gap: 8px; width: 100%;">
                 <input type="password" id="browserLockPassword" placeholder="Enter password..." style="flex-grow: 1; width:auto;">
                 <button id="savePasswordBtn" class="btn-save">Save</button>
-                <button id="deletePasswordBtn" style="display: none; background:var(--danger); border:none; border-radius:10px; color:#fff; padding:0 12px; cursor:pointer;" title="Remove Password">X</button>
+                <button id="deletePasswordBtn" style="display: none; background:var(--danger); border:none; border-radius:8px; color:#fff; padding:0 12px; cursor:pointer;" title="Remove Password">X</button>
               </div>
             </div>
             <div class="list-item">
