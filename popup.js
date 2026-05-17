@@ -37,10 +37,12 @@
 
     label.textContent = enabled ? `${config.labelPrefix} ON` : `${config.labelPrefix} OFF`;
     dot.style.background = enabled ? config.color : "var(--text-dim)";
-    dot.style.boxShadow = enabled ? `0 0 8px ${config.color}` : "none";
+    dot.style.boxShadow = enabled ? `0 0 6px ${config.color}` : "none";
     track.style.background = enabled ? config.color : "#1e1e26";
     track.style.borderColor = enabled ? config.color : "var(--off-border)";
-    thumb.style.left = enabled ? "calc(100% - 25px)" : "3px";
+    
+    // Updated distance mapping for the newly compacted 44x24px toggles
+    thumb.style.left = enabled ? "calc(100% - 20px)" : "2px";
     thumb.style.background = enabled ? "#fff" : "var(--text-dim)";
     
     card.classList.toggle(`active-${key}`, enabled);

@@ -14,83 +14,85 @@
       --blur-accent: #3b82f6; --invert-accent: #a855f7; --hover-accent: #10b981; --uniform-accent: #f59e0b;
       --frc-accent: #14b8a6; --vol-accent: #ec4899; --short-accent: #8b5cf6;
       --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
-      --radius: 16px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      --radius: 14px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     
-    body { width: 460px; background: var(--off-bg); color: var(--text-primary); overflow-y: auto; overflow-x: hidden; user-select: none; }
+    body { width: 420px; background: var(--off-bg); color: var(--text-primary); overflow-y: auto; overflow-x: hidden; user-select: none; }
     body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
     
-    .container { position: relative; z-index: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-    .brand-wrap { display: flex; align-items: center; gap: 12px; }
-    .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: var(--off-card); border: 1px solid var(--off-border); display: flex; align-items: center; justify-content: center; }
-    .logo-mark svg { width: 18px; height: 18px; }
-    .header-text .name { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
-    .header-text .tagline { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 1px; }
+    .container { position: relative; z-index: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+    .brand-wrap { display: flex; align-items: center; gap: 10px; }
+    .logo-mark { width: 32px; height: 32px; border-radius: 8px; background: var(--off-card); border: 1px solid var(--off-border); display: flex; align-items: center; justify-content: center; }
+    .logo-mark svg { width: 16px; height: 16px; }
+    .header-text .name { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+    .header-text .tagline { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 0px; }
 
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
-    .stat-box { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+    .stat-box { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
     .target-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 2px; }
-    .stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); }
-    .stat-value { font-size: 20px; font-weight: 800; line-height: 1; }
+    .stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+    .stat-value { font-size: 18px; font-weight: 800; line-height: 1; }
     
     .settings-box { cursor: pointer; transition: all 0.2s; justify-content: center; }
     .settings-box:hover { background: #2a2a32; border-color: var(--text-primary); }
     .settings-box:hover .settings-icon { stroke: var(--text-primary); transform: rotate(90deg); }
-    .settings-icon { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s; }
+    .settings-icon { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s; width: 18px; height: 18px; }
     
-    .small-toggle { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+    /* Compacted Small Toggle for Stats row */
+    .small-toggle { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
     .small-toggle input { opacity: 0; width: 0; height: 0; }
     .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 2px solid var(--off-border); transition: all var(--transition); border-radius: 100px; }
-    .small-toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: var(--text-dim); transition: all var(--transition); border-radius: 50%; }
+    .small-toggle-slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: var(--text-dim); transition: all var(--transition); border-radius: 50%; }
     .small-toggle input:checked + .small-toggle-slider { background-color: var(--text-primary); border-color: var(--text-primary); }
-    .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(18px); background-color: var(--off-bg); }
+    .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(16px); background-color: var(--off-bg); }
     
-    .status-card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: var(--radius); padding: 16px 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 14px; transition: all 0.3s ease; position: relative; text-align: center; }
-    .status-header { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; min-height: 32px; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); transition: all 0.3s ease; }
-    .status-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-secondary); transition: color 0.3s ease; text-transform: uppercase; line-height: 1.3; }
+    .status-card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px 10px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.3s ease; position: relative; text-align: center; }
+    .status-header { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; min-height: 28px; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); transition: all 0.3s ease; }
+    .status-label { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-secondary); transition: color 0.3s ease; text-transform: uppercase; line-height: 1.3; }
     
+    /* Compacted Main Grid Toggles */
     .toggle-wrapper { position: relative; }
     .toggle-input { position: absolute; opacity: 0; width: 0; height: 0; }
     .toggle-label { display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .toggle-track { width: 56px; height: 32px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; position: relative; transition: all var(--transition); }
-    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--text-dim); transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
+    .toggle-track { width: 44px; height: 24px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; position: relative; transition: all var(--transition); }
+    .toggle-thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--text-dim); transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
 
-    /* New Shorten URL Square Card Layout */
+    /* Compacted Shorten URL Square Card Layout */
     .action-card-square { cursor: pointer; border-color: var(--off-border); }
-    .action-card-square:hover { border-color: var(--short-accent); box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); background: #201b2a; }
-    .action-card-square .status-dot { background: var(--short-accent); box-shadow: 0 0 8px var(--short-accent); }
+    .action-card-square:hover { border-color: var(--short-accent); box-shadow: 0 0 12px rgba(139, 92, 246, 0.25); background: #201b2a; }
+    .action-card-square .status-dot { background: var(--short-accent); box-shadow: 0 0 6px var(--short-accent); }
     .action-card-square .status-label { color: var(--text-primary); transition: color 0.3s; }
     
-    .action-icon-btn { width: 56px; height: 32px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
-    .action-icon-btn svg { stroke: var(--text-secondary); transition: stroke 0.3s; }
+    .action-icon-btn { width: 44px; height: 24px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+    .action-icon-btn svg { width: 14px; height: 14px; stroke: var(--text-secondary); transition: stroke 0.3s; }
     .action-card-square:hover .action-icon-btn { border-color: var(--short-accent); }
     .action-card-square:hover .action-icon-btn svg { stroke: var(--short-accent); }
 
-    .footer { font-size: 10px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 4px; display: flex; justify-content: center; gap: 6px; }
+    .footer { font-size: 9px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 2px; display: flex; justify-content: center; gap: 6px; }
     
-    .status-card.active-mediaBlockEnabled { border-color: var(--on-accent); box-shadow: 0 0 15px var(--on-glow); }
-    .status-card.active-mediaBlurEnabled { border-color: var(--blur-accent); box-shadow: 0 0 15px rgba(59,130,246,0.25); }
-    .status-card.active-mediaHoverEnabled { border-color: var(--hover-accent); box-shadow: 0 0 15px rgba(16,185,129,0.25); }
-    .status-card.active-mediaInvertEnabled { border-color: var(--invert-accent); box-shadow: 0 0 15px rgba(168,85,247,0.25); }
-    .status-card.active-mediaUniformEnabled { border-color: var(--uniform-accent); box-shadow: 0 0 15px rgba(245,158,11,0.25); }
-    .status-card.active-forceRightClickEnabled { border-color: var(--frc-accent); box-shadow: 0 0 15px rgba(20,184,166,0.25); }
-    .status-card.active-stableVolumeEnabled { border-color: var(--vol-accent); box-shadow: 0 0 15px rgba(236,72,153,0.25); }
+    .status-card.active-mediaBlockEnabled { border-color: var(--on-accent); box-shadow: 0 0 12px var(--on-glow); }
+    .status-card.active-mediaBlurEnabled { border-color: var(--blur-accent); box-shadow: 0 0 12px rgba(59,130,246,0.25); }
+    .status-card.active-mediaHoverEnabled { border-color: var(--hover-accent); box-shadow: 0 0 12px rgba(16,185,129,0.25); }
+    .status-card.active-mediaInvertEnabled { border-color: var(--invert-accent); box-shadow: 0 0 12px rgba(168,85,247,0.25); }
+    .status-card.active-mediaUniformEnabled { border-color: var(--uniform-accent); box-shadow: 0 0 12px rgba(245,158,11,0.25); }
+    .status-card.active-forceRightClickEnabled { border-color: var(--frc-accent); box-shadow: 0 0 12px rgba(20,184,166,0.25); }
+    .status-card.active-stableVolumeEnabled { border-color: var(--vol-accent); box-shadow: 0 0 12px rgba(236,72,153,0.25); }
   </style>
 </head>
 <body>
   <div id="popupLockScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,15,17,0.9); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
     <div style="background: var(--off-card); border: 1px solid var(--off-border); padding: 20px; border-radius: 12px; width: 100%;">
-      <h2 style="font-size: 18px; margin-bottom: 8px;">Unlock Browser</h2>
-      <input type="password" id="popupLockPw" placeholder="Password" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--off-border); background: var(--off-bg); color: var(--text-primary); font-size: 14px; margin-bottom: 12px; outline: none;">
+      <h2 style="font-size: 16px; margin-bottom: 8px;">Unlock Browser</h2>
+      <input type="password" id="popupLockPw" placeholder="Password" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid var(--off-border); background: var(--off-bg); color: var(--text-primary); font-size: 13px; margin-bottom: 12px; outline: none;">
       <div style="display: flex; gap: 8px;">
-        <button id="popupLockCancel" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--off-border); background: transparent; color: var(--text-secondary); cursor: pointer;">Cancel</button>
-        <button id="popupLockBtn" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: var(--on-accent); color: #fff; font-weight: bold; cursor: pointer;">Unlock</button>
+        <button id="popupLockCancel" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--off-border); background: transparent; color: var(--text-secondary); cursor: pointer;">Cancel</button>
+        <button id="popupLockBtn" style="flex: 1; padding: 8px; border-radius: 8px; border: none; background: var(--on-accent); color: #fff; font-weight: bold; cursor: pointer;">Unlock</button>
       </div>
-      <div id="popupLockErr" style="color: var(--on-accent); font-size: 11px; margin-top: 12px; display: none;">Incorrect Password</div>
+      <div id="popupLockErr" style="color: var(--on-accent); font-size: 11px; margin-top: 10px; display: none;">Incorrect Password</div>
     </div>
   </div>
 
@@ -130,8 +132,8 @@
         <div class="target-header" style="justify-content: center;">
           <div class="stat-label">Settings</div>
         </div>
-        <div class="stat-value" style="display:flex; justify-content:center; align-items:center; margin-top: 6px;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="settings-icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <div class="stat-value" style="display:flex; justify-content:center; align-items:center; margin-top: 4px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="settings-icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </div>
       </div>
     </div>
@@ -207,7 +209,7 @@
           <div class="status-label" id="shortenStatusLabel">SHORTEN URL</div>
         </div>
         <div class="action-icon-btn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
