@@ -28,8 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       historyArray.forEach(item => {
-         const div = document.createElement('div');
-         div.className = 'history-item';
+         const div = document.createElement('div'); div.className = 'history-item';
          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(item.short)}&bgcolor=FFFFFF&color=000000`;
          const qrUrlHighRes = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(item.short)}&bgcolor=FFFFFF&color=000000`;
          
@@ -45,17 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('qrModalImg').src = qrUrlHighRes;
             document.getElementById('qrModal').style.display = 'flex';
          });
-
          historyContainer.appendChild(div);
       });
   }
 
-  document.getElementById('closeQrModal').addEventListener('click', () => {
-      document.getElementById('qrModal').style.display = 'none';
-  });
-  document.getElementById('qrModal').addEventListener('click', (e) => {
-      if(e.target.id === 'qrModal') document.getElementById('qrModal').style.display = 'none';
-  });
+  document.getElementById('closeQrModal').addEventListener('click', () => document.getElementById('qrModal').style.display = 'none');
+  document.getElementById('qrModal').addEventListener('click', (e) => { if(e.target.id === 'qrModal') document.getElementById('qrModal').style.display = 'none'; });
 
   function loadSettings() {
     chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
@@ -75,8 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateIntensityLabel();
       renderHistory(state.urlHistory);
       
-      inputs.browserLockPassword.value = "";
-      inputs.browserLockPasswordConfirm.value = "";
+      inputs.browserLockPassword.value = ""; inputs.browserLockPasswordConfirm.value = "";
       
       if (state.browserLockPassword && state.browserLockPassword !== "") {
         inputs.browserLockPassword.placeholder = "Enter new password...";
@@ -111,71 +104,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
   inputs.blurIntensity.addEventListener('input', (e) => updateSetting('blurIntensity', parseInt(e.target.value)));
 
-  // Password Logic
   function showFeedback(msg, isError = false) {
     const feedback = document.getElementById('passwordFeedback');
-    feedback.textContent = msg;
-    feedback.style.color = isError ? "var(--danger)" : "#10b981"; 
-    feedback.style.display = "block";
-    setTimeout(() => { feedback.style.display = "none"; }, 3000);
+    feedback.textContent = msg; feedback.style.color = isError ? "var(--danger)" : "#10b981"; 
+    feedback.style.display = "block"; setTimeout(() => { feedback.style.display = "none"; }, 3000);
   }
 
   document.getElementById('savePasswordBtn').addEventListener('click', () => {
     const pw = inputs.browserLockPassword.value;
     const confirmPw = inputs.browserLockPasswordConfirm.value;
-    
-    if (!pw) {
-      showFeedback("Password cannot be empty!", true);
-      return; 
-    }
-    
-    if (pw !== confirmPw) {
-      showFeedback("Passwords do not match!", true);
-      return;
-    }
+    if (!pw) { showFeedback("Password cannot be empty!", true); return; }
+    if (pw !== confirmPw) { showFeedback("Passwords do not match!", true); return; }
 
     updateSetting('browserLockPassword', pw);
     
-    inputs.browserLockPassword.value = "";
-    inputs.browserLockPasswordConfirm.value = "";
-    inputs.browserLockPassword.placeholder = "Enter new password...";
-    inputs.browserLockPasswordConfirm.placeholder = "Confirm new password...";
-    document.getElementById('savePasswordBtn').textContent = "Update";
-    document.getElementById('deletePasswordBtn').style.display = "block";
-    
+    inputs.browserLockPassword.value = ""; inputs.browserLockPasswordConfirm.value = "";
+    inputs.browserLockPassword.placeholder = "Enter new password..."; inputs.browserLockPasswordConfirm.placeholder = "Confirm new password...";
+    document.getElementById('savePasswordBtn').textContent = "Update"; document.getElementById('deletePasswordBtn').style.display = "block";
     showFeedback("Password saved successfully!");
   });
 
   document.getElementById('deletePasswordBtn').addEventListener('click', () => {
     if (confirm("Remove your password?")) {
-      updateSetting('browserLockPassword', "");
-      updateSetting('browserLockEnabled', false); 
-      
-      inputs.browserLockPassword.value = "";
-      inputs.browserLockPasswordConfirm.value = "";
-      inputs.browserLockPassword.placeholder = "Enter password...";
-      inputs.browserLockPasswordConfirm.placeholder = "Confirm password...";
-      document.getElementById('savePasswordBtn').textContent = "Save";
-      document.getElementById('deletePasswordBtn').style.display = "none";
-      
+      updateSetting('browserLockPassword', ""); updateSetting('browserLockEnabled', false); 
+      inputs.browserLockPassword.value = ""; inputs.browserLockPasswordConfirm.value = "";
+      inputs.browserLockPassword.placeholder = "Enter password..."; inputs.browserLockPasswordConfirm.placeholder = "Confirm password...";
+      document.getElementById('savePasswordBtn').textContent = "Save"; document.getElementById('deletePasswordBtn').style.display = "none";
       showFeedback("Password removed!");
     }
   });
 
   document.getElementById('clearHistoryBtn').addEventListener('click', () => {
-      chrome.runtime.sendMessage({ type: "CLEAR_HISTORY" }, () => {
-         renderHistory([]);
-      });
+      chrome.runtime.sendMessage({ type: "CLEAR_HISTORY" }, () => renderHistory([]));
   });
 
-  chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.type === "SYNC_SETTING" && inputs[msg.key]) {
-        if (msg.key === 'blurIntensity' || msg.key === 'shortcutAction' || msg.key === 'blurMode' || msg.key === 'audioEqMode') {
-          inputs[msg.key].value = msg.value;
-          if (msg.key === 'blurMode') updateIntensityLabel();
-        } else if (msg.key !== 'browserLockPassword' && msg.key !== 'browserLockPasswordConfirm') {
-          inputs[msg.key].checked = msg.value;
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local') {
+      Object.keys(changes).forEach(key => {
+        const newValue = changes[key].newValue;
+        if (inputs[key] && !['browserLockPassword', 'browserLockPasswordConfirm'].includes(key)) {
+            if (['blurIntensity', 'shortcutAction', 'blurMode', 'audioEqMode'].includes(key)) {
+                inputs[key].value = newValue;
+                if (key === 'blurMode') updateIntensityLabel();
+            } else {
+                inputs[key].checked = newValue;
+            }
+        } else if (key === 'urlHistory') {
+            renderHistory(newValue);
+        } else if (key === 'browserLockPassword') {
+            loadSettings(); 
         }
-    } else if (msg.type === "SYNC_ALL") loadSettings();
+      });
+    }
   });
+
 });

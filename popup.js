@@ -30,10 +30,7 @@
     const track = document.getElementById(`${key}Track`);
     const thumb = document.getElementById(`${key}Thumb`);
 
-    // Ensure we don't overwrite the special "SET PASSWORD" label if disabled
-    if (key === 'browserLockEnabled' && toggleEl && toggleEl.disabled) {
-       return; 
-    }
+    if (key === 'browserLockEnabled' && toggleEl && toggleEl.disabled) return; 
 
     label.textContent = enabled ? `${config.labelPrefix} ON` : `${config.labelPrefix} OFF`;
     dot.style.background = enabled ? config.color : "var(--text-dim)";
@@ -41,7 +38,6 @@
     track.style.background = enabled ? config.color : "#1e1e26";
     track.style.borderColor = enabled ? config.color : "var(--off-border)";
     
-    // Updated distance mapping for the newly compacted 44x24px toggles
     thumb.style.left = enabled ? "calc(100% - 20px)" : "2px";
     thumb.style.background = enabled ? "#fff" : "var(--text-dim)";
     
@@ -52,7 +48,7 @@
   async function fetchMediaCounts() {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab?.url || tab.url.startsWith("chrome")) throw new Error("Restricted");
+      if (!tab?.url || !tab.url.startsWith("http")) throw new Error("Restricted");
       
       const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
@@ -85,8 +81,8 @@
 
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         
-        if (!tab?.url || tab.url.startsWith("chrome://")) {
-            statusText.textContent = 'CANNOT SHORTEN BROWSER PAGES';
+        if (!tab?.url || !tab.url.startsWith("http")) {
+            statusText.textContent = 'HTTP/HTTPS SITES ONLY';
             statusText.style.color = '#ff3b3b';
             setTimeout(() => { statusText.textContent = 'SHORTEN URL'; statusText.style.color = 'var(--text-secondary)'; }, 3000);
             return;
@@ -125,7 +121,6 @@
     const lockErr = document.getElementById('popupLockErr');
     const lockScreen = document.getElementById('popupLockScreen');
     
-    // Track context: Did they click toggle off, or was it already locked when opened?
     let isTogglingOff = false; 
     
     const submitUnlock = () => {
@@ -147,26 +142,22 @@
     
     document.getElementById('popupLockCancel').addEventListener('click', () => {
       if (isTogglingOff) {
-        // They were trying to toggle off, cancel reverts toggle visually
         lockScreen.style.display = 'none';
         lockPw.value = '';
         lockErr.style.display = 'none';
         updateSubUI('browserLockEnabled', true);
         isTogglingOff = false;
       } else {
-        // They opened the popup while fully locked, cancel means close popup
         window.close();
       }
     });
 
     lockPw.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitUnlock(); });
-
     document.getElementById("appVersion").textContent = `v${chrome.runtime.getManifest().version}`;
     
     chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
       if(!state) return;
       
-      // SECURITY PATCH: Enforce popup lock screen immediately if globally locked
       if (state.browserLockEnabled) {
         lockScreen.style.display = 'flex';
         isTogglingOff = false; 
@@ -196,11 +187,7 @@
     const lockToggle = document.getElementById('browserLockEnabled');
     if (lockToggle) {
       lockToggle.addEventListener('change', (e) => {
-        if(lockToggle.disabled) {
-           e.preventDefault();
-           return;
-        }
-
+        if(lockToggle.disabled) { e.preventDefault(); return; }
         const isTurningOn = e.target.checked;
         updateSubUI('browserLockEnabled', isTurningOn);
         
@@ -225,16 +212,20 @@
       }
     });
 
-    document.getElementById('settingsBtn').addEventListener('click', () => {
-      chrome.runtime.openOptionsPage();
-    });
+    document.getElementById('settingsBtn').addEventListener('click', () => { chrome.runtime.openOptionsPage(); });
   }
 
   init();
 
-  chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.type === "SYNC_SETTING") {
-      updateSubUI(msg.key, msg.value);
+  // Storage Listener synchronizes other open UI seamlessly
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local') {
+      Object.keys(changes).forEach(key => {
+        if (changes[key] !== undefined) {
+          updateSubUI(key, changes[key].newValue);
+        }
+      });
     }
   });
+
 })();

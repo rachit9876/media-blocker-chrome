@@ -1,23 +1,11 @@
 // MediaBlock Pro - Background Service Worker
 const DEFAULTS = {
-  mediaBlockEnabled: false,
-  mediaInvertEnabled: false,
-  mediaBlurEnabled: false,
-  mediaHoverEnabled: false,
-  mediaUniformEnabled: false,
-  forceRightClickEnabled: false,
-  stableVolumeEnabled: false,
-  targetImgEnabled: true,
-  targetVidEnabled: true,
-  blurIntensity: 25,
-  blurMode: "blur", // "blur" or "pixelate"
-  audioEqMode: "stable", // "stable", "dialogue", "bass_cut"
-  videoAutoplayPreventEnabled: false,
-  videoAutoMuteEnabled: false,
-  shortcutAction: "toggle_blur",
-  browserLockEnabled: false,
-  browserLockPassword: "",
-  urlHistory: [] // Stores shortened URLs
+  mediaBlockEnabled: false, mediaInvertEnabled: false, mediaBlurEnabled: false,
+  mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,
+  stableVolumeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
+  blurIntensity: 25, blurMode: "blur", audioEqMode: "stable",
+  videoAutoplayPreventEnabled: false, videoAutoMuteEnabled: false,
+  shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [] 
 };
 
 async function hashPassword(password) {
@@ -60,13 +48,14 @@ async function updateDNR() {
   }
 }
 
-async function broadcastState(type, payload) {
-  const tabs = await chrome.tabs.query({});
-  for (const tab of tabs) {
-    if (!tab.id || !tab.url || !tab.url.startsWith("http")) continue;
-    chrome.tabs.sendMessage(tab.id, { type, ...payload }).catch(() => {});
+// Universal State Sync
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace === 'local') {
+    if (changes.mediaBlockEnabled || changes.targetImgEnabled || changes.targetVidEnabled) {
+      updateDNR();
+    }
   }
-}
+});
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "GET_ALL_STATE") {
@@ -77,27 +66,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "UPDATE_SETTING") {
     if (message.key === 'browserLockPassword') {
       hashPassword(message.value).then(hashed => {
-        chrome.storage.local.set({ browserLockPassword: hashed }).then(() => {
-          sendResponse({ success: true });
-        });
+        chrome.storage.local.set({ browserLockPassword: hashed }).then(() => sendResponse({ success: true }));
       });
       return true;
     }
-
-    chrome.storage.local.set({ [message.key]: message.value }).then(() => {
-      if (['mediaBlockEnabled', 'targetImgEnabled', 'targetVidEnabled'].includes(message.key)) updateDNR();
-      broadcastState("SYNC_SETTING", { key: message.key, value: message.value });
-      sendResponse({ success: true });
-    });
+    chrome.storage.local.set({ [message.key]: message.value }).then(() => sendResponse({ success: true }));
     return true;
   }
 
   if (message.type === "RESET_DEFAULTS") {
-    chrome.storage.local.set(DEFAULTS).then(() => {
-      updateDNR();
-      broadcastState("SYNC_ALL", DEFAULTS);
-      sendResponse(DEFAULTS);
-    });
+    chrome.storage.local.set(DEFAULTS).then(() => sendResponse(DEFAULTS));
     return true;
   }
 
@@ -114,10 +92,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "UNLOCK_ATTEMPT") {
     Promise.all([hashPassword(message.password), chrome.storage.local.get(['browserLockPassword'])]).then(([hashedInput, local]) => {
       if (hashedInput === local.browserLockPassword && local.browserLockPassword !== "") {
-        chrome.storage.local.set({ browserLockEnabled: false }).then(() => {
-          broadcastState("SYNC_SETTING", { key: "browserLockEnabled", value: false });
-          sendResponse({ success: true });
-        });
+        chrome.storage.local.set({ browserLockEnabled: false }).then(() => sendResponse({ success: true }));
       } else { sendResponse({ success: false }); }
     });
     return true;
@@ -134,24 +109,16 @@ chrome.commands.onCommand.addListener(async (command) => {
     const data = await chrome.storage.local.get(DEFAULTS);
     const action = data.shortcutAction;
 
-    // Added all missing shortcut bindings here 
     if (action === "open_settings") chrome.runtime.openOptionsPage();
-    else if (action === "toggle_block") toggleState(data, "mediaBlockEnabled");
-    else if (action === "toggle_blur") toggleState(data, "mediaBlurEnabled");
-    else if (action === "toggle_invert") toggleState(data, "mediaInvertEnabled");
-    else if (action === "toggle_uniform") toggleState(data, "mediaUniformEnabled");
-    else if (action === "toggle_hover") toggleState(data, "mediaHoverEnabled");
-    else if (action === "toggle_rightclick") toggleState(data, "forceRightClickEnabled");
-    else if (action === "toggle_stablevolume") toggleState(data, "stableVolumeEnabled");
+    else if (action === "toggle_block") await chrome.storage.local.set({mediaBlockEnabled: !data.mediaBlockEnabled});
+    else if (action === "toggle_blur") await chrome.storage.local.set({mediaBlurEnabled: !data.mediaBlurEnabled});
+    else if (action === "toggle_invert") await chrome.storage.local.set({mediaInvertEnabled: !data.mediaInvertEnabled});
+    else if (action === "toggle_uniform") await chrome.storage.local.set({mediaUniformEnabled: !data.mediaUniformEnabled});
+    else if (action === "toggle_hover") await chrome.storage.local.set({mediaHoverEnabled: !data.mediaHoverEnabled});
+    else if (action === "toggle_rightclick") await chrome.storage.local.set({forceRightClickEnabled: !data.forceRightClickEnabled});
+    else if (action === "toggle_stablevolume") await chrome.storage.local.set({stableVolumeEnabled: !data.stableVolumeEnabled});
   }
 });
-
-async function toggleState(data, key) {
-  const newState = !data[key];
-  await chrome.storage.local.set({ [key]: newState });
-  if (key === "mediaBlockEnabled") updateDNR();
-  broadcastState("SYNC_SETTING", { key: key, value: newState });
-}
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({ id: "shorten_page", title: "Copy Short URL (Current Page)", contexts: ["page"] });
@@ -162,8 +129,8 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   let targetUrl = info.menuItemId === "shorten_page" ? info.pageUrl : info.menuItemId === "shorten_media" ? info.srcUrl : info.linkUrl;
   if (targetUrl) {
-    if (targetUrl.startsWith('data:') || targetUrl.startsWith('blob:')) {
-      chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => alert("Cannot shorten a Data URI.") });
+    if (!targetUrl.startsWith('http')) {
+      chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => alert("Cannot shorten a non-HTTP/HTTPS URI.") });
       return; 
     }
     generateAndCopyShortUrl(targetUrl, tab.id);
@@ -184,14 +151,12 @@ async function generateAndCopyShortUrl(longUrl, tabId) {
   try {
     const data = await shortenUrlAPI(longUrl);
     if (data.status === 200) {
-      // Save History
       const historyItem = { original: longUrl, short: data.shorturl, date: Date.now() };
-      chrome.storage.local.get(['urlHistory']).then(res => {
-          let history = res.urlHistory || [];
-          history.unshift(historyItem);
-          if (history.length > 20) history = history.slice(0, 20);
-          chrome.storage.local.set({urlHistory: history});
-      });
+      const res = await chrome.storage.local.get(['urlHistory']);
+      let history = res.urlHistory || [];
+      history.unshift(historyItem);
+      if (history.length > 20) history = history.slice(0, 20);
+      await chrome.storage.local.set({urlHistory: history});
 
       chrome.scripting.executeScript({
         target: { tabId: tabId },
