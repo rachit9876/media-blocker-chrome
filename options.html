@@ -51,7 +51,8 @@
     
     .history-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--off-border); gap: 16px; background: #1e1e26;}
     .history-item:last-child { border-bottom: none; }
-    .qr-box { width: 48px; height: 48px; border-radius: 6px; background: #fff; padding: 2px; flex-shrink: 0;}
+    .qr-box { width: 48px; height: 48px; border-radius: 6px; background: #fff; padding: 2px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s; }
+    .qr-box:hover { transform: scale(1.05); }
     .qr-box img { width: 100%; height: 100%; border-radius: 4px; }
     .link-info { flex-grow: 1; overflow: hidden; }
     .link-short { font-size: 15px; color: var(--accent); font-weight: 600; text-decoration: none; display: block;}
@@ -89,7 +90,7 @@
               <button id="clearHistoryBtn" style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:12px;">Clear All</button>
             </div>
             <div id="historyContainer" style="max-height: 250px; overflow-y: auto;">
-                </div>
+            </div>
           </div>
         </div>
       </div>
@@ -145,6 +146,10 @@
                 <option value="open_settings">Open Settings</option>
                 <option value="toggle_block">Toggle Block</option>
                 <option value="toggle_invert">Toggle Invert</option>
+                <option value="toggle_uniform">Toggle Uniform Visuals</option>
+                <option value="toggle_hover">Toggle Hover Reveal</option>
+                <option value="toggle_rightclick">Toggle Force Right-Click</option>
+                <option value="toggle_stablevolume">Toggle Stable Volume</option>
               </select>
             </div>
           </div>
@@ -153,6 +158,15 @@
       </div>
     </div>
   </div>
+
+  <div id="qrModal" style="display:none; position:fixed; inset:0; background:rgba(15,15,17,0.9); z-index:9999; align-items:center; justify-content:center; flex-direction:column; padding:20px;">
+    <div style="background:var(--off-card); padding:24px; border-radius:16px; border:1px solid var(--off-border); text-align:center; position:relative; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+       <button id="closeQrModal" style="position:absolute; top:12px; right:16px; background:transparent; border:none; color:var(--text-secondary); cursor:pointer; font-size:20px; transition: color 0.2s;">✕</button>
+       <h3 style="margin-bottom:20px; font-size:18px; color: var(--text-primary);">Scan to Open on Mobile</h3>
+       <img id="qrModalImg" src="" alt="Enlarged QR Code" style="width:250px; height:250px; border-radius:8px; background:#fff; padding:12px; display:block; margin: 0 auto;">
+    </div>
+  </div>
+
   <script src="options.js"></script>
 </body>
 </html>

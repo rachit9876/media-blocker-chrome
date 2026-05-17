@@ -134,10 +134,15 @@ chrome.commands.onCommand.addListener(async (command) => {
     const data = await chrome.storage.local.get(DEFAULTS);
     const action = data.shortcutAction;
 
+    // Added all missing shortcut bindings here 
     if (action === "open_settings") chrome.runtime.openOptionsPage();
     else if (action === "toggle_block") toggleState(data, "mediaBlockEnabled");
     else if (action === "toggle_blur") toggleState(data, "mediaBlurEnabled");
     else if (action === "toggle_invert") toggleState(data, "mediaInvertEnabled");
+    else if (action === "toggle_uniform") toggleState(data, "mediaUniformEnabled");
+    else if (action === "toggle_hover") toggleState(data, "mediaHoverEnabled");
+    else if (action === "toggle_rightclick") toggleState(data, "forceRightClickEnabled");
+    else if (action === "toggle_stablevolume") toggleState(data, "stableVolumeEnabled");
   }
 });
 

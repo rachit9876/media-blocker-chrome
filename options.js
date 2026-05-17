@@ -31,17 +31,33 @@ document.addEventListener('DOMContentLoaded', () => {
          div.className = 'history-item';
          // Using a fast, free QR generator API
          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(item.short)}&bgcolor=FFFFFF&color=000000`;
+         const qrUrlHighRes = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(item.short)}&bgcolor=FFFFFF&color=000000`;
          
          div.innerHTML = `
-            <div class="qr-box"><img src="${qrUrl}" alt="QR Code"></div>
+            <div class="qr-box" title="Click to expand"><img src="${qrUrl}" alt="QR Code"></div>
             <div class="link-info">
                <a href="${item.short}" target="_blank" class="link-short">${item.short}</a>
                <span class="link-original" title="${item.original}">${item.original}</span>
             </div>
          `;
+         
+         // Attach click event for modal popup
+         div.querySelector('.qr-box').addEventListener('click', () => {
+            document.getElementById('qrModalImg').src = qrUrlHighRes;
+            document.getElementById('qrModal').style.display = 'flex';
+         });
+
          historyContainer.appendChild(div);
       });
   }
+
+  // Handle QR Modal Close
+  document.getElementById('closeQrModal').addEventListener('click', () => {
+      document.getElementById('qrModal').style.display = 'none';
+  });
+  document.getElementById('qrModal').addEventListener('click', (e) => {
+      if(e.target.id === 'qrModal') document.getElementById('qrModal').style.display = 'none';
+  });
 
   function loadSettings() {
     chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
