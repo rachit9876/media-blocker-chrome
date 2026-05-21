@@ -2,7 +2,7 @@
 const DEFAULTS = {
   mediaBlockEnabled: false, mediaInvertEnabled: false, mediaBlurEnabled: false,
   mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,
-  stableVolumeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
+  stableVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
   blurIntensity: 25, blurMode: "blur", audioEqMode: "stable",
   videoAutoplayPreventEnabled: false, videoAutoMuteEnabled: false,
   shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [] 
@@ -117,6 +117,7 @@ chrome.commands.onCommand.addListener(async (command) => {
     else if (action === "toggle_hover") await chrome.storage.local.set({mediaHoverEnabled: !data.mediaHoverEnabled});
     else if (action === "toggle_rightclick") await chrome.storage.local.set({forceRightClickEnabled: !data.forceRightClickEnabled});
     else if (action === "toggle_stablevolume") await chrome.storage.local.set({stableVolumeEnabled: !data.stableVolumeEnabled});
+    else if (action === "toggle_darkmode") await chrome.storage.local.set({darkModeEnabled: !data.darkModeEnabled});
   }
 });
 

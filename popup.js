@@ -10,6 +10,7 @@
     mediaHoverEnabled: { color: "var(--hover-accent)", labelPrefix: "HOVER REVEAL" },
     forceRightClickEnabled: { color: "var(--frc-accent)", labelPrefix: "FORCE RIGHT-CLICK" },
     stableVolumeEnabled: { color: "var(--vol-accent)", labelPrefix: "STABLE VOL" },
+    darkModeEnabled: { color: "var(--dark-accent)", labelPrefix: "DARK MODE" },
     browserLockEnabled: { color: "var(--on-accent)", labelPrefix: "LOCK" }
   };
 
@@ -217,7 +218,6 @@
 
   init();
 
-  // Storage Listener synchronizes other open UI seamlessly
   chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'local') {
       Object.keys(changes).forEach(key => {

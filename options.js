@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     videoAutoplayPreventEnabled: document.getElementById('videoAutoplayPreventEnabled'),
     videoAutoMuteEnabled: document.getElementById('videoAutoMuteEnabled'),
     forceRightClickEnabled: document.getElementById('forceRightClickEnabled'),
+    darkModeEnabled: document.getElementById('darkModeEnabled'),
     blurMode: document.getElementById('blurMode'),
     blurIntensity: document.getElementById('blurIntensity'),
     stableVolumeEnabled: document.getElementById('stableVolumeEnabled'),
@@ -60,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
       inputs.videoAutoplayPreventEnabled.checked = state.videoAutoplayPreventEnabled;
       inputs.videoAutoMuteEnabled.checked = state.videoAutoMuteEnabled;
       inputs.forceRightClickEnabled.checked = state.forceRightClickEnabled;
+      inputs.darkModeEnabled.checked = state.darkModeEnabled;
       inputs.blurMode.value = state.blurMode;
       inputs.blurIntensity.value = state.blurIntensity;
       inputs.stableVolumeEnabled.checked = state.stableVolumeEnabled;
@@ -91,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value });
   }
 
-  ['targetImgEnabled', 'targetVidEnabled', 'videoAutoplayPreventEnabled', 'videoAutoMuteEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled'].forEach(key => {
+  ['targetImgEnabled', 'targetVidEnabled', 'videoAutoplayPreventEnabled', 'videoAutoMuteEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'darkModeEnabled'].forEach(key => {
       inputs[key].addEventListener('change', (e) => updateSetting(key, e.target.checked));
   });
 

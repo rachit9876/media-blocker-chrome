@@ -12,7 +12,7 @@
       --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
       --on-accent: #ff3b3b; --on-glow: rgba(255,59,59,0.35);
       --blur-accent: #3b82f6; --invert-accent: #a855f7; --hover-accent: #10b981; --uniform-accent: #f59e0b;
-      --frc-accent: #14b8a6; --vol-accent: #ec4899; --short-accent: #8b5cf6;
+      --frc-accent: #14b8a6; --vol-accent: #ec4899; --short-accent: #8b5cf6; --dark-accent: #6366f1;
       --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
       --radius: 14px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -41,7 +41,6 @@
     .settings-box:hover .settings-icon { stroke: var(--text-primary); transform: rotate(90deg); }
     .settings-icon { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s; width: 18px; height: 18px; }
     
-    /* Compacted Small Toggle for Stats row */
     .small-toggle { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
     .small-toggle input { opacity: 0; width: 0; height: 0; }
     .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 2px solid var(--off-border); transition: all var(--transition); border-radius: 100px; }
@@ -54,14 +53,12 @@
     .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); transition: all 0.3s ease; }
     .status-label { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-secondary); transition: color 0.3s ease; text-transform: uppercase; line-height: 1.3; }
     
-    /* Compacted Main Grid Toggles */
     .toggle-wrapper { position: relative; }
     .toggle-input { position: absolute; opacity: 0; width: 0; height: 0; }
     .toggle-label { display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .toggle-track { width: 44px; height: 24px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; position: relative; transition: all var(--transition); }
     .toggle-thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--text-dim); transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
 
-    /* Compacted Shorten URL Square Card Layout */
     .action-card-square { cursor: pointer; border-color: var(--off-border); }
     .action-card-square:hover { border-color: var(--short-accent); box-shadow: 0 0 12px rgba(139, 92, 246, 0.25); background: #201b2a; }
     .action-card-square .status-dot { background: var(--short-accent); box-shadow: 0 0 6px var(--short-accent); }
@@ -81,6 +78,7 @@
     .status-card.active-mediaUniformEnabled { border-color: var(--uniform-accent); box-shadow: 0 0 12px rgba(245,158,11,0.25); }
     .status-card.active-forceRightClickEnabled { border-color: var(--frc-accent); box-shadow: 0 0 12px rgba(20,184,166,0.25); }
     .status-card.active-stableVolumeEnabled { border-color: var(--vol-accent); box-shadow: 0 0 12px rgba(236,72,153,0.25); }
+    .status-card.active-darkModeEnabled { border-color: var(--dark-accent); box-shadow: 0 0 12px rgba(99,102,241,0.25); }
   </style>
 </head>
 <body>
@@ -193,6 +191,14 @@
           <div class="status-label" id="forceRightClickEnabledLabel">RIGHT-CLICK</div>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="forceRightClickEnabled" /><label class="toggle-label" for="forceRightClickEnabled"><div class="toggle-track" id="forceRightClickEnabledTrack"><div class="toggle-thumb" id="forceRightClickEnabledThumb"></div></div></label></div>
+      </div>
+
+      <div class="status-card" id="darkModeEnabledCard">
+        <div class="status-header">
+          <div class="status-dot" id="darkModeEnabledDot"></div>
+          <div class="status-label" id="darkModeEnabledLabel">DARK OFF</div>
+        </div>
+        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="darkModeEnabled" /><label class="toggle-label" for="darkModeEnabled"><div class="toggle-track" id="darkModeEnabledTrack"><div class="toggle-thumb" id="darkModeEnabledThumb"></div></div></label></div>
       </div>
 
       <div class="status-card" id="stableVolumeEnabledCard">
