@@ -28,14 +28,11 @@
     }
   }
 
-  // --- FORCE RIGHT CLICK LOGIC (Fixed Propagation) ---
+  // --- FORCE RIGHT CLICK LOGIC ---
   let isForceRightClickOn = false;
   ['contextmenu', 'copy', 'paste', 'selectstart', 'dragstart', 'mousedown', 'mouseup'].forEach(evt => {
       window.addEventListener(evt, function(e) { 
-          if (isForceRightClickOn) { 
-              e.stopPropagation(); 
-              e.stopImmediatePropagation(); 
-          } 
+          if (isForceRightClickOn) { e.stopPropagation(); e.stopImmediatePropagation(); } 
       }, true);
   });
 
@@ -51,6 +48,7 @@
       } else { if (styleEl) styleEl.remove(); }
   }
 
+  // --- MEDIA ENGINE ---
   let vidAutoplayPrev = false; let vidAutoMute = false;
   function processVideoNode(v) { if (vidAutoplayPrev) { if (v.hasAttribute('autoplay')) v.removeAttribute('autoplay'); if (!v.paused && !v.__mbPaused) { v.pause(); v.__mbPaused = true; } } if (vidAutoMute) v.muted = true; }
   const videoObserver = new MutationObserver((mutations) => { if (!vidAutoplayPrev && !vidAutoMute) return; mutations.forEach(m => { m.addedNodes.forEach(node => { if (node.tagName === 'VIDEO') processVideoNode(node); else if (node.querySelectorAll) node.querySelectorAll('video').forEach(processVideoNode); }); }); });
@@ -84,11 +82,122 @@
   }
   document.addEventListener('play', (e) => { if (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') { attachStableVolume(e.target); if (isStableVolumeOn && audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } }, true);
 
+  // --- SMART DARK MODE ENGINE ---
+  let darkModeEnabled = false;
+  let darkObserver = null;
 
+  function applySmartDarkMode() {
+    if (!darkModeEnabled) {
+       document.documentElement.removeAttribute("data-mb-darkmode");
+       return;
+    }
+
+    const root = document.documentElement;
+    const body = document.body;
+    let isDark = false;
+
+    // 1. Explicit Dark Mode Attributes/Classes
+    // Many sites (Tailwind, Bootstrap, etc.) use specific classes or data attributes to define their dark themes.
+    const htmlClasses = (root.className || '').toString().toLowerCase();
+    const bodyClasses = body ? (body.className || '').toString().toLowerCase() : '';
+    const themeAttrs = [
+        root.getAttribute('data-theme'), root.getAttribute('theme'), 
+        root.getAttribute('data-color-mode'), root.getAttribute('data-bs-theme'),
+        body ? body.getAttribute('data-theme') : null
+    ].map(a => (a || '').toLowerCase());
+
+    if (
+        htmlClasses.includes('dark') || htmlClasses.includes('night') ||
+        bodyClasses.includes('dark') || bodyClasses.includes('night') ||
+        themeAttrs.some(attr => attr.includes('dark') || attr.includes('night'))
+    ) {
+        isDark = true;
+    }
+
+    // 2. Computed Native System Color Scheme Support
+    if (!isDark) {
+        let computedStyleRoot = window.getComputedStyle(root);
+        if (computedStyleRoot.colorScheme.includes('dark') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            isDark = true;
+        }
+    }
+
+    // 3. Deep Computed Background Color Checking (Handles System Detectors)
+    // We check HTML, Body, and the primary app wrappers (#root, #app).
+    if (!isDark) {
+        let elementsToCheck = [root, body];
+        if (body) {
+            // Include main child wrappers that might hold the background color
+            Array.from(body.children).forEach(child => {
+                if (['DIV', 'MAIN', 'APP-ROOT', 'SECTION'].includes(child.tagName)) {
+                    elementsToCheck.push(child);
+                }
+            });
+        }
+
+        for (let el of elementsToCheck) {
+            if (!el) continue;
+            
+            // Only consider elements that take up significant screen real-estate to avoid false positives from dark navigation bars
+            let rect = el.getBoundingClientRect ? el.getBoundingClientRect() : { width: 0, height: 0 };
+            if (el === root || el === body || (rect.width > window.innerWidth * 0.4 && rect.height > window.innerHeight * 0.4)) {
+                let bg = window.getComputedStyle(el).backgroundColor;
+                
+                if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+                    let match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                    if (match) {
+                        let r = parseInt(match[1]), g = parseInt(match[2]), b = parseInt(match[3]);
+                        // YIQ brightness formula
+                        let brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+                        if (brightness < 127) {
+                            isDark = true;
+                        }
+                        break; // Stop checking once we find the dominant structural background
+                    }
+                }
+            }
+        }
+    }
+
+    // Apply state without double-inverting natively dark sites
+    if (isDark) {
+       root.removeAttribute("data-mb-darkmode");
+    } else {
+       root.setAttribute("data-mb-darkmode", "true");
+    }
+  }
+
+  function toggleDarkMode(enabled) {
+    darkModeEnabled = enabled;
+    if (enabled) {
+        applySmartDarkMode();
+        
+        // Watch for sites that dynamically change themes (e.g. clicking a Light/Dark button on a page)
+        if (!darkObserver) {
+            darkObserver = new MutationObserver(() => applySmartDarkMode());
+            darkObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme', 'theme'] });
+            if (document.body) darkObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
+        }
+        
+        if (!document.body) {
+            window.addEventListener('DOMContentLoaded', () => {
+                applySmartDarkMode();
+                if (darkObserver) darkObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
+            });
+        }
+    } else {
+        document.documentElement.removeAttribute("data-mb-darkmode");
+        if (darkObserver) {
+            darkObserver.disconnect();
+            darkObserver = null;
+        }
+    }
+  }
+
+  // --- STATE MANAGEMENT ---
   const STATE_MAP = {
     mediaBlockEnabled: "data-mb-block", mediaInvertEnabled: "data-mb-invert", mediaHoverEnabled: "data-mb-hover", 
-    mediaUniformEnabled: "data-mb-uniform", targetImgEnabled: "data-mb-target-img", targetVidEnabled: "data-mb-target-vid",
-    darkModeEnabled: "data-mb-darkmode"
+    mediaUniformEnabled: "data-mb-uniform", targetImgEnabled: "data-mb-target-img", targetVidEnabled: "data-mb-target-vid"
   };
 
   let currentBlurVal = 25;
@@ -111,6 +220,7 @@
     else if (key === "audioEqMode") { audioEqMode = value; document.querySelectorAll('video, audio').forEach(el => updateEQNodes(processedMedia.get(el))); }
     else if (key === "videoAutoplayPreventEnabled") { vidAutoplayPrev = value; triggerVideoProcessing(); }
     else if (key === "videoAutoMuteEnabled") { vidAutoMute = value; triggerVideoProcessing(); }
+    else if (key === "darkModeEnabled") { toggleDarkMode(value); }
     else if (key === "browserLockEnabled") { value ? showLockScreen() : document.getElementById('mb-lock-screen')?.remove(); }
     else if (STATE_MAP[key]) { value ? root.setAttribute(STATE_MAP[key], "true") : root.removeAttribute(STATE_MAP[key]); }
   }
