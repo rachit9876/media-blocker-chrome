@@ -5,7 +5,8 @@ const DEFAULTS = {
   stableVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
   blurIntensity: 25, blurMode: "blur", audioEqMode: "stable",
   videoAutoplayPreventEnabled: false, videoAutoMuteEnabled: false,
-  shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [] 
+  shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
+  textAlternativesEnabled: false
 };
 
 async function hashPassword(password) {
@@ -20,6 +21,7 @@ async function init() {
   const data = await chrome.storage.local.get(DEFAULTS);
   await chrome.storage.local.set(data);
   await updateDNR();
+  await updateBadge();
 }
 
 init();
@@ -36,15 +38,49 @@ async function updateDNR() {
     const disableRulesetIds = ["block_images", "block_videos"].filter(id => !enableRulesetIds.includes(id));
     
     await chrome.declarativeNetRequest.updateEnabledRulesets({ enableRulesetIds, disableRulesetIds });
-    
-    if (blockOn) {
-      chrome.action.setBadgeText({ text: "ON" });
-      chrome.action.setBadgeBackgroundColor({ color: "#E53E3E" });
-    } else {
-      chrome.action.setBadgeText({ text: "" });
-    }
   } catch (error) {
     console.error("MediaBlock Pro: DNR Update Failed", error);
+  }
+}
+
+// Dynamic Emoji Badge Updater - Supports up to 4 Emojis
+async function updateBadge() {
+  try {
+    const data = await chrome.storage.local.get(DEFAULTS);
+    
+    // Highest Priority: Lock Screen overrides everything else
+    if (data.browserLockEnabled) {
+      chrome.action.setBadgeText({ text: "🔒" });
+      chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] }); 
+      return;
+    }
+
+    const activeEmojis = [];
+    
+    // Visual Shields (Tier 1)
+    if (data.mediaBlockEnabled) activeEmojis.push("🛑");
+    if (data.mediaBlurEnabled) activeEmojis.push("💧");
+    if (data.mediaInvertEnabled) activeEmojis.push("☯️");
+    if (data.mediaUniformEnabled) activeEmojis.push("🔲");
+    
+    // Utilities & Audio (Tier 2)
+    if (data.darkModeEnabled) activeEmojis.push("🌙");
+    if (data.stableVolumeEnabled) activeEmojis.push("🔊");
+    if (data.forceRightClickEnabled) activeEmojis.push("🔓");
+    if (data.mediaHoverEnabled) activeEmojis.push("👁️");
+
+    // Chrome badges can hold about 4 characters max before truncating.
+    // We slice at 4 to allow maximum combination visibility.
+    const text = activeEmojis.slice(0, 4).join("");
+
+    chrome.action.setBadgeText({ text });
+    
+    // Forces the badge background to be completely transparent 
+    // so the emojis sit directly on top of your extension icon
+    chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
+    
+  } catch (error) {
+    console.error("MediaBlock Pro: Badge Update Failed", error);
   }
 }
 
@@ -54,6 +90,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     if (changes.mediaBlockEnabled || changes.targetImgEnabled || changes.targetVidEnabled) {
       updateDNR();
     }
+    updateBadge();
   }
 });
 
@@ -147,7 +184,7 @@ async function shortenUrlAPI(longUrl) {
 
 async function generateAndCopyShortUrl(longUrl, tabId) {
   chrome.action.setBadgeText({ text: "..." });
-  chrome.action.setBadgeBackgroundColor({ color: "#F59E0B" });
+  chrome.action.setBadgeBackgroundColor({ color: [245, 158, 11, 255] }); 
 
   try {
     const data = await shortenUrlAPI(longUrl);
@@ -168,6 +205,6 @@ async function generateAndCopyShortUrl(longUrl, tabId) {
   } catch (error) {
     console.error('Fetch Error:', error);
   } finally {
-    updateDNR();
+    updateBadge();
   }
 }
