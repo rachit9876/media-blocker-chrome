@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stableVolumeEnabled: document.getElementById('stableVolumeEnabled'),
     audioEqMode: document.getElementById('audioEqMode'),
     shortcutAction: document.getElementById('shortcutAction'),
+    textAlternativesEnabled: document.getElementById('textAlternativesEnabled'),
     browserLockPassword: document.getElementById('browserLockPassword'),
     browserLockPasswordConfirm: document.getElementById('browserLockPasswordConfirm') 
   };
@@ -68,6 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
       inputs.audioEqMode.value = state.audioEqMode;
       inputs.shortcutAction.value = state.shortcutAction;
       
+      if(inputs.textAlternativesEnabled) {
+          inputs.textAlternativesEnabled.checked = state.textAlternativesEnabled || false;
+      }
+      
       updateIntensityLabel();
       renderHistory(state.urlHistory);
       
@@ -93,18 +98,24 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value });
   }
 
-  ['targetImgEnabled', 'targetVidEnabled', 'videoAutoplayPreventEnabled', 'videoAutoMuteEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'darkModeEnabled'].forEach(key => {
-      inputs[key].addEventListener('change', (e) => updateSetting(key, e.target.checked));
+  ['targetImgEnabled', 'targetVidEnabled', 'videoAutoplayPreventEnabled', 'videoAutoMuteEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'darkModeEnabled', 'textAlternativesEnabled'].forEach(key => {
+      if (inputs[key]) {
+          inputs[key].addEventListener('change', (e) => updateSetting(key, e.target.checked));
+      }
   });
 
   ['blurMode', 'audioEqMode', 'shortcutAction'].forEach(key => {
-      inputs[key].addEventListener('change', (e) => {
-          updateSetting(key, e.target.value);
-          if (key === 'blurMode') updateIntensityLabel();
-      });
+      if (inputs[key]) {
+          inputs[key].addEventListener('change', (e) => {
+              updateSetting(key, e.target.value);
+              if (key === 'blurMode') updateIntensityLabel();
+          });
+      }
   });
 
-  inputs.blurIntensity.addEventListener('input', (e) => updateSetting('blurIntensity', parseInt(e.target.value)));
+  if (inputs.blurIntensity) {
+      inputs.blurIntensity.addEventListener('input', (e) => updateSetting('blurIntensity', parseInt(e.target.value)));
+  }
 
   function showFeedback(msg, isError = false) {
     const feedback = document.getElementById('passwordFeedback');

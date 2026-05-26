@@ -11,6 +11,7 @@
       --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
       --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
       --accent: #3b82f6; --accent-hover: #2563eb; --danger: #ff3b3b; --danger-hover: #dc2626;
+      --purplish: #a855f7; --purplish-light: #d8b4fe;
       --radius: 14px; --transition: 0.3s ease;
     }
 
@@ -57,9 +58,34 @@
     .qr-box { width: 40px; height: 40px; border-radius: 6px; background: #fff; padding: 2px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s; }
     .qr-box:hover { transform: scale(1.05); }
     .qr-box img { width: 100%; height: 100%; border-radius: 4px; }
-    .link-info { flex-grow: 1; overflow: hidden; }
-    .link-short { font-size: 14px; color: var(--accent); font-weight: 600; text-decoration: none; display: block; margin-bottom: 1px;}
-    .link-original { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;}
+    
+    /* Modified for Word Wrapping */
+    .link-info { flex-grow: 1; word-wrap: break-word; overflow-wrap: break-word; overflow: hidden; }
+    .link-short { font-size: 14px; color: var(--accent); font-weight: 600; text-decoration: none; display: block; margin-bottom: 2px; word-break: break-all; }
+    .link-original { font-size: 11px; color: var(--text-secondary); display: block; word-break: break-all; }
+
+    /* Skeleton Preview Styles */
+    .skeleton-preview {
+      height: 90px;
+      border: 2px dashed var(--purplish);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(90deg, #1e1e26 25%, #2a2a32 50%, #1e1e26 75%);
+      background-size: 200% 100%;
+      animation: mb-shimmer 2s infinite linear;
+      color: var(--purplish-light);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px;
+      text-align: center;
+      font-style: italic;
+    }
+    @keyframes mb-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
   </style>
 </head>
 <body>
@@ -82,6 +108,28 @@
             <div class="list-item"><div class="list-item-text"><span class="item-title">Prevent Auto-Play</span><span class="item-desc">Stop videos from playing automatically.</span></div><label class="small-toggle"><input type="checkbox" id="videoAutoplayPreventEnabled"><span class="small-toggle-slider"></span></label></div>
             <div class="list-item"><div class="list-item-text"><span class="item-title">Auto-Mute Background</span><span class="item-desc">Force all loaded media to start muted.</span></div><label class="small-toggle"><input type="checkbox" id="videoAutoMuteEnabled"><span class="small-toggle-slider"></span></label></div>
             <div class="list-item"><div class="list-item-text"><span class="item-title">Force Right-Click & Copy</span><span class="item-desc">Unlock context menus on restrictive sites.</span></div><label class="small-toggle"><input type="checkbox" id="forceRightClickEnabled"><span class="small-toggle-slider"></span></label></div>
+          </div>
+        </div>
+
+        <div>
+          <h2>Accessibility & Feedback</h2>
+          <div class="card">
+            <div class="list-item">
+              <div class="list-item-text">
+                <span class="item-title">Text Alternatives</span>
+                <span class="item-desc">Extract and show alt-text on blocked media.</span>
+              </div>
+              <label class="small-toggle">
+                <input type="checkbox" id="textAlternativesEnabled">
+                <span class="small-toggle-slider"></span>
+              </label>
+            </div>
+            <div class="list-item" style="flex-direction: column; align-items: stretch; background: var(--off-bg); padding: 16px;">
+              <span class="item-desc" style="margin-bottom: 8px; color: var(--text-primary); font-weight: bold;">Skeleton Preview:</span>
+              <div class="skeleton-preview">
+                alt: "A golden retriever puppy running through a field"
+              </div>
+            </div>
           </div>
         </div>
 
