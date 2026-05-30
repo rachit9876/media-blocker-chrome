@@ -12,11 +12,23 @@ document.addEventListener('DOMContentLoaded', () => {
     audioEqMode: document.getElementById('audioEqMode'),
     shortcutAction: document.getElementById('shortcutAction'),
     textAlternativesEnabled: document.getElementById('textAlternativesEnabled'),
+    textSpoofingEnabled: document.getElementById('textSpoofingEnabled'),
+    textSpoofingSeed: document.getElementById('textSpoofingSeed'),
     browserLockPassword: document.getElementById('browserLockPassword'),
     browserLockPasswordConfirm: document.getElementById('browserLockPasswordConfirm') 
   };
   
   const historyContainer = document.getElementById('historyContainer');
+
+  function escapeHtml(value) {
+      return String(value || '').replace(/[&<>"']/g, (char) => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+      }[char]));
+  }
   
   function updateIntensityLabel() {
      document.getElementById('blurIntensityLabel').textContent = inputs.blurMode.value === 'pixelate' ? 'Mosaic Intensity' : 'Blur Intensity';
@@ -33,12 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
          const div = document.createElement('div'); div.className = 'history-item';
          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(item.short)}&bgcolor=FFFFFF&color=000000`;
          const qrUrlHighRes = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(item.short)}&bgcolor=FFFFFF&color=000000`;
+         const shortUrl = escapeHtml(item.short);
+         const originalUrl = escapeHtml(item.original);
          
          div.innerHTML = `
             <div class="qr-box" title="Click to expand"><img src="${qrUrl}" alt="QR Code"></div>
             <div class="link-info">
-               <a href="${item.short}" target="_blank" class="link-short">${item.short}</a>
-               <span class="link-original" title="${item.original}">${item.original}</span>
+               <a href="${shortUrl}" target="_blank" rel="noopener noreferrer" class="link-short">${shortUrl}</a>
+               <span class="link-original" title="${originalUrl}">${originalUrl}</span>
             </div>
          `;
          
@@ -60,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
       domains.forEach(domain => {
           const div = document.createElement('div');
           div.style.cssText = "display: flex; justify-content: space-between; background: #1e1e26; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--off-border); font-size: 13px; align-items: center;";
-          div.innerHTML = `<span>${domain}</span> <button data-domain="${domain}" class="remove-domain-btn" style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-weight:bold; transition: 0.2s;">X</button>`;
+          const safeDomain = escapeHtml(domain);
+          div.innerHTML = `<span>${safeDomain}</span> <button data-domain="${safeDomain}" class="remove-domain-btn" style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-weight:bold; transition: 0.2s;">X</button>`;
           container.appendChild(div);
       });
       
@@ -97,6 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if(inputs.textAlternativesEnabled) {
           inputs.textAlternativesEnabled.checked = state.textAlternativesEnabled || false;
       }
+      if(inputs.textSpoofingEnabled) {
+          inputs.textSpoofingEnabled.checked = state.textSpoofingEnabled || false;
+      }
+      if(inputs.textSpoofingSeed) {
+          inputs.textSpoofingSeed.value = state.textSpoofingSeed || "mediablock";
+      }
       
       updateIntensityLabel();
       renderHistory(state.urlHistory);
@@ -124,11 +145,19 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value });
   }
 
-  ['targetImgEnabled', 'targetVidEnabled', 'videoAutoplayPreventEnabled', 'videoAutoMuteEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'darkModeEnabled', 'textAlternativesEnabled'].forEach(key => {
+  ['targetImgEnabled', 'targetVidEnabled', 'videoAutoplayPreventEnabled', 'videoAutoMuteEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'darkModeEnabled', 'textAlternativesEnabled', 'textSpoofingEnabled'].forEach(key => {
       if (inputs[key]) {
           inputs[key].addEventListener('change', (e) => updateSetting(key, e.target.checked));
       }
   });
+
+  if (inputs.textSpoofingSeed) {
+      inputs.textSpoofingSeed.addEventListener('change', (e) => {
+          const seed = e.target.value.trim() || "mediablock";
+          e.target.value = seed;
+          updateSetting('textSpoofingSeed', seed);
+      });
+  }
 
   ['blurMode', 'audioEqMode', 'shortcutAction'].forEach(key => {
       if (inputs[key]) {
@@ -180,6 +209,10 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Strip out http://, https://, and www. if pasted directly from URL bar
       val = val.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0];
+      if (!/^[a-z0-9.-]+$/.test(val) || !val.includes('.')) {
+          alert("Enter a valid domain, for example reddit.com");
+          return;
+      }
       
       chrome.storage.local.get(['lockedDomains'], (res) => {
           const current = res.lockedDomains || [];
@@ -200,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
       Object.keys(changes).forEach(key => {
         const newValue = changes[key].newValue;
         if (inputs[key] && !['browserLockPassword', 'browserLockPasswordConfirm'].includes(key)) {
-            if (['blurIntensity', 'shortcutAction', 'blurMode', 'audioEqMode'].includes(key)) {
+            if (['blurIntensity', 'shortcutAction', 'blurMode', 'audioEqMode', 'textSpoofingSeed'].includes(key)) {
                 inputs[key].value = newValue;
                 if (key === 'blurMode') updateIntensityLabel();
             } else {

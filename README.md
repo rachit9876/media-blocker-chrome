@@ -1,58 +1,131 @@
-# MediaBlock Pro 🛡️
+# MediaBlock Pro
+
+MediaBlock Pro is a Manifest V3 Chrome extension for screen privacy, media filtering, and safer browsing in public or shared spaces. It can block, blur, invert, grayscale, or reveal media on hover, and it now includes seeded Text Spoofing to make visible page text harder for nearby observers to read while keeping it readable for you.
 
 [Download the latest ZIP](https://github.com/rachit9876/media-blocker-chrome/archive/refs/heads/main.zip)
 
-## See it in Action
+## What's New
 
-| Original (Extension Off) | Total Media Block |
-| :---: | :---: |
-| ![Original](https://dr-fast-upload.pages.dev/public/e2f0cc24193b.webp) | ![Block ON](https://dr-fast-upload.pages.dev/public/80fe8ced5f6a.webp) |
-| **Smart Blur Mode** | **Invert Mode (Privacy Filter)** |
-| ![Blur ON](https://dr-fast-upload.pages.dev/public/8892ba4abd32.webp) | ![Invert ON](https://dr-fast-upload.pages.dev/public/2aab16d8eaae.webp) |
+- **Text Spoofing:** Converts visible page text into deterministic, seed-based typoglycemic text.
+- **Spoofing Seed:** Change the seed from Options. The same seed always produces the same transformation.
+- **Domain Lock:** Require your universal password before opening selected websites.
+- **Browser Lock:** Lock pages behind a password overlay.
+- **URL Shortener:** Shorten current pages, links, images, video, and audio URLs, with recent history and QR preview.
+- **Smart Dark Mode:** Applies a dark-style inversion only when the current site appears light.
+- **Audio Tools:** Stable Volume compression, dialogue boost, and heavy bass cut profiles.
 
----
+## Core Features
 
-## Why MediaBlock Pro?
-Want true privacy while browsing in public or at work? MediaBlock Pro is a lightweight, highly stable Chrome extension that instantly filters or blocks images, videos, and background media on every website you visit. 
+### Visual Privacy
 
-More than just a visual blocker, MediaBlock Pro now includes advanced productivity utilities—like a native audio normalizer and a force-right-click tool—to help you take back your screen, ears, and browser.
+- **Total Media Block:** Blocks images and videos using Chrome's `declarativeNetRequest` rules.
+- **Smart Blur:** Applies blur to images, videos, embeds, canvas content, and background images.
+- **Pixelation Mode:** Alternative visual filter for a mosaic-style privacy effect.
+- **Invert Mode:** Inverts filtered media for lower-detail viewing.
+- **Uniform Visuals:** Converts targeted media to grayscale.
+- **Hover Reveal:** Temporarily reveals filtered media when hovering.
+- **Target Controls:** Apply filtering to images, videos, or both.
 
-## 🚀 What's New in the Latest Stable Release
-* **Real-Time Global Sync:** Settings updated in the popup, options page, or via keyboard shortcuts now apply instantly across all open tabs using native storage listeners—zero lag.
-* **Hardened Browser Lock:** The password lock screen now fully blocks background scrolling, keyboard bypasses, and mouse-wheel events.
-* **Aggressive Right-Click Unblocker:** Upgraded the force-right-click engine to completely hijack restrictive website scripts, guaranteeing text selection and copy-paste freedom anywhere.
-* **Smarter URL Shortener:** Added strict protocol validation to prevent shortener crashes on local files or restricted `chrome://` pages.
+### Text Privacy
 
-## 🌟 Core Features
+- **Seeded Text Spoofing:** Scrambles the inner letters of visible words while preserving the first and last letters.
+- **Deterministic Output:** The same seed and same word produce the same spoofed result, helping your brain adapt over time.
+- **Dynamic Page Support:** Newly added and updated DOM text is transformed automatically.
+- **Readable to Owner:** Designed for shoulder-surfing protection in offices, public transport, classrooms, cafes, and shared screens.
 
-### 👁️ Visual Privacy & Shields
-* **Total Media Block:** Completely hides all images and videos. Uses Chrome's highly efficient `declarativeNetRequest` API to block media at the network level, saving bandwidth and preventing layout breakage.
-* **Smart Blur:** Applies a heavy blur to all media. You can adjust the exact blur intensity in the Options page (default is 25px).
-* **Invert Mode (Privacy Filter):** Need to know what a picture is without fully exposing it to anyone looking at your screen? Toggle Invert Mode to flip the colors, allowing you to see the media's outline discreetly.
-* **Uniform Visuals (Grayscale):** Turns all media entirely black and white, stripping away eye-catching colors for distraction-free reading.
+Text Spoofing works on normal webpage text. It does not affect text baked into images, videos, PDFs, canvas-rendered charts, or inaccessible closed shadow DOM.
 
-### ⚡ Interactive Control
-* **Hover Reveal:** When enabled alongside Blur or Invert, simply hover your mouse over a specific image or video to temporarily reveal it in its original state.
-* **Granular Targeting:** Choose whether the extension affects *just* images, *just* videos, or both.
-* **Live Media Counters:** Open the popup to instantly see exactly how many images and videos are present on your current tab.
-* **Custom Shortcut (Alt+S):** Instantly toggle your preferred filter (Block, Blur, Invert) or open settings without clicking the extension icon.
+### Media Behavior
 
-### 🛠️ Advanced Web Utilities
-* **Force Right-Click & Copy:** Annoyed by websites that disable your right-click menu or prevent text selection? Toggle this on to strip away their restrictions and regain control of your mouse and clipboard.
-* **Stable Volume (Audio Normalizer):** Uses the Web Audio API to apply dynamic range compression to HTML5 videos and audio. It squashes ear-piercing loud noises and boosts quiet whispers, protecting your speakers and your hearing.
-* **Lightning Fast:** Uses pure CSS overrides and Manifest V3 network rules instead of heavy DOM monitoring, ensuring zero CPU spikes or lag.
+- **Prevent Auto-Play:** Removes autoplay behavior and pauses newly loaded videos.
+- **Auto-Mute Background Media:** Forces loaded videos to mute.
+- **Stable Volume Engine:** Uses Web Audio compression to reduce loud spikes and boost quiet audio.
+- **Audio Profiles:** Choose Flat, Dialogue Boost, or Heavy Bass Cut.
 
----
+### Security And Utilities
 
-## How to Install (Manual Installation)
+- **Universal Password:** Used for browser lock and domain locks.
+- **Domain Lock List:** Add domains like `reddit.com` or `youtube.com` in Options.
+- **Force Right-Click And Copy:** Re-enables text selection, context menus, copy, paste, and drag behavior on restrictive sites.
+- **Short URL Generator:** Copy shortened links from popup or context menu.
+- **QR History:** View recent shortened URLs and expand QR codes for mobile scanning.
+- **Keyboard Shortcut:** `Alt+S` can toggle your chosen action, including Text Spoofing.
 
-Since this is an unpacked extension, you can install it in just a few seconds using Chrome's Developer Tools:
+## Popup Controls
 
-1.  **Download** the [ZIP file](https://github.com/rachit9876/media-blocker-chrome/archive/refs/heads/main.zip) from this repository.
-2.  **Extract** the downloaded ZIP file to a folder anywhere on your computer.
-3.  **Open Chrome** and type `chrome://extensions/` into your address bar, then hit Enter.
-4.  **Enable Developer Mode** by turning on the toggle switch in the top right corner of the extensions page.
-5.  **Click "Load unpacked"** (a button that appears in the top left after enabling Developer mode).
-6.  **Select the extracted folder** from Step 2. 
+The popup gives quick access to:
 
-That's it! MediaBlock Pro is now installed and ready to keep your browsing private. Pin it to your toolbar for quick access.
+- Browser Lock
+- Media Block
+- Blur
+- Invert
+- Uniform Visuals
+- Hover Reveal
+- Force Right-Click
+- Dark Mode
+- Stable Volume
+- Text Spoofing
+- URL Shortener
+- Image and video counters
+
+## Options Page
+
+The Options page includes:
+
+- Image/video targeting
+- Video autoplay prevention
+- Auto-mute
+- Force right-click
+- Text Alternatives toggle
+- Text Spoofing toggle
+- Text Spoofing seed
+- Blur mode and blur intensity
+- Smart Dark Mode
+- Stable Volume and EQ mode
+- Universal password management
+- Domain Lock management
+- `Alt+S` shortcut action
+- Short URL history and QR previews
+
+## Installation
+
+1. Download the ZIP from this repository.
+2. Extract it to a folder.
+3. Open Chrome and go to `chrome://extensions/`.
+4. Enable **Developer mode**.
+5. Click **Load unpacked**.
+6. Select the extracted extension folder.
+7. Pin MediaBlock Pro to your toolbar for quick access.
+
+## Permissions Used
+
+- `storage`: Save extension settings, password hash, domain locks, and URL history.
+- `declarativeNetRequest`: Block image and video requests efficiently.
+- `declarativeNetRequestWithHostAccess`: Apply network rules across allowed sites.
+- `scripting`: Run small page scripts for counters, clipboard writes, and alerts.
+- `tabs`: Read the active tab URL for counters and URL shortening.
+- `activeTab`: Interact with the currently active page.
+- `clipboardWrite`: Copy shortened URLs.
+- `contextMenus`: Add right-click URL shortening actions.
+- `<all_urls>` host access: Apply media filtering, text spoofing, locks, and page protections across websites.
+
+## Notes And Limitations
+
+- Text Spoofing affects visible DOM text, including many dynamic pages and chat-style responses.
+- Canvas-rendered text, chart labels, image text, video captions baked into video, and PDFs are outside normal DOM text handling.
+- Stable Volume uses the Web Audio API and may not attach to every protected cross-origin media element.
+- URL shortening depends on the external shortening service being reachable.
+- Passwords are stored as SHA-256 hashes in local extension storage, not as plain text.
+
+## Project Files
+
+- `manifest.json`: Chrome extension manifest.
+- `background.js`: Defaults, storage, badge state, DNR rules, shortcut handling, context menus, URL shortening, password checks.
+- `content.js`: Page-side media filters, dark mode, lock overlays, video/audio behavior, force right-click, Text Spoofing.
+- `popup.html` / `popup.js`: Quick controls and URL shortener.
+- `options.html` / `options.js`: Advanced settings, domain locks, password settings, history, and seed controls.
+- `rules/`: Declarative network request rules for image and video blocking.
+
+## Version
+
+Current manifest version: `4.3.0`.

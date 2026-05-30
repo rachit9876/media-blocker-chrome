@@ -6,7 +6,8 @@ const DEFAULTS = {
   blurIntensity: 25, blurMode: "blur", audioEqMode: "stable",
   videoAutoplayPreventEnabled: false, videoAutoMuteEnabled: false,
   shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
-  textAlternativesEnabled: false, lockedDomains: []
+  textAlternativesEnabled: false, textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
+  lockedDomains: []
 };
 
 async function hashPassword(password) {
@@ -59,6 +60,7 @@ async function updateBadge() {
     if (data.mediaBlurEnabled) activeEmojis.push("💧");
     if (data.mediaInvertEnabled) activeEmojis.push("☯️");
     if (data.mediaUniformEnabled) activeEmojis.push("🔲");
+    if (data.textSpoofingEnabled) activeEmojis.push("Tx");
     
     if (data.darkModeEnabled) activeEmojis.push("🌙");
     if (data.stableVolumeEnabled) activeEmojis.push("🔊");
@@ -149,6 +151,7 @@ chrome.commands.onCommand.addListener(async (command) => {
     else if (action === "toggle_rightclick") await chrome.storage.local.set({forceRightClickEnabled: !data.forceRightClickEnabled});
     else if (action === "toggle_stablevolume") await chrome.storage.local.set({stableVolumeEnabled: !data.stableVolumeEnabled});
     else if (action === "toggle_darkmode") await chrome.storage.local.set({darkModeEnabled: !data.darkModeEnabled});
+    else if (action === "toggle_textspoof") await chrome.storage.local.set({textSpoofingEnabled: !data.textSpoofingEnabled});
   }
 });
 

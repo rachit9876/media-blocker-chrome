@@ -11,6 +11,7 @@
     forceRightClickEnabled: { color: "var(--frc-accent)", labelPrefix: "FORCE RIGHT-CLICK" },
     stableVolumeEnabled: { color: "var(--vol-accent)", labelPrefix: "STABLE VOL" },
     darkModeEnabled: { color: "var(--dark-accent)", labelPrefix: "DARK MODE" },
+    textSpoofingEnabled: { color: "var(--textspoof-accent)", labelPrefix: "TEXT SPOOF" },
     browserLockEnabled: { color: "var(--on-accent)", labelPrefix: "LOCK" }
   };
 

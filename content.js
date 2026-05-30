@@ -138,6 +138,206 @@
     }
   }
 
+  let textSpoofingEnabled = false;
+  let textSpoofingSeed = "mediablock";
+  let textSpoofObserver = null;
+  let textSpoofApplyDepth = 0;
+  let textSpoofScheduled = false;
+  const textSpoofState = new WeakMap();
+  const TEXT_SKIP_TAGS = new Set([
+    "SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "SELECT", "OPTION",
+    "PRE", "CODE", "KBD", "SAMP", "SVG", "CANVAS"
+  ]);
+
+  function hashString(input) {
+    let hash = 2166136261;
+    for (let i = 0; i < input.length; i++) {
+      hash ^= input.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  function seededRandom(seed) {
+    let value = seed >>> 0;
+    return function () {
+      value += 0x6D2B79F5;
+      let t = value;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function spoofWord(word) {
+    const chars = Array.from(word);
+    if (chars.length < 4) return word;
+
+    const first = chars[0];
+    const last = chars[chars.length - 1];
+    const middle = chars.slice(1, -1);
+    if (middle.length < 2 || middle.every(ch => ch === middle[0])) return word;
+
+    const rand = seededRandom(hashString(`${textSpoofingSeed}:${word.toLocaleLowerCase()}`));
+    const originalMiddle = middle.join("");
+
+    for (let i = middle.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [middle[i], middle[j]] = [middle[j], middle[i]];
+    }
+
+    if (middle.join("") === originalMiddle) {
+      [middle[0], middle[middle.length - 1]] = [middle[middle.length - 1], middle[0]];
+    }
+
+    return `${first}${middle.join("")}${last}`;
+  }
+
+  function spoofText(text) {
+    return text.replace(/[\p{L}\p{M}]{4,}/gu, spoofWord);
+  }
+
+  function shouldIgnoreTextNode(node) {
+    if (!node || !node.nodeValue || !node.nodeValue.trim()) return true;
+    const parent = node.parentElement;
+    if (!parent || parent.closest('[data-mb-text-spoof-ignore="true"]')) return true;
+    if (parent.isContentEditable) return true;
+    return TEXT_SKIP_TAGS.has(parent.tagName);
+  }
+
+  function shouldSkipTextNode(node) {
+    if (shouldIgnoreTextNode(node)) return true;
+    const parent = node.parentElement;
+
+    const style = window.getComputedStyle(parent);
+    return style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0;
+  }
+
+  function spoofTextNode(node) {
+    if (shouldSkipTextNode(node)) return;
+
+    const existing = textSpoofState.get(node);
+    const original = existing ? existing.original : node.nodeValue;
+    const spoofed = spoofText(original);
+
+    if (!existing || existing.original !== original || existing.spoofed !== spoofed) {
+      textSpoofState.set(node, { original, spoofed });
+    }
+
+    if (node.nodeValue !== spoofed) {
+      textSpoofApplyDepth++;
+      node.nodeValue = spoofed;
+      textSpoofApplyDepth--;
+    }
+  }
+
+  function restoreTextNode(node) {
+    const existing = textSpoofState.get(node);
+    if (!existing) return;
+    if (node.nodeValue === existing.spoofed) {
+      textSpoofApplyDepth++;
+      node.nodeValue = existing.original;
+      textSpoofApplyDepth--;
+    }
+    textSpoofState.delete(node);
+  }
+
+  function walkTextNodes(root, callback, includeHidden = false) {
+    if (!root) return;
+
+    if (root.nodeType === Node.TEXT_NODE) {
+      if (includeHidden ? !shouldIgnoreTextNode(root) : !shouldSkipTextNode(root)) callback(root);
+      return;
+    }
+
+    if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_NODE && root.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) {
+      return;
+    }
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const skip = includeHidden ? shouldIgnoreTextNode(node) : shouldSkipTextNode(node);
+        return skip ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+
+    let node;
+    while ((node = walker.nextNode())) callback(node);
+  }
+
+  function applyTextSpoofingToPage() {
+    if (!textSpoofingEnabled) return;
+    walkTextNodes(document.body || document.documentElement, spoofTextNode);
+  }
+
+  function scheduleTextSpoofing() {
+    if (!textSpoofingEnabled || textSpoofScheduled) return;
+    textSpoofScheduled = true;
+    requestAnimationFrame(() => {
+      textSpoofScheduled = false;
+      applyTextSpoofingToPage();
+    });
+  }
+
+  function startTextSpoofObserver() {
+    if (textSpoofObserver) return;
+    textSpoofObserver = new MutationObserver((mutations) => {
+      if (textSpoofApplyDepth > 0 || !textSpoofingEnabled) return;
+
+      let needsFullPass = false;
+      mutations.forEach(mutation => {
+        if (mutation.type === "characterData") {
+          const existing = textSpoofState.get(mutation.target);
+          if (existing && mutation.target.nodeValue !== existing.spoofed) {
+            textSpoofState.set(mutation.target, { original: mutation.target.nodeValue, spoofed: "" });
+          }
+          spoofTextNode(mutation.target);
+          return;
+        }
+
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE) spoofTextNode(node);
+          else if (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+            walkTextNodes(node, spoofTextNode);
+          }
+        });
+
+        if (mutation.type === "attributes") needsFullPass = true;
+      });
+
+      if (needsFullPass) scheduleTextSpoofing();
+    });
+    textSpoofObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "hidden", "aria-hidden"]
+    });
+  }
+
+  function toggleTextSpoofing(enabled) {
+    textSpoofingEnabled = enabled;
+    document.documentElement.toggleAttribute("data-mb-text-spoofing", enabled);
+
+    if (enabled) {
+      applyTextSpoofingToPage();
+      startTextSpoofObserver();
+      if (!document.body) window.addEventListener("DOMContentLoaded", applyTextSpoofingToPage, { once: true });
+    } else {
+      if (textSpoofObserver) { textSpoofObserver.disconnect(); textSpoofObserver = null; }
+      walkTextNodes(document.body || document.documentElement, restoreTextNode, true);
+    }
+  }
+
+  function updateTextSpoofSeed(seed) {
+    textSpoofingSeed = String(seed || "mediablock");
+    if (textSpoofingEnabled) {
+      walkTextNodes(document.body || document.documentElement, restoreTextNode, true);
+      applyTextSpoofingToPage();
+    }
+  }
+
   const STATE_MAP = { mediaBlockEnabled: "data-mb-block", mediaInvertEnabled: "data-mb-invert", mediaHoverEnabled: "data-mb-hover", mediaUniformEnabled: "data-mb-uniform", targetImgEnabled: "data-mb-target-img", targetVidEnabled: "data-mb-target-vid" };
 
   let currentBlurVal = 25;
@@ -161,6 +361,8 @@
     else if (key === "videoAutoplayPreventEnabled") { vidAutoplayPrev = value; triggerVideoProcessing(); }
     else if (key === "videoAutoMuteEnabled") { vidAutoMute = value; triggerVideoProcessing(); }
     else if (key === "darkModeEnabled") { toggleDarkMode(value); }
+    else if (key === "textSpoofingEnabled") { toggleTextSpoofing(value); }
+    else if (key === "textSpoofingSeed") { updateTextSpoofSeed(value); }
     else if (key === "browserLockEnabled") { value ? showLockScreen() : document.getElementById('mb-lock-screen')?.remove(); }
     else if (STATE_MAP[key]) { value ? root.setAttribute(STATE_MAP[key], "true") : root.removeAttribute(STATE_MAP[key]); }
   }

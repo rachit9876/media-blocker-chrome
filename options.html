@@ -122,6 +122,23 @@
                 <span class="small-toggle-slider"></span>
               </label>
             </div>
+            <div class="list-item">
+              <div class="list-item-text">
+                <span class="item-title">Text Spoofing</span>
+                <span class="item-desc">Scramble page text into deterministic, seed-based typoglycemia.</span>
+              </div>
+              <label class="small-toggle">
+                <input type="checkbox" id="textSpoofingEnabled">
+                <span class="small-toggle-slider"></span>
+              </label>
+            </div>
+            <div class="list-item">
+              <div class="list-item-text">
+                <span class="item-title">Spoofing Seed</span>
+                <span class="item-desc">The same seed always produces the same text pattern.</span>
+              </div>
+              <input type="text" id="textSpoofingSeed" placeholder="mediablock" spellcheck="false">
+            </div>
             <div class="list-item" style="flex-direction: column; align-items: stretch; background: var(--off-bg); padding: 16px;">
               <span class="item-desc" style="margin-bottom: 8px; color: var(--text-primary); font-weight: bold;">Skeleton Preview:</span>
               <div class="skeleton-preview">
@@ -218,6 +235,7 @@
                 <option value="toggle_rightclick">Toggle Force Right-Click</option>
                 <option value="toggle_stablevolume">Toggle Stable Volume</option>
                 <option value="toggle_darkmode">Toggle Dark Mode</option>
+                <option value="toggle_textspoof">Toggle Text Spoofing</option>
               </select>
             </div>
           </div>
