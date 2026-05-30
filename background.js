@@ -6,7 +6,7 @@ const DEFAULTS = {
   blurIntensity: 25, blurMode: "blur", audioEqMode: "stable",
   videoAutoplayPreventEnabled: false, videoAutoMuteEnabled: false,
   shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
-  textAlternativesEnabled: false
+  textAlternativesEnabled: false, lockedDomains: []
 };
 
 async function hashPassword(password) {
@@ -43,12 +43,10 @@ async function updateDNR() {
   }
 }
 
-// Dynamic Emoji Badge Updater - Supports up to 4 Emojis
 async function updateBadge() {
   try {
     const data = await chrome.storage.local.get(DEFAULTS);
     
-    // Highest Priority: Lock Screen overrides everything else
     if (data.browserLockEnabled) {
       chrome.action.setBadgeText({ text: "🔒" });
       chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] }); 
@@ -57,26 +55,19 @@ async function updateBadge() {
 
     const activeEmojis = [];
     
-    // Visual Shields (Tier 1)
     if (data.mediaBlockEnabled) activeEmojis.push("🛑");
     if (data.mediaBlurEnabled) activeEmojis.push("💧");
     if (data.mediaInvertEnabled) activeEmojis.push("☯️");
     if (data.mediaUniformEnabled) activeEmojis.push("🔲");
     
-    // Utilities & Audio (Tier 2)
     if (data.darkModeEnabled) activeEmojis.push("🌙");
     if (data.stableVolumeEnabled) activeEmojis.push("🔊");
     if (data.forceRightClickEnabled) activeEmojis.push("🔓");
     if (data.mediaHoverEnabled) activeEmojis.push("👁️");
 
-    // Chrome badges can hold about 4 characters max before truncating.
-    // We slice at 4 to allow maximum combination visibility.
     const text = activeEmojis.slice(0, 4).join("");
 
     chrome.action.setBadgeText({ text });
-    
-    // Forces the badge background to be completely transparent 
-    // so the emojis sit directly on top of your extension icon
     chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
     
   } catch (error) {
@@ -84,7 +75,6 @@ async function updateBadge() {
   }
 }
 
-// Universal State Sync
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local') {
     if (changes.mediaBlockEnabled || changes.targetImgEnabled || changes.targetVidEnabled) {
@@ -129,7 +119,11 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "UNLOCK_ATTEMPT") {
     Promise.all([hashPassword(message.password), chrome.storage.local.get(['browserLockPassword'])]).then(([hashedInput, local]) => {
       if (hashedInput === local.browserLockPassword && local.browserLockPassword !== "") {
-        chrome.storage.local.set({ browserLockEnabled: false }).then(() => sendResponse({ success: true }));
+        if (!message.isDomainUnlock) {
+           chrome.storage.local.set({ browserLockEnabled: false }).then(() => sendResponse({ success: true }));
+        } else {
+           sendResponse({ success: true });
+        }
       } else { sendResponse({ success: false }); }
     });
     return true;

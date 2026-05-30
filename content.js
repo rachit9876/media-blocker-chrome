@@ -28,7 +28,6 @@
     }
   }
 
-  // --- FORCE RIGHT CLICK LOGIC ---
   let isForceRightClickOn = false;
   ['contextmenu', 'copy', 'paste', 'selectstart', 'dragstart', 'mousedown', 'mouseup'].forEach(evt => {
       window.addEventListener(evt, function(e) { 
@@ -48,7 +47,6 @@
       } else { if (styleEl) styleEl.remove(); }
   }
 
-  // --- MEDIA ENGINE ---
   let vidAutoplayPrev = false; let vidAutoMute = false;
   function processVideoNode(v) { if (vidAutoplayPrev) { if (v.hasAttribute('autoplay')) v.removeAttribute('autoplay'); if (!v.paused && !v.__mbPaused) { v.pause(); v.__mbPaused = true; } } if (vidAutoMute) v.muted = true; }
   const videoObserver = new MutationObserver((mutations) => { if (!vidAutoplayPrev && !vidAutoMute) return; mutations.forEach(m => { m.addedNodes.forEach(node => { if (node.tagName === 'VIDEO') processVideoNode(node); else if (node.querySelectorAll) node.querySelectorAll('video').forEach(processVideoNode); }); }); });
@@ -82,103 +80,52 @@
   }
   document.addEventListener('play', (e) => { if (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') { attachStableVolume(e.target); if (isStableVolumeOn && audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } }, true);
 
-  // --- SMART DARK MODE ENGINE ---
   let darkModeEnabled = false;
   let darkObserver = null;
 
   function applySmartDarkMode() {
-    if (!darkModeEnabled) {
-       document.documentElement.removeAttribute("data-mb-darkmode");
-       return;
-    }
-
-    const root = document.documentElement;
-    const body = document.body;
-    let isDark = false;
-
-    // 1. Explicit Dark Mode Attributes/Classes
-    // Many sites (Tailwind, Bootstrap, etc.) use specific classes or data attributes to define their dark themes.
+    if (!darkModeEnabled) { document.documentElement.removeAttribute("data-mb-darkmode"); return; }
+    const root = document.documentElement; const body = document.body; let isDark = false;
     const htmlClasses = (root.className || '').toString().toLowerCase();
     const bodyClasses = body ? (body.className || '').toString().toLowerCase() : '';
-    const themeAttrs = [
-        root.getAttribute('data-theme'), root.getAttribute('theme'), 
-        root.getAttribute('data-color-mode'), root.getAttribute('data-bs-theme'),
-        body ? body.getAttribute('data-theme') : null
-    ].map(a => (a || '').toLowerCase());
-
-    if (
-        htmlClasses.includes('dark') || htmlClasses.includes('night') ||
-        bodyClasses.includes('dark') || bodyClasses.includes('night') ||
-        themeAttrs.some(attr => attr.includes('dark') || attr.includes('night'))
-    ) {
-        isDark = true;
-    }
-
-    // 2. Computed Native System Color Scheme Support
+    const themeAttrs = [ root.getAttribute('data-theme'), root.getAttribute('theme'), root.getAttribute('data-color-mode'), root.getAttribute('data-bs-theme'), body ? body.getAttribute('data-theme') : null ].map(a => (a || '').toLowerCase());
+    if ( htmlClasses.includes('dark') || htmlClasses.includes('night') || bodyClasses.includes('dark') || bodyClasses.includes('night') || themeAttrs.some(attr => attr.includes('dark') || attr.includes('night')) ) { isDark = true; }
     if (!isDark) {
         let computedStyleRoot = window.getComputedStyle(root);
-        if (computedStyleRoot.colorScheme.includes('dark') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            isDark = true;
-        }
+        if (computedStyleRoot.colorScheme.includes('dark') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) { isDark = true; }
     }
-
-    // 3. Deep Computed Background Color Checking (Handles System Detectors)
-    // We check HTML, Body, and the primary app wrappers (#root, #app).
     if (!isDark) {
         let elementsToCheck = [root, body];
-        if (body) {
-            // Include main child wrappers that might hold the background color
-            Array.from(body.children).forEach(child => {
-                if (['DIV', 'MAIN', 'APP-ROOT', 'SECTION'].includes(child.tagName)) {
-                    elementsToCheck.push(child);
-                }
-            });
-        }
-
+        if (body) { Array.from(body.children).forEach(child => { if (['DIV', 'MAIN', 'APP-ROOT', 'SECTION'].includes(child.tagName)) { elementsToCheck.push(child); } }); }
         for (let el of elementsToCheck) {
             if (!el) continue;
-            
-            // Only consider elements that take up significant screen real-estate to avoid false positives from dark navigation bars
             let rect = el.getBoundingClientRect ? el.getBoundingClientRect() : { width: 0, height: 0 };
             if (el === root || el === body || (rect.width > window.innerWidth * 0.4 && rect.height > window.innerHeight * 0.4)) {
                 let bg = window.getComputedStyle(el).backgroundColor;
-                
                 if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
                     let match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
                     if (match) {
                         let r = parseInt(match[1]), g = parseInt(match[2]), b = parseInt(match[3]);
-                        // YIQ brightness formula
                         let brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-                        if (brightness < 127) {
-                            isDark = true;
-                        }
-                        break; // Stop checking once we find the dominant structural background
+                        if (brightness < 127) { isDark = true; }
+                        break; 
                     }
                 }
             }
         }
     }
-
-    // Apply state without double-inverting natively dark sites
-    if (isDark) {
-       root.removeAttribute("data-mb-darkmode");
-    } else {
-       root.setAttribute("data-mb-darkmode", "true");
-    }
+    if (isDark) { root.removeAttribute("data-mb-darkmode"); } else { root.setAttribute("data-mb-darkmode", "true"); }
   }
 
   function toggleDarkMode(enabled) {
     darkModeEnabled = enabled;
     if (enabled) {
         applySmartDarkMode();
-        
-        // Watch for sites that dynamically change themes (e.g. clicking a Light/Dark button on a page)
         if (!darkObserver) {
             darkObserver = new MutationObserver(() => applySmartDarkMode());
             darkObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme', 'theme'] });
             if (document.body) darkObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
         }
-        
         if (!document.body) {
             window.addEventListener('DOMContentLoaded', () => {
                 applySmartDarkMode();
@@ -187,18 +134,11 @@
         }
     } else {
         document.documentElement.removeAttribute("data-mb-darkmode");
-        if (darkObserver) {
-            darkObserver.disconnect();
-            darkObserver = null;
-        }
+        if (darkObserver) { darkObserver.disconnect(); darkObserver = null; }
     }
   }
 
-  // --- STATE MANAGEMENT ---
-  const STATE_MAP = {
-    mediaBlockEnabled: "data-mb-block", mediaInvertEnabled: "data-mb-invert", mediaHoverEnabled: "data-mb-hover", 
-    mediaUniformEnabled: "data-mb-uniform", targetImgEnabled: "data-mb-target-img", targetVidEnabled: "data-mb-target-vid"
-  };
+  const STATE_MAP = { mediaBlockEnabled: "data-mb-block", mediaInvertEnabled: "data-mb-invert", mediaHoverEnabled: "data-mb-hover", mediaUniformEnabled: "data-mb-uniform", targetImgEnabled: "data-mb-target-img", targetVidEnabled: "data-mb-target-vid" };
 
   let currentBlurVal = 25;
   let currentBlurMode = "blur";
@@ -225,6 +165,80 @@
     else if (STATE_MAP[key]) { value ? root.setAttribute(STATE_MAP[key], "true") : root.removeAttribute(STATE_MAP[key]); }
   }
 
+  // --- NEW: DOMAIN LOCK LOGIC ---
+  function checkDomainLock(state) {
+    if (!state.lockedDomains || state.lockedDomains.length === 0) return;
+    if (!state.browserLockPassword) return; // Needs universal password to work
+    
+    const currentHost = window.location.hostname;
+    // Check if current hostname ends with any locked domain (handles subdomains)
+    const isLocked = state.lockedDomains.some(d => currentHost === d || currentHost.endsWith('.' + d));
+    
+    if (isLocked) {
+        const sessionKey = 'mb_unlocked_' + currentHost;
+        if (!sessionStorage.getItem(sessionKey)) {
+            showDomainLockScreen(currentHost);
+        }
+    }
+  }
+
+  function showDomainLockScreen(domain) {
+    if (document.getElementById('mb-domain-lock') || document.getElementById('mb-lock-screen')) return;
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'mb-domain-lock';
+    overlay.style.cssText = `
+      position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important;
+      background: #0f0f11 !important; z-index: 2147483647 !important; display: flex !important; flex-direction: column !important; 
+      align-items: center !important; justify-content: center !important; font-family: sans-serif !important; color: #f0f0f5 !important;
+    `;
+    
+    overlay.innerHTML = `
+      <div style="background: #1a1a1f; padding: 40px; border-radius: 16px; border: 1px solid #2a2a32; text-align: center; width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+        <div style="margin-bottom: 20px; display: flex; justify-content: center;">
+           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff3b3b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+        <h2 style="margin-bottom: 8px; font-size: 20px;">Site Locked</h2>
+        <p style="font-size: 13px; color: #7a7a8a; margin-bottom: 24px;"><b>${domain}</b> requires a password.</p>
+        <input type="password" id="mb-domain-pw" placeholder="Enter Password" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #2a2a32; background: #0f0f11; color: #fff; margin-bottom: 12px; outline: none; box-sizing: border-box; font-size: 14px;">
+        <button id="mb-domain-unlock-btn" style="width: 100%; padding: 12px; background: #ff3b3b; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;">Unlock Session</button>
+        <div id="mb-domain-err" style="color: #ff3b3b; font-size: 12px; margin-top: 12px; display: none;">Incorrect Password</div>
+      </div>
+    `;
+    
+    const appendOverlay = () => { if (!document.getElementById('mb-domain-lock')) (document.body || document.documentElement).appendChild(overlay); };
+    appendOverlay();
+    if (!document.body) window.addEventListener('DOMContentLoaded', appendOverlay);
+    
+    ['click', 'mousedown', 'wheel', 'contextmenu', 'scroll'].forEach(evt => overlay.addEventListener(evt, e => {
+      e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault();
+    }, true));
+    
+    overlay.addEventListener('keydown', e => {
+       e.stopPropagation(); e.stopImmediatePropagation();
+       if(e.key === 'Enter') submitPw();
+    }, true);
+
+    const pwInput = overlay.querySelector('#mb-domain-pw');
+    const errDiv = overlay.querySelector('#mb-domain-err');
+    
+    const submitPw = () => {
+        chrome.runtime.sendMessage({ type: "UNLOCK_ATTEMPT", password: pwInput.value, isDomainUnlock: true }, (res) => {
+            if (res && res.success) {
+                sessionStorage.setItem('mb_unlocked_' + domain, 'true');
+                overlay.remove();
+            } else {
+                errDiv.style.display = 'block';
+                pwInput.value = '';
+                pwInput.focus();
+            }
+        });
+    };
+    
+    overlay.querySelector('#mb-domain-unlock-btn').addEventListener('click', submitPw);
+    setTimeout(() => pwInput.focus(), 100);
+  }
+
   function showLockScreen() {
     if (document.getElementById('mb-lock-screen')) return;
     const overlay = document.createElement('div');
@@ -249,6 +263,8 @@
     chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
       if(!state) return;
       Object.keys(state).forEach(key => applyState(key, state[key]));
+      // Trigger domain lock check
+      checkDomainLock(state);
     });
   }
 
@@ -257,6 +273,9 @@
   chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'local') {
       Object.keys(changes).forEach(key => applyState(key, changes[key].newValue));
+      if (changes.lockedDomains || changes.browserLockPassword) {
+          chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => checkDomainLock(state));
+      }
     }
   });
 

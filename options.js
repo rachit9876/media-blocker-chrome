@@ -49,6 +49,31 @@ document.addEventListener('DOMContentLoaded', () => {
          historyContainer.appendChild(div);
       });
   }
+  
+  function renderLockedDomains(domains) {
+      const container = document.getElementById('lockedDomainsList');
+      container.innerHTML = '';
+      if (!domains || domains.length === 0) {
+          container.innerHTML = '<div style="color: var(--text-secondary); font-size: 12px; padding: 4px;">No domains locked.</div>';
+          return;
+      }
+      domains.forEach(domain => {
+          const div = document.createElement('div');
+          div.style.cssText = "display: flex; justify-content: space-between; background: #1e1e26; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--off-border); font-size: 13px; align-items: center;";
+          div.innerHTML = `<span>${domain}</span> <button data-domain="${domain}" class="remove-domain-btn" style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-weight:bold; transition: 0.2s;">X</button>`;
+          container.appendChild(div);
+      });
+      
+      document.querySelectorAll('.remove-domain-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+              const toRemove = e.target.getAttribute('data-domain');
+              chrome.storage.local.get(['lockedDomains'], (res) => {
+                  const updated = (res.lockedDomains || []).filter(d => d !== toRemove);
+                  updateSetting("lockedDomains", updated);
+              });
+          });
+      });
+  }
 
   document.getElementById('closeQrModal').addEventListener('click', () => document.getElementById('qrModal').style.display = 'none');
   document.getElementById('qrModal').addEventListener('click', (e) => { if(e.target.id === 'qrModal') document.getElementById('qrModal').style.display = 'none'; });
@@ -75,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       updateIntensityLabel();
       renderHistory(state.urlHistory);
+      renderLockedDomains(state.lockedDomains || []);
       
       inputs.browserLockPassword.value = ""; inputs.browserLockPasswordConfirm.value = "";
       
@@ -138,13 +164,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('deletePasswordBtn').addEventListener('click', () => {
-    if (confirm("Remove your password?")) {
+    if (confirm("Remove your password? This will also disable Domain Locks.")) {
       updateSetting('browserLockPassword', ""); updateSetting('browserLockEnabled', false); 
       inputs.browserLockPassword.value = ""; inputs.browserLockPasswordConfirm.value = "";
       inputs.browserLockPassword.placeholder = "Enter password..."; inputs.browserLockPasswordConfirm.placeholder = "Confirm password...";
       document.getElementById('savePasswordBtn').textContent = "Save"; document.getElementById('deletePasswordBtn').style.display = "none";
       showFeedback("Password removed!");
     }
+  });
+
+  document.getElementById('addDomainBtn').addEventListener('click', () => {
+      const input = document.getElementById('newLockedDomain');
+      let val = input.value.trim().toLowerCase();
+      if (!val) return;
+      
+      // Strip out http://, https://, and www. if pasted directly from URL bar
+      val = val.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0];
+      
+      chrome.storage.local.get(['lockedDomains'], (res) => {
+          const current = res.lockedDomains || [];
+          if (!current.includes(val)) {
+              current.push(val);
+              updateSetting("lockedDomains", current);
+              input.value = '';
+          }
+      });
   });
 
   document.getElementById('clearHistoryBtn').addEventListener('click', () => {
@@ -164,6 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else if (key === 'urlHistory') {
             renderHistory(newValue);
+        } else if (key === 'lockedDomains') {
+            renderLockedDomains(newValue);
         } else if (key === 'browserLockPassword') {
             loadSettings(); 
         }
