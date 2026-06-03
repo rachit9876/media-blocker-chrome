@@ -118,6 +118,19 @@
     });
   }
 
+  function initImageSearch() {
+    const btn = document.getElementById('searchImageBtn');
+    btn.addEventListener('click', async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.url || !tab.url.startsWith("http")) return;
+
+      // Inject the crosshair selector tools and immediately close popup
+      await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["selector.css"] });
+      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["selector.js"] });
+      window.close();
+    });
+  }
+
   async function init() {
     const lockPw = document.getElementById('popupLockPw');
     const lockErr = document.getElementById('popupLockErr');
@@ -185,6 +198,7 @@
 
     fetchMediaCounts();
     initUrlShortener();
+    initImageSearch(); // Init our new search button
 
     const lockToggle = document.getElementById('browserLockEnabled');
     if (lockToggle) {

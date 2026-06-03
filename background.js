@@ -86,7 +86,12 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "search_image") {
+    searchImage(message.imgUrl, sender.tab, "all"); 
+    return true;
+  }
+
   if (message.type === "GET_ALL_STATE") {
     chrome.storage.local.get(DEFAULTS).then(sendResponse);
     return true;
@@ -156,12 +161,29 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
+  // Shortener Context Menus
   chrome.contextMenus.create({ id: "shorten_page", title: "Copy Short URL (Current Page)", contexts: ["page"] });
   chrome.contextMenus.create({ id: "shorten_media", title: "Copy Short URL (This Media)", contexts: ["image", "video", "audio"] });
   chrome.contextMenus.create({ id: "shorten_link", title: "Copy Short URL (This Link)", contexts: ["link"] });
+
+  // Search by Image Context Menus
+  chrome.contextMenus.create({ id: "sbi-parent", title: "Search by Image", contexts: ["image"] });
+  for (const [id, engine] of Object.entries(ENGINES)) {
+    chrome.contextMenus.create({ id: `sbi-${id}`, parentId: "sbi-parent", title: engine.name, contexts: ["image"] });
+  }
+  chrome.contextMenus.create({ id: "sbi-separator", parentId: "sbi-parent", type: "separator", contexts: ["image"] });
+  chrome.contextMenus.create({ id: "sbi-all", parentId: "sbi-parent", title: "Search All", contexts: ["image"] });
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
+  // Handle Search by Image
+  if (info.menuItemId.toString().startsWith("sbi-")) {
+    if (info.menuItemId === "sbi-parent" || info.menuItemId === "sbi-separator") return;
+    searchImage(info.srcUrl, tab, info.menuItemId.replace("sbi-", ""));
+    return;
+  }
+
+  // Handle URL Shortener
   let targetUrl = info.menuItemId === "shorten_page" ? info.pageUrl : info.menuItemId === "shorten_media" ? info.srcUrl : info.linkUrl;
   if (targetUrl) {
     if (!targetUrl.startsWith('http')) {
@@ -172,6 +194,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
+// --- URL SHORTENER LOGIC ---
 async function shortenUrlAPI(longUrl) {
   const apiKey = 'fcdc158ebe36c6c0408bcb6c7e9a2fde';
   const params = new URLSearchParams({ key: apiKey, url: longUrl, analytics: 'true', filterbots: 'false' });
@@ -203,5 +226,102 @@ async function generateAndCopyShortUrl(longUrl, tabId) {
     console.error('Fetch Error:', error);
   } finally {
     updateBadge();
+  }
+}
+
+// --- SEARCH BY IMAGE LOGIC ---
+const ENGINES = {
+  google: { name: "Google", url: "https://lens.google.com/upload?url=" },
+  yandex: { name: "Yandex", url: "https://yandex.com/images/search?rpt=imageview&url=" },
+  tineye: { name: "TinEye", url: "https://www.tineye.com/search/?url=" }
+};
+
+function searchImage(imgUrl, tab, engineId) {
+  if (!imgUrl) return;
+
+  if (imgUrl.startsWith('data:')) {
+    handleBase64Upload(imgUrl, tab, engineId);
+    return;
+  }
+
+  const encodedUrl = encodeURIComponent(imgUrl);
+  if (engineId === "all") {
+    Object.values(ENGINES).forEach((engine, i) => {
+      chrome.tabs.create({ url: engine.url + encodedUrl, index: tab.index + 1 + i, active: i === 0 });
+    });
+  } else if (ENGINES[engineId]) {
+    chrome.tabs.create({ url: ENGINES[engineId].url + encodedUrl, index: tab.index + 1 });
+  }
+}
+
+async function handleBase64Upload(base64, tab, engineId) {
+  if (engineId === 'google' || engineId === 'all') {
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      args: [base64],
+      func: (b64) => {
+        fetch(b64).then(r => r.blob()).then(blob => {
+          const form = document.createElement('form');
+          form.action = 'https://www.google.com/searchbyimage/upload';
+          form.method = 'POST';
+          form.enctype = 'multipart/form-data';
+          form.target = '_blank';
+          const dt = new DataTransfer();
+          dt.items.add(new File([blob], "image.jpg", { type: blob.type }));
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.name = 'encoded_image';
+          input.files = dt.files;
+          form.appendChild(input);
+          document.body.appendChild(form);
+          form.submit();
+          setTimeout(() => form.remove(), 1000);
+        });
+      }
+    });
+  }
+
+  if (engineId === 'yandex' || engineId === 'all') {
+    try {
+      const res = await fetch(base64);
+      const blob = await res.blob();
+      const fd = new FormData();
+      fd.append('upfile', blob, 'image.jpg');
+      
+      const apiReq = await fetch('https://yandex.com/images/touch/search?rpt=imageview&format=json&request={"blocks":[{"block":"cbir-uploader__get-cbir-id"}]}', {
+        method: 'POST',
+        body: fd
+      });
+      const apiRes = await apiReq.json();
+      const cbirId = apiRes.blocks[0].params.cbirId;
+      chrome.tabs.create({ url: `https://yandex.com/images/search?rpt=imageview&cbir_id=${cbirId}`, index: tab.index + 2 });
+    } catch (e) {
+      console.error("Yandex Base64 upload failed", e);
+    }
+  }
+
+  if (engineId === 'tineye' || engineId === 'all') {
+    chrome.tabs.create({ url: 'https://tineye.com/', index: tab.index + 3 }, (newTab) => {
+      chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
+        if (tabId === newTab.id && info.status === 'complete') {
+          chrome.tabs.onUpdated.removeListener(listener);
+          chrome.scripting.executeScript({
+            target: { tabId: newTab.id },
+            args: [base64],
+            func: (b64) => {
+              fetch(b64).then(r => r.blob()).then(blob => {
+                const dt = new DataTransfer();
+                dt.items.add(new File([blob], "image.jpg", { type: blob.type }));
+                const input = document.querySelector("input#upload-box") || document.querySelector('input[type="file"]');
+                if (input) {
+                  input.files = dt.files;
+                  input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+              });
+            }
+          });
+        }
+      });
+    });
   }
 }
