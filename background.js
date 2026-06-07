@@ -4,10 +4,9 @@ const DEFAULTS = {
   mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,
   stableVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
   blurIntensity: 25, blurMode: "blur", audioEqMode: "stable",
-  videoAutoplayPreventEnabled: false, videoAutoMuteEnabled: false,
   shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
   textAlternativesEnabled: false, textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
-  lockedDomains: []
+  domainLockEnabled: false, lockedDomains: []
 };
 
 async function hashPassword(password) {

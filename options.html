@@ -101,17 +101,9 @@
         </div>
 
         <div>
-          <h2>Media Behavior</h2>
-          <div class="card">
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Prevent Auto-Play</span><span class="item-desc">Stop videos from playing automatically.</span></div><label class="small-toggle"><input type="checkbox" id="videoAutoplayPreventEnabled"><span class="small-toggle-slider"></span></label></div>
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Auto-Mute Background</span><span class="item-desc">Force all loaded media to start muted.</span></div><label class="small-toggle"><input type="checkbox" id="videoAutoMuteEnabled"><span class="small-toggle-slider"></span></label></div>
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Force Right-Click & Copy</span><span class="item-desc">Unlock context menus on restrictive sites.</span></div><label class="small-toggle"><input type="checkbox" id="forceRightClickEnabled"><span class="small-toggle-slider"></span></label></div>
-          </div>
-        </div>
-
-        <div>
           <h2>Accessibility & Feedback</h2>
           <div class="card">
+            <div class="list-item"><div class="list-item-text"><span class="item-title">Force Right-Click & Copy</span><span class="item-desc">Unlock context menus on restrictive sites.</span></div><label class="small-toggle"><input type="checkbox" id="forceRightClickEnabled"><span class="small-toggle-slider"></span></label></div>
             <div class="list-item">
               <div class="list-item-text">
                 <span class="item-title">Text Alternatives</span>
@@ -215,7 +207,10 @@
             </div>
             
             <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-              <div class="list-item-text"><span class="item-title">Domain Lock</span><span class="item-desc">Require universal password for specific websites.</span></div>
+              <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                <div class="list-item-text"><span class="item-title">Domain Lock</span><span class="item-desc">Require universal password for specific websites.</span></div>
+                <label class="small-toggle"><input type="checkbox" id="domainLockEnabled"><span class="small-toggle-slider"></span></label>
+              </div>
               <div style="display: flex; gap: 8px; width: 100%;">
                 <input type="text" id="newLockedDomain" placeholder="e.g. reddit.com" style="flex-grow: 1; width:auto;">
                 <button id="addDomainBtn" class="btn-save">Add</button>

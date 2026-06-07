@@ -2,8 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputs = {
     targetImgEnabled: document.getElementById('targetImgEnabled'),
     targetVidEnabled: document.getElementById('targetVidEnabled'),
-    videoAutoplayPreventEnabled: document.getElementById('videoAutoplayPreventEnabled'),
-    videoAutoMuteEnabled: document.getElementById('videoAutoMuteEnabled'),
     forceRightClickEnabled: document.getElementById('forceRightClickEnabled'),
     darkModeEnabled: document.getElementById('darkModeEnabled'),
     blurMode: document.getElementById('blurMode'),
@@ -15,7 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     textSpoofingEnabled: document.getElementById('textSpoofingEnabled'),
     textSpoofingSeed: document.getElementById('textSpoofingSeed'),
     browserLockPassword: document.getElementById('browserLockPassword'),
-    browserLockPasswordConfirm: document.getElementById('browserLockPasswordConfirm') 
+    browserLockPasswordConfirm: document.getElementById('browserLockPasswordConfirm'),
+    domainLockEnabled: document.getElementById('domainLockEnabled')
   };
   
   const historyContainer = document.getElementById('historyContainer');
@@ -99,8 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       inputs.targetImgEnabled.checked = state.targetImgEnabled;
       inputs.targetVidEnabled.checked = state.targetVidEnabled;
-      inputs.videoAutoplayPreventEnabled.checked = state.videoAutoplayPreventEnabled;
-      inputs.videoAutoMuteEnabled.checked = state.videoAutoMuteEnabled;
       inputs.forceRightClickEnabled.checked = state.forceRightClickEnabled;
       inputs.darkModeEnabled.checked = state.darkModeEnabled;
       inputs.blurMode.value = state.blurMode;
@@ -117,6 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if(inputs.textSpoofingSeed) {
           inputs.textSpoofingSeed.value = state.textSpoofingSeed || "mediablock";
+      }
+      if(inputs.domainLockEnabled) {
+          inputs.domainLockEnabled.checked = state.domainLockEnabled || false;
       }
       
       updateIntensityLabel();
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value });
   }
 
-  ['targetImgEnabled', 'targetVidEnabled', 'videoAutoplayPreventEnabled', 'videoAutoMuteEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'darkModeEnabled', 'textAlternativesEnabled', 'textSpoofingEnabled'].forEach(key => {
+  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'darkModeEnabled', 'textAlternativesEnabled', 'textSpoofingEnabled', 'domainLockEnabled'].forEach(key => {
       if (inputs[key]) {
           inputs[key].addEventListener('change', (e) => updateSetting(key, e.target.checked));
       }

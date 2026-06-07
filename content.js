@@ -47,11 +47,6 @@
       } else { if (styleEl) styleEl.remove(); }
   }
 
-  let vidAutoplayPrev = false; let vidAutoMute = false;
-  function processVideoNode(v) { if (vidAutoplayPrev) { if (v.hasAttribute('autoplay')) v.removeAttribute('autoplay'); if (!v.paused && !v.__mbPaused) { v.pause(); v.__mbPaused = true; } } if (vidAutoMute) v.muted = true; }
-  const videoObserver = new MutationObserver((mutations) => { if (!vidAutoplayPrev && !vidAutoMute) return; mutations.forEach(m => { m.addedNodes.forEach(node => { if (node.tagName === 'VIDEO') processVideoNode(node); else if (node.querySelectorAll) node.querySelectorAll('video').forEach(processVideoNode); }); }); });
-  function triggerVideoProcessing() { if (vidAutoplayPrev || vidAutoMute) { document.querySelectorAll('video').forEach(processVideoNode); videoObserver.observe(document.documentElement, { childList: true, subtree: true }); } else { videoObserver.disconnect(); } }
-
   let isStableVolumeOn = false; let audioEqMode = 'stable'; let audioCtx = null; const processedMedia = new WeakMap();
   function attachStableVolume(mediaEl) {
     if (processedMedia.has(mediaEl)) return;
@@ -358,8 +353,6 @@
     else if (key === "forceRightClickEnabled") { isForceRightClickOn = value; toggleForceRightClickStyle(value); }
     else if (key === "stableVolumeEnabled") { toggleStableVolumeLive(value); }
     else if (key === "audioEqMode") { audioEqMode = value; document.querySelectorAll('video, audio').forEach(el => updateEQNodes(processedMedia.get(el))); }
-    else if (key === "videoAutoplayPreventEnabled") { vidAutoplayPrev = value; triggerVideoProcessing(); }
-    else if (key === "videoAutoMuteEnabled") { vidAutoMute = value; triggerVideoProcessing(); }
     else if (key === "darkModeEnabled") { toggleDarkMode(value); }
     else if (key === "textSpoofingEnabled") { toggleTextSpoofing(value); }
     else if (key === "textSpoofingSeed") { updateTextSpoofSeed(value); }
@@ -367,13 +360,12 @@
     else if (STATE_MAP[key]) { value ? root.setAttribute(STATE_MAP[key], "true") : root.removeAttribute(STATE_MAP[key]); }
   }
 
-  // --- NEW: DOMAIN LOCK LOGIC ---
   function checkDomainLock(state) {
+    if (!state.domainLockEnabled) return;
     if (!state.lockedDomains || state.lockedDomains.length === 0) return;
     if (!state.browserLockPassword) return; // Needs universal password to work
     
     const currentHost = window.location.hostname;
-    // Check if current hostname ends with any locked domain (handles subdomains)
     const isLocked = state.lockedDomains.some(d => currentHost === d || currentHost.endsWith('.' + d));
     
     if (isLocked) {
@@ -413,7 +405,7 @@
     if (!document.body) window.addEventListener('DOMContentLoaded', appendOverlay);
     
     ['click', 'mousedown', 'wheel', 'contextmenu', 'scroll'].forEach(evt => overlay.addEventListener(evt, e => {
-      e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault();
+      e.stopPropagation(); e.stopImmediatePropagation();
     }, true));
     
     overlay.addEventListener('keydown', e => {
@@ -455,7 +447,7 @@
     appendOverlay();
     if (!document.body) window.addEventListener('DOMContentLoaded', appendOverlay);
     ['click', 'mousedown', 'keydown', 'wheel', 'contextmenu', 'scroll'].forEach(evt => overlay.addEventListener(evt, e => {
-      e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault();
+      e.stopPropagation(); e.stopImmediatePropagation();
     }, true));
   }
 
@@ -475,7 +467,7 @@
   chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'local') {
       Object.keys(changes).forEach(key => applyState(key, changes[key].newValue));
-      if (changes.lockedDomains || changes.browserLockPassword) {
+      if (changes.lockedDomains || changes.browserLockPassword || changes.domainLockEnabled) {
           chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => checkDomainLock(state));
       }
     }
