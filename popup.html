@@ -78,7 +78,17 @@
     .action-card-square.btn-search:hover .action-icon-btn { border-color: var(--search-accent); }
     .action-card-square.btn-search:hover .action-icon-btn svg { stroke: var(--search-accent); }
 
-    .footer { font-size: 9px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 2px; display: flex; justify-content: center; gap: 6px; }
+    /* Custom QR Generator Styles */
+    .qr-gen-card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px; margin-top: 2px; }
+    .qr-gen-header { display: flex; align-items: center; margin-bottom: 8px; }
+    .qr-input-group { display: flex; gap: 8px; }
+    .qr-input-group input { flex-grow: 1; padding: 8px 12px; border-radius: 8px; border: 2px solid var(--off-border); background: var(--off-bg); color: var(--text-primary); font-size: 12px; outline: none; transition: border-color 0.2s; }
+    .qr-input-group input:focus { border-color: var(--short-accent); }
+    .qr-input-group button { background: var(--off-border); border: 1px solid var(--off-border); border-radius: 8px; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 14px; transition: 0.2s; }
+    .qr-input-group button:hover { background: var(--short-accent); border-color: var(--short-accent); color: #fff; }
+    .qr-input-group button svg { width: 16px; height: 16px; stroke: currentColor; }
+
+    .footer { font-size: 9px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 4px; display: flex; justify-content: center; gap: 6px; }
     
     .status-card.active-mediaBlockEnabled { border-color: var(--on-accent); box-shadow: 0 0 12px var(--on-glow); }
     .status-card.active-mediaBlurEnabled { border-color: var(--blur-accent); box-shadow: 0 0 12px rgba(59,130,246,0.25); }
@@ -249,6 +259,27 @@
             <line x1="8" y1="11" x2="14" y2="11"></line>
           </svg>
         </div>
+      </div>
+    </div>
+
+    <div class="qr-gen-card">
+      <div class="qr-gen-header">
+        <div class="status-label">INSTANT QR GENERATOR</div>
+      </div>
+      <div class="qr-input-group">
+        <input type="text" id="customUrlInput" placeholder="Paste any text or URL here..." spellcheck="false" />
+        <button id="generateQrBtn" title="Generate QR Code">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <rect x="7" y="7" width="3" height="3"></rect>
+            <rect x="14" y="7" width="3" height="3"></rect>
+            <rect x="7" y="14" width="3" height="3"></rect>
+            <rect x="14" y="14" width="3" height="3"></rect>
+          </svg>
+        </button>
+      </div>
+      <div id="customQrContainer" style="display: none; justify-content: center; margin-top: 12px; padding-bottom: 4px;">
+         <img id="customQrImage" src="" alt="QR Code" style="width: 140px; height: 140px; border-radius: 8px; background: #fff; padding: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
       </div>
     </div>
     

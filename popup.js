@@ -124,10 +124,38 @@
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab?.url || !tab.url.startsWith("http")) return;
 
-      // Inject the crosshair selector tools and immediately close popup
       await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["selector.css"] });
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["selector.js"] });
       window.close();
+    });
+  }
+
+  function initQrGenerator() {
+    const input = document.getElementById('customUrlInput');
+    const btn = document.getElementById('generateQrBtn');
+    const container = document.getElementById('customQrContainer');
+    const img = document.getElementById('customQrImage');
+
+    const generate = () => {
+      const content = input.value.trim();
+      if (!content) {
+         container.style.display = 'none';
+         return;
+      }
+      
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(content)}&bgcolor=FFFFFF&color=000000`;
+      img.src = qrUrl;
+      container.style.display = 'flex';
+    };
+
+    btn.addEventListener('click', generate);
+    
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') generate();
+    });
+    
+    input.addEventListener('paste', () => {
+      setTimeout(generate, 50);
     });
   }
 
@@ -198,7 +226,8 @@
 
     fetchMediaCounts();
     initUrlShortener();
-    initImageSearch(); // Init our new search button
+    initImageSearch();
+    initQrGenerator(); 
 
     const lockToggle = document.getElementById('browserLockEnabled');
     if (lockToggle) {
