@@ -1,4 +1,4 @@
-// MediaBlock Pro - Content Script
+// MediaBlock Pro Content Script
 (function () {
   "use strict";
   if (window.__MB_LOADED) return;
@@ -47,32 +47,94 @@
       } else { if (styleEl) styleEl.remove(); }
   }
 
-  let isStableVolumeOn = false; let audioEqMode = 'stable'; let audioCtx = null; const processedMedia = new WeakMap();
+  let isStableVolumeOn = false; 
+  let audioEqMode = 'stable'; 
+  let audioCtx = null; 
+  const processedMedia = new WeakMap();
+
   function attachStableVolume(mediaEl) {
     if (processedMedia.has(mediaEl)) return;
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const source = audioCtx.createMediaElementSource(mediaEl);
-      const lowEQ = audioCtx.createBiquadFilter(); lowEQ.type = "lowshelf"; lowEQ.frequency.value = 250;
-      const midEQ = audioCtx.createBiquadFilter(); midEQ.type = "peaking"; midEQ.frequency.value = 2000; midEQ.Q.value = 1.0;
-      const compressor = audioCtx.createDynamicsCompressor(); compressor.threshold.value = -20; compressor.knee.value = 20; compressor.ratio.value = 4; compressor.attack.value = 0.005; compressor.release.value = 0.1;   
-      const makeupGain = audioCtx.createGain(); makeupGain.gain.value = 2.5; 
-      const effectGain = audioCtx.createGain(); effectGain.gain.value = isStableVolumeOn ? 1 : 0;
-      const bypassGain = audioCtx.createGain(); bypassGain.gain.value = isStableVolumeOn ? 0 : 1;
-      source.connect(lowEQ); lowEQ.connect(midEQ); midEQ.connect(compressor); compressor.connect(makeupGain); makeupGain.connect(effectGain); effectGain.connect(audioCtx.destination); source.connect(bypassGain); bypassGain.connect(audioCtx.destination);
-      processedMedia.set(mediaEl, { effectGain, bypassGain, lowEQ, midEQ });
+      
+      const lowEQ = audioCtx.createBiquadFilter(); 
+      lowEQ.type = "lowshelf"; 
+      lowEQ.frequency.value = 250;
+      
+      const midEQ = audioCtx.createBiquadFilter(); 
+      midEQ.type = "peaking"; 
+      midEQ.frequency.value = 2000; 
+      midEQ.Q.value = 1.0;
+
+      const highEQ = audioCtx.createBiquadFilter();
+      highEQ.type = "highshelf";
+      highEQ.frequency.value = 6000;
+      
+      const compressor = audioCtx.createDynamicsCompressor(); 
+      compressor.threshold.value = -24; 
+      compressor.knee.value = 30; 
+      compressor.ratio.value = 4; 
+      compressor.attack.value = 0.01; 
+      compressor.release.value = 0.25;   
+      
+      const makeupGain = audioCtx.createGain(); 
+      makeupGain.gain.value = 2.5; 
+      
+      const effectGain = audioCtx.createGain(); 
+      effectGain.gain.value = isStableVolumeOn ? 1 : 0;
+      
+      const bypassGain = audioCtx.createGain(); 
+      bypassGain.gain.value = isStableVolumeOn ? 0 : 1;
+      
+      source.connect(lowEQ); 
+      lowEQ.connect(midEQ); 
+      midEQ.connect(highEQ);
+      highEQ.connect(compressor); 
+      compressor.connect(makeupGain); 
+      makeupGain.connect(effectGain); 
+      effectGain.connect(audioCtx.destination); 
+      
+      source.connect(bypassGain); 
+      bypassGain.connect(audioCtx.destination);
+      
+      processedMedia.set(mediaEl, { effectGain, bypassGain, lowEQ, midEQ, highEQ });
       updateEQNodes(processedMedia.get(mediaEl));
     } catch (e) { }
   }
+
   function updateEQNodes(nodes) {
     if (!nodes) return;
-    if (audioEqMode === 'stable') { nodes.lowEQ.gain.value = 0; nodes.midEQ.gain.value = 0; } else if (audioEqMode === 'dialogue') { nodes.lowEQ.gain.value = -6; nodes.midEQ.gain.value = 5; } else if (audioEqMode === 'bass_cut') { nodes.lowEQ.gain.value = -12; nodes.midEQ.gain.value = 0; }
+    switch (audioEqMode) {
+      case 'stable':
+        nodes.lowEQ.gain.value = 0; nodes.midEQ.gain.value = 0; nodes.highEQ.gain.value = 0;
+        break;
+      case 'dialogue':
+        nodes.lowEQ.gain.value = -4; nodes.midEQ.gain.value = 6; nodes.highEQ.gain.value = 3;
+        break;
+      case 'bass_cut':
+        nodes.lowEQ.gain.value = -12; nodes.midEQ.gain.value = 0; nodes.highEQ.gain.value = 0;
+        break;
+      case 'bass_boost':
+        nodes.lowEQ.gain.value = 8; nodes.midEQ.gain.value = -2; nodes.highEQ.gain.value = -2;
+        break;
+      case 'music':
+        nodes.lowEQ.gain.value = 4; nodes.midEQ.gain.value = -2; nodes.highEQ.gain.value = 4;
+        break;
+      case 'cinema':
+        nodes.lowEQ.gain.value = 6; nodes.midEQ.gain.value = 2; nodes.highEQ.gain.value = 4;
+        break;
+      default:
+        nodes.lowEQ.gain.value = 0; nodes.midEQ.gain.value = 0; nodes.highEQ.gain.value = 0;
+    }
   }
+
   function toggleStableVolumeLive(enabled) {
     isStableVolumeOn = enabled; const mediaEls = document.querySelectorAll('video, audio'); mediaEls.forEach(attachStableVolume);
     mediaEls.forEach(el => { const nodes = processedMedia.get(el); if (nodes) { nodes.effectGain.gain.setTargetAtTime(enabled ? 1 : 0, audioCtx.currentTime, 0.05); nodes.bypassGain.gain.setTargetAtTime(enabled ? 0 : 1, audioCtx.currentTime, 0.05); updateEQNodes(nodes); } });
     if (enabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   }
+  
   document.addEventListener('play', (e) => { if (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') { attachStableVolume(e.target); if (isStableVolumeOn && audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } }, true);
 
   let darkModeEnabled = false;
@@ -363,7 +425,7 @@
   function checkDomainLock(state) {
     if (!state.domainLockEnabled) return;
     if (!state.lockedDomains || state.lockedDomains.length === 0) return;
-    if (!state.browserLockPassword) return; // Needs universal password to work
+    if (!state.browserLockPassword) return; 
     
     const currentHost = window.location.hostname;
     const isLocked = state.lockedDomains.some(d => currentHost === d || currentHost.endsWith('.' + d));
@@ -457,7 +519,6 @@
     chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
       if(!state) return;
       Object.keys(state).forEach(key => applyState(key, state[key]));
-      // Trigger domain lock check
       checkDomainLock(state);
     });
   }
