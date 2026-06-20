@@ -15,7 +15,7 @@
 
   const DARK_MODE_CSS = ` html[data-mb-darkmode="true"] { background-color: #ffffff !important; filter: invert(1) hue-rotate(180deg) !important; } html[data-mb-darkmode="true"] body { background-color: #ffffff !important; } html[data-mb-darkmode="true"] img, html[data-mb-darkmode="true"] picture, html[data-mb-darkmode="true"] video, html[data-mb-darkmode="true"] canvas, html[data-mb-darkmode="true"] object, html[data-mb-darkmode="true"] embed, html[data-mb-darkmode="true"] svg image { filter: invert(1) hue-rotate(180deg) var(--mb-filter-func) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important; } `;
 
-  const MASTER_CSS = `:root { --mb-filter-func: blur(25px); --mb-grayscale: 0%; --mb-invert: 0; --mb-hue: 0deg; --mb-opacity: 1; } :root[data-mb-invert="true"] { --mb-invert: 1; --mb-hue: 180deg; } :root[data-mb-uniform="true"] { --mb-grayscale: 100%; } :root[data-mb-block="true"] { --mb-opacity: 0; } ${prefix(':root', IMG_ALL)}, ${prefix(':root', VID_SELECTORS)} { will-change: filter, opacity; } ${prefix(':root[data-mb-target-img="true"]', IMG_ALL)}, ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} { filter: var(--mb-filter-func) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important; opacity: var(--mb-opacity) !important; transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease !important; } ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} { transform: translateZ(0); } ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL).split(',').map(s => `${s.trim()}:hover`).join(', ')}, ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS).split(',').map(s => `${s.trim()}:hover`).join(', ')} { --mb-filter-func: blur(0px) !important; --mb-grayscale: 0% !important; --mb-invert: 0 !important; --mb-hue: 0deg !important; --mb-opacity: 1 !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL)}, ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS)} { cursor: pointer !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', 'img')} { position: relative !important; visibility: hidden !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', 'img')}::after { content: attr(alt) " (Media Blocked)" !important; visibility: visible !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: #1a1a1f !important; color: #a0a0b0 !important; font-size: 13px !important; font-family: sans-serif !important; display: flex !important; align-items: center !important; justify-content: center !important; text-align: center !important; padding: 8px !important; box-sizing: border-box !important; border: 1px dashed #3a3a4a !important; overflow: hidden !important; text-overflow: ellipsis !important; } ${prefix(':root[data-mb-target-vid="true"][data-mb-block="true"]', VID_SELECTORS)} { pointer-events: none !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', BG_SELECTORS)} { background-image: none !important; } ${DARK_MODE_CSS}`;
+  const MASTER_CSS = `:root { --mb-filter-func: blur(25px); --mb-grayscale: 0%; --mb-invert: 0; --mb-hue: 0deg; --mb-opacity: 1; } :root[data-mb-invert="true"] { --mb-invert: 1; --mb-hue: 180deg; } :root[data-mb-uniform="true"] { --mb-grayscale: 100%; } :root[data-mb-block="true"] { --mb-opacity: 0; } ${prefix(':root', IMG_ALL)}, ${prefix(':root', VID_SELECTORS)} { will-change: filter, opacity; } ${prefix(':root[data-mb-target-img="true"]', IMG_ALL)}, ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} { filter: var(--mb-filter-func) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important; opacity: var(--mb-opacity) !important; } ${prefix(':root[data-mb-ready="true"][data-mb-target-img="true"]', IMG_ALL)}, ${prefix(':root[data-mb-ready="true"][data-mb-target-vid="true"]', VID_SELECTORS)} { transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease !important; } ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} { transform: translateZ(0); } ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL).split(',').map(s => `${s.trim()}:hover`).join(', ')}, ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS).split(',').map(s => `${s.trim()}:hover`).join(', ')} { --mb-filter-func: blur(0px) !important; --mb-grayscale: 0% !important; --mb-invert: 0 !important; --mb-hue: 0deg !important; --mb-opacity: 1 !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL)}, ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS)} { cursor: pointer !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', 'img')} { position: relative !important; visibility: hidden !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', 'img')}::after { content: attr(alt) " (Media Blocked)" !important; visibility: visible !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: #1a1a1f !important; color: #a0a0b0 !important; font-size: 13px !important; font-family: sans-serif !important; display: flex !important; align-items: center !important; justify-content: center !important; text-align: center !important; padding: 8px !important; box-sizing: border-box !important; border: 1px dashed #3a3a4a !important; overflow: hidden !important; text-overflow: ellipsis !important; } ${prefix(':root[data-mb-target-vid="true"][data-mb-block="true"]', VID_SELECTORS)} { pointer-events: none !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', BG_SELECTORS)} { background-image: none !important; } ${DARK_MODE_CSS}`;
 
   function injectMasterStyle() {
     if (!document.getElementById("__mb_svg_filters__")) {
@@ -513,13 +513,26 @@
     }, true));
   }
 
+  const DEFAULTS = {
+    mediaBlockEnabled: false, mediaInvertEnabled: false, mediaBlurEnabled: false,
+    mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,
+    stableVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
+    blurIntensity: 25, blurMode: "blur", audioEqMode: "stable",
+    shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
+    textAlternativesEnabled: false, textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
+    domainLockEnabled: false, lockedDomains: []
+  };
+
   function init() {
     injectMasterStyle();
-    chrome.runtime.sendMessage({ type: "CHECK_LOCK" }, (r) => { if (r?.locked) showLockScreen(); });
-    chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
-      if(!state) return;
+    chrome.storage.local.get(DEFAULTS, (state) => {
+      if (!state) return;
+      if (state.browserLockEnabled) showLockScreen();
       Object.keys(state).forEach(key => applyState(key, state[key]));
       checkDomainLock(state);
+      requestAnimationFrame(() => {
+        document.documentElement.setAttribute('data-mb-ready', 'true');
+      });
     });
   }
 
@@ -529,7 +542,7 @@
     if (namespace === 'local') {
       Object.keys(changes).forEach(key => applyState(key, changes[key].newValue));
       if (changes.lockedDomains || changes.browserLockPassword || changes.domainLockEnabled) {
-          chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => checkDomainLock(state));
+          chrome.storage.local.get(DEFAULTS, (state) => checkDomainLock(state));
       }
     }
   });
