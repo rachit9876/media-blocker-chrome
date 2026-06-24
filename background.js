@@ -165,6 +165,11 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({ id: "shorten_media", title: "Copy Short URL (This Media)", contexts: ["image", "video", "audio"] });
   chrome.contextMenus.create({ id: "shorten_link", title: "Copy Short URL (This Link)", contexts: ["link"] });
 
+  // QR Context Menus
+  chrome.contextMenus.create({ id: "qr_page", title: "Get QR Code (Current Page)", contexts: ["page"] });
+  chrome.contextMenus.create({ id: "qr_media", title: "Get QR Code (This Media)", contexts: ["image", "video", "audio"] });
+  chrome.contextMenus.create({ id: "qr_link", title: "Get QR Code (This Link)", contexts: ["link"] });
+
   // Search by Image Context Menus
   chrome.contextMenus.create({ id: "sbi-parent", title: "Search by Image", contexts: ["image"] });
   for (const [id, engine] of Object.entries(ENGINES)) {
@@ -182,6 +187,19 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     return;
   }
 
+  // Handle QR Code
+  if (info.menuItemId.toString().startsWith("qr_")) {
+    let targetUrl = info.menuItemId === "qr_page" ? info.pageUrl : info.menuItemId === "qr_media" ? info.srcUrl : info.linkUrl;
+    if (targetUrl) {
+      if (!targetUrl.startsWith('http')) {
+        chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => alert("Cannot generate QR for a non-HTTP/HTTPS URI.") });
+        return; 
+      }
+      showQrOverlay(targetUrl, tab.id);
+    }
+    return;
+  }
+
   // Handle URL Shortener
   let targetUrl = info.menuItemId === "shorten_page" ? info.pageUrl : info.menuItemId === "shorten_media" ? info.srcUrl : info.linkUrl;
   if (targetUrl) {
@@ -192,6 +210,34 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     generateAndCopyShortUrl(targetUrl, tab.id);
   }
 });
+
+function showQrOverlay(targetUrl, tabId) {
+  chrome.scripting.executeScript({
+    target: { tabId: tabId },
+    args: [targetUrl],
+    func: (url) => {
+      if (document.getElementById('mb-qr-overlay')) return;
+      const overlay = document.createElement('div');
+      overlay.id = 'mb-qr-overlay';
+      overlay.style.cssText = 'position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15,15,17,0.9) !important; z-index: 2147483647 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; font-family: sans-serif !important; color: #f0f0f5 !important;';
+      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(url) + '&bgcolor=FFFFFF&color=000000';
+      
+      const safeUrl = url.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      overlay.innerHTML = '<div style="background: #1a1a1f; padding: 24px; border-radius: 16px; border: 1px solid #2a2a32; text-align: center; position: relative; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">' +
+           '<button id="mb-qr-close" style="position: absolute; top: 12px; right: 16px; background: transparent; border: none; color: #7a7a8a; cursor: pointer; font-size: 20px; transition: color 0.2s;">✕</button>' +
+           '<h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px; color: #f0f0f5; font-weight: normal;">Scan QR Code</h3>' +
+           '<img src="' + qrUrl + '" alt="QR Code" style="width: 250px; height: 250px; border-radius: 8px; background: #fff; padding: 12px; display: block; margin: 0 auto;">' +
+           '<div style="margin-top: 16px; font-size: 11px; color: #3b82f6; word-break: break-all; max-width: 250px; margin-left: auto; margin-right: auto;">' + safeUrl + '</div>' +
+        '</div>';
+      
+      document.body.appendChild(overlay);
+      
+      const closeOverlay = () => overlay.remove();
+      overlay.querySelector('#mb-qr-close').addEventListener('click', closeOverlay);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
+    }
+  });
+}
 
 // --- URL SHORTENER LOGIC ---
 async function shortenUrlAPI(longUrl) {
