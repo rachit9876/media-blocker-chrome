@@ -54,6 +54,17 @@
 
   function attachStableVolume(mediaEl) {
     if (processedMedia.has(mediaEl)) return;
+    
+    try {
+      const src = mediaEl.currentSrc || mediaEl.src;
+      if (src) {
+        const url = new URL(src, window.location.href);
+        if (url.origin !== window.location.origin && url.protocol !== 'blob:' && url.protocol !== 'data:' && !mediaEl.crossOrigin) {
+          return; // Skip cross-origin media to prevent outputting zeroes
+        }
+      }
+    } catch(e) {}
+
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const source = audioCtx.createMediaElementSource(mediaEl);
@@ -130,12 +141,13 @@
   }
 
   function toggleStableVolumeLive(enabled) {
-    isStableVolumeOn = enabled; const mediaEls = document.querySelectorAll('video, audio'); mediaEls.forEach(attachStableVolume);
+    isStableVolumeOn = enabled; const mediaEls = document.querySelectorAll('video, audio'); 
+    if (enabled) mediaEls.forEach(attachStableVolume);
     mediaEls.forEach(el => { const nodes = processedMedia.get(el); if (nodes) { nodes.effectGain.gain.setTargetAtTime(enabled ? 1 : 0, audioCtx.currentTime, 0.05); nodes.bypassGain.gain.setTargetAtTime(enabled ? 0 : 1, audioCtx.currentTime, 0.05); updateEQNodes(nodes); } });
     if (enabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   }
   
-  document.addEventListener('play', (e) => { if (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') { attachStableVolume(e.target); if (isStableVolumeOn && audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } }, true);
+  document.addEventListener('play', (e) => { if (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') { if (isStableVolumeOn) { attachStableVolume(e.target); if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } } }, true);
 
   let darkModeEnabled = false;
   let darkObserver = null;
