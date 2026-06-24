@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     blurIntensity: document.getElementById('blurIntensity'),
     stableVolumeEnabled: document.getElementById('stableVolumeEnabled'),
     audioEqMode: document.getElementById('audioEqMode'),
+    audioLufs: document.getElementById('audioLufs'),
     shortcutAction: document.getElementById('shortcutAction'),
-    textAlternativesEnabled: document.getElementById('textAlternativesEnabled'),
     textSpoofingEnabled: document.getElementById('textSpoofingEnabled'),
     textSpoofingSeed: document.getElementById('textSpoofingSeed'),
     browserLockPassword: document.getElementById('browserLockPassword'),
@@ -104,11 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
       inputs.blurIntensity.value = state.blurIntensity;
       inputs.stableVolumeEnabled.checked = state.stableVolumeEnabled;
       inputs.audioEqMode.value = state.audioEqMode;
+      if (inputs.audioLufs) inputs.audioLufs.value = state.audioLufs || "-12";
       inputs.shortcutAction.value = state.shortcutAction;
       
-      if(inputs.textAlternativesEnabled) {
-          inputs.textAlternativesEnabled.checked = state.textAlternativesEnabled || false;
-      }
       if(inputs.textSpoofingEnabled) {
           inputs.textSpoofingEnabled.checked = state.textSpoofingEnabled || false;
       }
@@ -145,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value });
   }
 
-  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'darkModeEnabled', 'textAlternativesEnabled', 'textSpoofingEnabled', 'domainLockEnabled'].forEach(key => {
+  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'darkModeEnabled', 'textSpoofingEnabled', 'domainLockEnabled'].forEach(key => {
       if (inputs[key]) {
           inputs[key].addEventListener('change', (e) => updateSetting(key, e.target.checked));
       }
@@ -159,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  ['blurMode', 'audioEqMode', 'shortcutAction'].forEach(key => {
+  ['blurMode', 'audioEqMode', 'audioLufs', 'shortcutAction'].forEach(key => {
       if (inputs[key]) {
           inputs[key].addEventListener('change', (e) => {
               updateSetting(key, e.target.value);
@@ -233,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
       Object.keys(changes).forEach(key => {
         const newValue = changes[key].newValue;
         if (inputs[key] && !['browserLockPassword', 'browserLockPasswordConfirm'].includes(key)) {
-            if (['blurIntensity', 'shortcutAction', 'blurMode', 'audioEqMode', 'textSpoofingSeed'].includes(key)) {
+            if (['blurIntensity', 'shortcutAction', 'blurMode', 'audioEqMode', 'audioLufs', 'textSpoofingSeed'].includes(key)) {
                 inputs[key].value = newValue;
                 if (key === 'blurMode') updateIntensityLabel();
             } else {

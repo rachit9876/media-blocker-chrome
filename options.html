@@ -15,25 +15,25 @@
       --radius: 14px; --transition: 0.3s ease;
     }
 
-    body { background: var(--off-bg); color: var(--text-primary); padding: 30px 20px; display: flex; justify-content: center; min-height: 100vh; }
-    .container { position: relative; z-index: 1; max-width: 1040px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+    body { background: var(--off-bg); color: var(--text-primary); padding: 20px 16px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { position: relative; z-index: 1; max-width: 960px; width: 100%; display: flex; flex-direction: column; gap: 16px; }
     
-    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; }
-    .column-group { display: flex; flex-direction: column; gap: 16px; }
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .column-group { display: flex; flex-direction: column; gap: 12px; }
     
     @media (max-width: 850px) { .grid-layout { grid-template-columns: 1fr; } }
 
-    h1 { font-weight: 800; font-size: 26px; margin-bottom: 4px; }
-    h2 { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-left: 4px; margin-bottom: 6px; }
+    h1 { font-weight: 800; font-size: 24px; margin-bottom: 2px; }
+    h2 { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-left: 4px; margin-bottom: 4px; }
     
     .card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
     
-    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--off-border); gap: 16px; }
+    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--off-border); gap: 12px; flex-wrap: wrap; }
     .list-item:last-child { border-bottom: none; }
-    .list-item-text { display: flex; flex-direction: column; flex-grow: 1; }
+    .list-item-text { display: flex; flex-direction: column; flex-grow: 1; min-width: 150px; }
     
-    .item-title { font-size: 15px; font-weight: 400; color: var(--text-primary); }
-    .item-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; line-height: 1.3; }
+    .item-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .item-desc { font-size: 11px; color: var(--text-secondary); margin-top: 1px; line-height: 1.25; }
     
     .small-toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
     .small-toggle input { opacity: 0; width: 0; height: 0; }
@@ -46,12 +46,12 @@
     input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--text-primary); cursor: pointer; margin-top: -6px; }
     input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: var(--off-border); border-radius: 2px; }
 
-    select, input[type=password], input[type=text] { padding: 8px 12px; font-size: 13px; border: 2px solid var(--off-border); border-radius: 8px; background: #1e1e26; color: var(--text-primary); outline: none; transition: all 0.2s; width: 160px; }
+    select, input[type=password], input[type=text] { padding: 6px 10px; font-size: 12px; border: 2px solid var(--off-border); border-radius: 6px; background: #1e1e26; color: var(--text-primary); outline: none; transition: all 0.2s; width: auto; max-width: 100%; flex-shrink: 1; }
     select:focus, input[type=password]:focus, input[type=text]:focus { border-color: var(--text-primary); }
 
-    .btn { padding: 8px 20px; font-size: 13px; font-weight: 500; color: var(--danger); background: transparent; border: 2px solid var(--off-border); border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .btn { padding: 6px 16px; font-size: 12px; font-weight: 500; color: var(--danger); background: transparent; border: 2px solid var(--off-border); border-radius: 6px; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
     .btn:hover { border-color: var(--danger); background: rgba(255, 59, 59, 0.1); }
-    .btn-save { padding: 8px 16px; font-weight: 700; color: #fff; background: var(--accent); border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .btn-save { padding: 6px 14px; font-weight: 600; font-size: 12px; color: #fff; background: var(--accent); border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
     
     .history-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; border-bottom: 1px solid var(--off-border); gap: 14px; background: #1e1e26; }
     .history-item:last-child { border-bottom: none; }
@@ -104,16 +104,7 @@
           <h2>Accessibility & Feedback</h2>
           <div class="card">
             <div class="list-item"><div class="list-item-text"><span class="item-title">Force Right-Click & Copy</span><span class="item-desc">Unlock context menus on restrictive sites.</span></div><label class="small-toggle"><input type="checkbox" id="forceRightClickEnabled"><span class="small-toggle-slider"></span></label></div>
-            <div class="list-item">
-              <div class="list-item-text">
-                <span class="item-title">Text Alternatives</span>
-                <span class="item-desc">Extract and show alt-text on blocked media.</span>
-              </div>
-              <label class="small-toggle">
-                <input type="checkbox" id="textAlternativesEnabled">
-                <span class="small-toggle-slider"></span>
-              </label>
-            </div>
+
             <div class="list-item">
               <div class="list-item-text">
                 <span class="item-title">Text Spoofing</span>
@@ -188,6 +179,19 @@
                 <option value="bass_boost">Heavy Bass (Punchy)</option>
                 <option value="music">Music (Dynamic EQ)</option>
                 <option value="cinema">Cinema (Immersive)</option>
+              </select>
+            </div>
+            <div class="list-item">
+              <div class="list-item-text"><span class="item-title">Target Loudness (LUFS)</span><span class="item-desc">Adjust the volume normalization target.</span></div>
+              <select id="audioLufs">
+                <option value="-10">-10 LUFS</option>
+                <option value="-12">-12 LUFS (Default)</option>
+                <option value="-14">-14 LUFS</option>
+                <option value="-16">-16 LUFS</option>
+                <option value="-18">-18 LUFS</option>
+                <option value="-20">-20 LUFS</option>
+                <option value="-22">-22 LUFS</option>
+                <option value="-24">-24 LUFS</option>
               </select>
             </div>
           </div>

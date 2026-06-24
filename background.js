@@ -3,9 +3,9 @@ const DEFAULTS = {
   mediaBlockEnabled: false, mediaInvertEnabled: false, mediaBlurEnabled: false,
   mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,
   stableVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
-  blurIntensity: 25, blurMode: "blur", audioEqMode: "stable",
+  blurIntensity: 25, blurMode: "blur", audioEqMode: "stable", audioLufs: "-12",
   shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
-  textAlternativesEnabled: false, textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
+  textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
   domainLockEnabled: false, lockedDomains: []
 };
 

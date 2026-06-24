@@ -7,7 +7,7 @@
   const IMG_SELECTORS = 'img, picture, canvas, svg image, object[type^="image"], embed[type^="image"], [role="img"]';
   const BG_SELECTORS = '[style*="background-image"], [style*="url("]';
   const VID_SELECTORS = 'video, iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"], iframe[src*="twitch"], iframe[src*="tiktok"], iframe[src*="facebook"], iframe[src*="instagram"], iframe[src*="twitter"], iframe[src*="x.com"], object[type^="video"], embed[type^="video"]';
-  const IMG_ALL = `${IMG_SELECTORS}, ${BG_SELECTORS}`;
+  const IMG_ALL = IMG_SELECTORS; // Exclude BG_SELECTORS from general blur/invert filters
   
   const prefix = (parent, selectors) => selectors.split(',').map(s => `${parent} ${s.trim()}`).join(', ');
 
@@ -49,6 +49,7 @@
 
   let isStableVolumeOn = false; 
   let audioEqMode = 'stable'; 
+  let currentAudioLufs = -12;
   let audioCtx = null; 
   const processedMedia = new WeakMap();
 
@@ -83,7 +84,7 @@
       highEQ.frequency.value = 6000;
       
       const compressor = audioCtx.createDynamicsCompressor(); 
-      compressor.threshold.value = -24; 
+      compressor.threshold.value = currentAudioLufs; 
       compressor.knee.value = 30; 
       compressor.ratio.value = 4; 
       compressor.attack.value = 0.01; 
@@ -109,7 +110,7 @@
       source.connect(bypassGain); 
       bypassGain.connect(audioCtx.destination);
       
-      processedMedia.set(mediaEl, { effectGain, bypassGain, lowEQ, midEQ, highEQ });
+      processedMedia.set(mediaEl, { effectGain, bypassGain, lowEQ, midEQ, highEQ, compressor });
       updateEQNodes(processedMedia.get(mediaEl));
     } catch (e) { }
   }
@@ -186,12 +187,21 @@
     if (isDark) { root.removeAttribute("data-mb-darkmode"); } else { root.setAttribute("data-mb-darkmode", "true"); }
   }
 
+  let darkModeDebounceTimer = null;
+  function debouncedSmartDarkMode() {
+    if (darkModeDebounceTimer) return;
+    darkModeDebounceTimer = setTimeout(() => {
+        applySmartDarkMode();
+        darkModeDebounceTimer = null;
+    }, 250);
+  }
+
   function toggleDarkMode(enabled) {
     darkModeEnabled = enabled;
     if (enabled) {
         applySmartDarkMode();
         if (!darkObserver) {
-            darkObserver = new MutationObserver(() => applySmartDarkMode());
+            darkObserver = new MutationObserver(() => debouncedSmartDarkMode());
             darkObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme', 'theme'] });
             if (document.body) darkObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
         }
@@ -427,10 +437,18 @@
     else if (key === "forceRightClickEnabled") { isForceRightClickOn = value; toggleForceRightClickStyle(value); }
     else if (key === "stableVolumeEnabled") { toggleStableVolumeLive(value); }
     else if (key === "audioEqMode") { audioEqMode = value; document.querySelectorAll('video, audio').forEach(el => updateEQNodes(processedMedia.get(el))); }
+    else if (key === "audioLufs") { 
+        currentAudioLufs = parseInt(value); 
+        document.querySelectorAll('video, audio').forEach(el => {
+            const nodes = processedMedia.get(el);
+            if (nodes && nodes.compressor) nodes.compressor.threshold.setTargetAtTime(currentAudioLufs, audioCtx.currentTime, 0.1);
+        });
+    }
     else if (key === "darkModeEnabled") { toggleDarkMode(value); }
     else if (key === "textSpoofingEnabled") { toggleTextSpoofing(value); }
     else if (key === "textSpoofingSeed") { updateTextSpoofSeed(value); }
     else if (key === "browserLockEnabled") { value ? showLockScreen() : document.getElementById('mb-lock-screen')?.remove(); }
+    else if (key === "domainLockEnabled") { if (!value) document.getElementById('mb-domain-lock')?.remove(); }
     else if (STATE_MAP[key]) { value ? root.setAttribute(STATE_MAP[key], "true") : root.removeAttribute(STATE_MAP[key]); }
   }
 
@@ -529,7 +547,7 @@
     mediaBlockEnabled: false, mediaInvertEnabled: false, mediaBlurEnabled: false,
     mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,
     stableVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
-    blurIntensity: 25, blurMode: "blur", audioEqMode: "stable",
+    blurIntensity: 25, blurMode: "blur", audioEqMode: "stable", audioLufs: "-12",
     shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
     textAlternativesEnabled: false, textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
     domainLockEnabled: false, lockedDomains: []
