@@ -76,9 +76,8 @@ The Options page includes:
 - Video autoplay prevention
 - Auto-mute
 - Force right-click
-- Text Alternatives toggle
 - Text Spoofing toggle
-- Text Spoofing seed
+- Text Spoofing seed & live preview
 - Blur mode and blur intensity
 - Smart Dark Mode
 - Stable Volume and EQ mode

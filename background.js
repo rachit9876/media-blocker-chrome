@@ -86,6 +86,20 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Capture visible viewport for area snipping tool
+  if (message.action === "capture_visible_tab") {
+    const windowId = sender.tab ? sender.tab.windowId : chrome.windows.WINDOW_ID_CURRENT;
+    chrome.tabs.captureVisibleTab(windowId, { format: 'png' })
+      .then(dataUrl => sendResponse({ dataUrl }))
+      .catch(err => sendResponse({ error: err ? err.message : "Capture failed" }));
+    return true;
+  }
+
+  // ============================================================================
+  // CRITICAL SEARCH BY IMAGE API ENGINE
+  // NOTE: Keep these exact endpoints, form submissions, and message formats
+  // unchanged to ensure both context menu and snippet area search function properly.
+  // ============================================================================
   if (message.action === "search_image") {
     searchImage(message.imgUrl, sender.tab, "all"); 
     return true;
@@ -274,13 +288,19 @@ async function generateAndCopyShortUrl(longUrl, tabId) {
   }
 }
 
-// --- SEARCH BY IMAGE LOGIC ---
+// ============================================================================
+// CRITICAL SEARCH BY IMAGE API ENGINE
+// NOTE: These search engine endpoints, reverse image lookup URLs, and multipart
+// form upload implementations are shared between right-click context menus
+// and the visual screenshot area snipping tool. DO NOT modify parameters or endpoints.
+// ============================================================================
 const ENGINES = {
   google: { name: "Google", url: "https://lens.google.com/upload?url=" },
   yandex: { name: "Yandex", url: "https://yandex.com/images/search?rpt=imageview&url=" },
   tineye: { name: "TinEye", url: "https://www.tineye.com/search/?url=" }
 };
 
+// Handles image searching for both external URLs and Base64 cropped screenshots
 function searchImage(imgUrl, tab, engineId) {
   if (!imgUrl) return;
 
@@ -300,30 +320,58 @@ function searchImage(imgUrl, tab, engineId) {
 }
 
 async function handleBase64Upload(base64, tab, engineId) {
+  let targetTab = tab;
+  if (!targetTab || !targetTab.id) {
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    targetTab = activeTab;
+  }
+  if (!targetTab || !targetTab.id) return;
+
+  const tabIndex = typeof targetTab.index === 'number' ? targetTab.index : 0;
+
   if (engineId === 'google' || engineId === 'all') {
     chrome.scripting.executeScript({
-      target: { tabId: tab.id },
+      target: { tabId: targetTab.id },
       args: [base64],
       func: (b64) => {
-        fetch(b64).then(r => r.blob()).then(blob => {
-          const form = document.createElement('form');
-          form.action = 'https://www.google.com/searchbyimage/upload';
-          form.method = 'POST';
-          form.enctype = 'multipart/form-data';
-          form.target = '_blank';
-          const dt = new DataTransfer();
-          dt.items.add(new File([blob], "image.jpg", { type: blob.type }));
-          const input = document.createElement('input');
-          input.type = 'file';
-          input.name = 'encoded_image';
-          input.files = dt.files;
-          form.appendChild(input);
-          document.body.appendChild(form);
-          form.submit();
-          setTimeout(() => form.remove(), 1000);
-        });
+        fetch(b64)
+          .then(r => r.blob())
+          .then(blob => {
+            const form = document.createElement('form');
+            // Use Google Lens official web upload endpoint
+            form.action = 'https://lens.google.com/v3/upload';
+            form.method = 'POST';
+            form.enctype = 'multipart/form-data';
+            form.target = '_blank';
+
+            const dt = new DataTransfer();
+            dt.items.add(new File([blob], "image.jpg", { type: "image/jpeg" }));
+
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.name = 'encoded_image';
+            fileInput.files = dt.files;
+            form.appendChild(fileInput);
+
+            const epInput = document.createElement('input');
+            epInput.type = 'hidden';
+            epInput.name = 'ep';
+            epInput.value = 'ccb';
+            form.appendChild(epInput);
+
+            const hlInput = document.createElement('input');
+            hlInput.type = 'hidden';
+            hlInput.name = 'hl';
+            hlInput.value = 'en';
+            form.appendChild(hlInput);
+
+            document.body.appendChild(form);
+            form.submit();
+            setTimeout(() => form.remove(), 1000);
+          })
+          .catch(err => console.error("MediaBlock Pro: Google Lens upload failed", err));
       }
-    });
+    }).catch(err => console.error("MediaBlock Pro: Script execution failed", err));
   }
 
   if (engineId === 'yandex' || engineId === 'all') {
@@ -339,14 +387,14 @@ async function handleBase64Upload(base64, tab, engineId) {
       });
       const apiRes = await apiReq.json();
       const cbirId = apiRes.blocks[0].params.cbirId;
-      chrome.tabs.create({ url: `https://yandex.com/images/search?rpt=imageview&cbir_id=${cbirId}`, index: tab.index + 2 });
+      chrome.tabs.create({ url: `https://yandex.com/images/search?rpt=imageview&cbir_id=${cbirId}`, index: tabIndex + 2 });
     } catch (e) {
       console.error("Yandex Base64 upload failed", e);
     }
   }
 
   if (engineId === 'tineye' || engineId === 'all') {
-    chrome.tabs.create({ url: 'https://tineye.com/', index: tab.index + 3 }, (newTab) => {
+    chrome.tabs.create({ url: 'https://tineye.com/', index: tabIndex + 3 }, (newTab) => {
       chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
         if (tabId === newTab.id && info.status === 'complete') {
           chrome.tabs.onUpdated.removeListener(listener);

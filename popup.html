@@ -6,270 +6,689 @@
   <title>MediaBlock Pro</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Alata&display=swap');
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Alata', sans-serif !important; }
     
-    :root {
-      --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
-      --on-accent: #ff3b3b; --on-glow: rgba(255,59,59,0.35);
-      --blur-accent: #3b82f6; --invert-accent: #a855f7; --hover-accent: #10b981; --uniform-accent: #f59e0b;
-      --frc-accent: #14b8a6; --vol-accent: #ec4899; --short-accent: #8b5cf6; --dark-accent: #6366f1; --textspoof-accent: #22c55e;
-      --search-accent: #eab308;
-      --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
-      --radius: 14px; --transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Alata', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     }
     
-    body { width: 420px; background: var(--off-bg); color: var(--text-primary); overflow-y: auto; overflow-x: hidden; user-select: none; }
-    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
+    :root {
+      --bg: #0c0c0e;
+      --card-bg: #141418;
+      --card-hover: #1a1a20;
+      --border: #222228;
+      --border-focus: #353540;
+      
+      --on-accent: #ff3b3b;
+      --on-glow: rgba(255, 59, 59, 0.25);
+      --blur-accent: #3b82f6;
+      --invert-accent: #a855f7;
+      --hover-accent: #10b981;
+      --uniform-accent: #f59e0b;
+      --frc-accent: #14b8a6;
+      --vol-accent: #ec4899;
+      --dark-accent: #6366f1;
+      --textspoof-accent: #22c55e;
+      --short-accent: #8b5cf6;
+      --search-accent: #eab308;
+      
+      --text-primary: #f0f0f5;
+      --text-secondary: #7a7a88;
+      --text-dim: #3a3a46;
+      --radius: 10px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
     
-    .container { position: relative; z-index: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
-    .brand-wrap { display: flex; align-items: center; gap: 10px; }
-    .logo-mark { width: 32px; height: 32px; border-radius: 8px; background: var(--off-card); border: 1px solid var(--off-border); display: flex; align-items: center; justify-content: center; }
-    .logo-mark svg { width: 16px; height: 16px; }
-    .header-text .name { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
-    .header-text .tagline { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 0px; }
+    body {
+      width: 350px;
+      background: var(--bg);
+      color: var(--text-primary);
+      overflow-y: auto;
+      overflow-x: hidden;
+      user-select: none;
+      font-size: 12px;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .container {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 2px;
+    }
+    
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .logo-mark {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    
+    .logo-mark img {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .header-text {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    
+    .header-text .name {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+    
+    .header-text .badge {
+      font-size: 8px;
+      font-weight: 800;
+      color: var(--on-accent);
+      background: rgba(255, 59, 59, 0.12);
+      border: 1px solid rgba(255, 59, 59, 0.25);
+      border-radius: 4px;
+      padding: 1px 4px;
+      letter-spacing: 0.05em;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .scope-btn-mini {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      height: 26px;
+      padding: 0 7px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all var(--transition);
+    }
+    
+    .scope-btn-mini svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+    }
+    
+    .scope-tag {
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+    
+    .scope-btn-mini:hover {
+      background: var(--card-hover);
+      border-color: var(--border-focus);
+      color: var(--text-primary);
+    }
+    
+    .scope-btn-mini.active-tab-scope {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--blur-accent);
+      color: var(--blur-accent);
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+    }
+    
+    .scope-btn-mini.active-tab-scope .scope-tag {
+      color: var(--blur-accent);
+    }
 
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .settings-btn-mini {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all var(--transition);
+    }
+    
+    .settings-btn-mini:hover {
+      background: var(--card-hover);
+      border-color: var(--text-secondary);
+      color: var(--text-primary);
+    }
+    
+    .settings-btn-mini svg {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.4s var(--transition);
+    }
+    
+    .settings-btn-mini:hover svg {
+      transform: rotate(90deg);
+    }
 
-    .stat-box { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
-    .target-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 2px; }
-    .stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
-    .stat-value { font-size: 18px; font-weight: 800; line-height: 1; }
+    /* Target & Stats Strip */
+    .target-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
     
-    .settings-box { cursor: pointer; transition: all 0.2s; justify-content: center; }
-    .settings-box:hover { background: #2a2a32; border-color: var(--text-primary); }
-    .settings-box:hover .settings-icon { stroke: var(--text-primary); transform: rotate(90deg); }
-    .settings-icon { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s; width: 18px; height: 18px; }
+    .target-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
     
-    .small-toggle { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
-    .small-toggle input { opacity: 0; width: 0; height: 0; }
-    .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 2px solid var(--off-border); transition: all var(--transition); border-radius: 100px; }
-    .small-toggle-slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: var(--text-dim); transition: all var(--transition); border-radius: 50%; }
-    .small-toggle input:checked + .small-toggle-slider { background-color: var(--text-primary); border-color: var(--text-primary); }
-    .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(16px); background-color: var(--off-bg); }
+    .target-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
     
-    .status-card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px 10px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.3s ease; position: relative; text-align: center; }
-    .status-header { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; min-height: 28px; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); transition: all 0.3s ease; }
-    .status-label { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-secondary); transition: color 0.3s ease; text-transform: uppercase; line-height: 1.3; }
+    .target-label {
+      font-size: 8.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+    }
     
-    .toggle-wrapper { position: relative; }
-    .toggle-input { position: absolute; opacity: 0; width: 0; height: 0; }
-    .toggle-label { display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .toggle-track { width: 44px; height: 24px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; position: relative; transition: all var(--transition); }
-    .toggle-thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--text-dim); transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
+    .target-count {
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text-primary);
+    }
+    
+    /* Toggle Switches */
+    .small-toggle {
+      position: relative;
+      display: inline-block;
+      width: 32px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+    
+    .small-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .small-toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #1a1a20;
+      border: 1px solid var(--border);
+      transition: all var(--transition);
+      border-radius: 20px;
+    }
+    
+    .small-toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 2px;
+      bottom: 2px;
+      background-color: var(--text-dim);
+      transition: all var(--transition);
+      border-radius: 50%;
+    }
+    
+    .small-toggle input:checked + .small-toggle-slider {
+      background-color: var(--text-primary);
+      border-color: var(--text-primary);
+    }
+    
+    .small-toggle input:checked + .small-toggle-slider:before {
+      transform: translateX(14px);
+      background-color: var(--bg);
+    }
 
-    .action-card-square { cursor: pointer; border-color: var(--off-border); }
-    .action-card-square.btn-shorten:hover { border-color: var(--short-accent); box-shadow: 0 0 12px rgba(139, 92, 246, 0.25); background: #201b2a; }
-    .action-card-square.btn-shorten .status-dot { background: var(--short-accent); box-shadow: 0 0 6px var(--short-accent); }
+    /* Minimalist Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
     
-    .action-card-square.btn-search:hover { border-color: var(--search-accent); box-shadow: 0 0 12px rgba(234, 179, 8, 0.25); background: #232014; }
-    .action-card-square.btn-search .status-dot { background: var(--search-accent); box-shadow: 0 0 6px var(--search-accent); }
+    .status-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      transition: all var(--transition);
+      cursor: default;
+    }
     
-    .action-card-square .status-label { color: var(--text-primary); transition: color 0.3s; }
+    .status-card:hover {
+      background: var(--card-hover);
+      border-color: var(--border-focus);
+    }
     
-    .action-icon-btn { width: 44px; height: 24px; background: #1e1e26; border: 2px solid var(--off-border); border-radius: 100px; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
-    .action-icon-btn svg { width: 14px; height: 14px; stroke: var(--text-secondary); transition: stroke 0.3s; }
+    .status-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+    }
     
-    .action-card-square.btn-shorten:hover .action-icon-btn { border-color: var(--short-accent); }
-    .action-card-square.btn-shorten:hover .action-icon-btn svg { stroke: var(--short-accent); }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+      transition: all var(--transition);
+    }
+    
+    .status-label {
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color var(--transition);
+    }
+    
+    .toggle-wrapper {
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .toggle-input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .toggle-track {
+      width: 32px;
+      height: 18px;
+      background: #1a1a20;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      position: relative;
+      transition: all var(--transition);
+    }
+    
+    .toggle-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      transition: all var(--transition);
+    }
 
-    .action-card-square.btn-search:hover .action-icon-btn { border-color: var(--search-accent); }
-    .action-card-square.btn-search:hover .action-icon-btn svg { stroke: var(--search-accent); }
-
-    /* Custom QR Generator Styles */
-    .qr-gen-card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: 12px; padding: 12px; margin-top: 2px; }
-    .qr-gen-header { display: flex; align-items: center; margin-bottom: 8px; }
-    .qr-input-group { display: flex; gap: 8px; }
-    .qr-input-group input { flex-grow: 1; padding: 8px 12px; border-radius: 8px; border: 2px solid var(--off-border); background: var(--off-bg); color: var(--text-primary); font-size: 12px; outline: none; transition: border-color 0.2s; }
-    .qr-input-group input:focus { border-color: var(--short-accent); }
-    .qr-input-group button { background: var(--off-border); border: 1px solid var(--off-border); border-radius: 8px; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 14px; transition: 0.2s; }
-    .qr-input-group button:hover { background: var(--short-accent); border-color: var(--short-accent); color: #fff; }
-    .qr-input-group button svg { width: 16px; height: 16px; stroke: currentColor; }
-
-    .footer { font-size: 9px; color: var(--text-dim); text-align: center; letter-spacing: 0.05em; margin-top: 4px; display: flex; justify-content: center; gap: 6px; }
+    /* Actions Strip */
+    .actions-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
     
-    .status-card.active-mediaBlockEnabled { border-color: var(--on-accent); box-shadow: 0 0 12px var(--on-glow); }
-    .status-card.active-mediaBlurEnabled { border-color: var(--blur-accent); box-shadow: 0 0 12px rgba(59,130,246,0.25); }
-    .status-card.active-mediaHoverEnabled { border-color: var(--hover-accent); box-shadow: 0 0 12px rgba(16,185,129,0.25); }
-    .status-card.active-mediaInvertEnabled { border-color: var(--invert-accent); box-shadow: 0 0 12px rgba(168,85,247,0.25); }
-    .status-card.active-mediaUniformEnabled { border-color: var(--uniform-accent); box-shadow: 0 0 12px rgba(245,158,11,0.25); }
-    .status-card.active-forceRightClickEnabled { border-color: var(--frc-accent); box-shadow: 0 0 12px rgba(20,184,166,0.25); }
-    .status-card.active-stableVolumeEnabled { border-color: var(--vol-accent); box-shadow: 0 0 12px rgba(236,72,153,0.25); }
-    .status-card.active-darkModeEnabled { border-color: var(--dark-accent); box-shadow: 0 0 12px rgba(99,102,241,0.25); }
-    .status-card.active-textSpoofingEnabled { border-color: var(--textspoof-accent); box-shadow: 0 0 12px rgba(34,197,94,0.25); }
+    .action-btn-compact {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    
+    .action-btn-compact:hover {
+      background: var(--card-hover);
+      border-color: var(--border-focus);
+    }
+    
+    .action-btn-compact.btn-shorten:hover {
+      border-color: var(--short-accent);
+      box-shadow: 0 0 8px rgba(139, 92, 246, 0.2);
+    }
+    .action-btn-compact.btn-shorten:hover .status-label {
+      color: var(--short-accent);
+    }
+    
+    .action-btn-compact.btn-search:hover {
+      border-color: var(--search-accent);
+      box-shadow: 0 0 8px rgba(234, 179, 8, 0.2);
+    }
+    .action-btn-compact.btn-search:hover .status-label {
+      color: var(--search-accent);
+    }
+    
+    .action-icon {
+      width: 13px;
+      height: 13px;
+      stroke: var(--text-secondary);
+      transition: stroke var(--transition);
+    }
+    
+    .action-btn-compact:hover .action-icon {
+      stroke: var(--text-primary);
+    }
+
+    /* QR Generator Compact */
+    .qr-card-compact {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .qr-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 4px 2px 8px;
+      transition: border-color var(--transition);
+    }
+    
+    .qr-input-wrap:focus-within {
+      border-color: var(--border-focus);
+    }
+    
+    .qr-input-wrap input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 11px;
+      outline: none;
+      padding: 3px 0;
+    }
+    
+    .qr-input-wrap button {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 6px;
+      transition: all var(--transition);
+    }
+    
+    .qr-input-wrap button:hover {
+      background: var(--short-accent);
+      border-color: var(--short-accent);
+      color: #fff;
+    }
+    
+    .qr-input-wrap button svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* Footer */
+    .footer {
+      font-size: 8.5px;
+      color: var(--text-dim);
+      text-align: center;
+      letter-spacing: 0.06em;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      padding-top: 2px;
+    }
+
+    /* Active Highlight States */
+    .status-card.active-mediaBlockEnabled { border-color: var(--on-accent); }
+    .status-card.active-mediaBlurEnabled { border-color: var(--blur-accent); }
+    .status-card.active-mediaHoverEnabled { border-color: var(--hover-accent); }
+    .status-card.active-mediaInvertEnabled { border-color: var(--invert-accent); }
+    .status-card.active-mediaUniformEnabled { border-color: var(--uniform-accent); }
+    .status-card.active-forceRightClickEnabled { border-color: var(--frc-accent); }
+    .status-card.active-stableVolumeEnabled { border-color: var(--vol-accent); }
+    .status-card.active-darkModeEnabled { border-color: var(--dark-accent); }
+    .status-card.active-textSpoofingEnabled { border-color: var(--textspoof-accent); }
+    .status-card.active-browserLockEnabled { border-color: var(--on-accent); }
   </style>
 </head>
 <body>
-  <div id="popupLockScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,15,17,0.9); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
-    <div style="background: var(--off-card); border: 1px solid var(--off-border); padding: 20px; border-radius: 12px; width: 100%;">
-      <h2 style="font-size: 16px; margin-bottom: 8px;">Unlock Browser</h2>
-      <input type="password" id="popupLockPw" placeholder="Password" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid var(--off-border); background: var(--off-bg); color: var(--text-primary); font-size: 13px; margin-bottom: 12px; outline: none;">
-      <div style="display: flex; gap: 8px;">
-        <button id="popupLockCancel" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--off-border); background: transparent; color: var(--text-secondary); cursor: pointer;">Cancel</button>
-        <button id="popupLockBtn" style="flex: 1; padding: 8px; border-radius: 8px; border: none; background: var(--on-accent); color: #fff; font-weight: bold; cursor: pointer;">Unlock</button>
+  <!-- Lock Screen Modal -->
+  <div id="popupLockScreen" style="display: none; position: fixed; inset: 0; background: rgba(12,12,14,0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+    <div style="background: var(--card-bg); border: 1px solid var(--border); padding: 18px; border-radius: 12px; width: 100%; max-width: 280px; box-shadow: 0 8px 24px rgba(0,0,0,0.6);">
+      <h2 style="font-size: 14px; margin-bottom: 8px;">Unlock Browser</h2>
+      <input type="password" id="popupLockPw" placeholder="Password" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text-primary); font-size: 12px; margin-bottom: 10px; outline: none;">
+      <div style="display: flex; gap: 6px;">
+        <button id="popupLockCancel" style="flex: 1; padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 11px;">Cancel</button>
+        <button id="popupLockBtn" style="flex: 1; padding: 6px; border-radius: 6px; border: none; background: var(--on-accent); color: #fff; font-weight: bold; cursor: pointer; font-size: 11px;">Unlock</button>
       </div>
-      <div id="popupLockErr" style="color: var(--on-accent); font-size: 11px; margin-top: 10px; display: none;">Incorrect Password</div>
+      <div id="popupLockErr" style="color: var(--on-accent); font-size: 10px; margin-top: 8px; display: none;">Incorrect Password</div>
     </div>
   </div>
 
   <div class="container" id="mainContainer">
+    <!-- Header -->
     <div class="header">
       <div class="brand-wrap">
         <div class="logo-mark">
-          <img src="icons/icon32.png" alt="MediaBlock Pro" style="width: 20px; height: 20px;">
+          <img src="icons/icon32.png" alt="MediaBlock Pro">
         </div>
         <div class="header-text">
-          <div class="name">MediaBlock Pro</div>
-          <div class="tagline">Image &amp; Video Shield</div>
+          <span class="name">MediaBlock</span>
+          <span class="badge">PRO</span>
         </div>
+      </div>
+      <div class="header-actions">
+        <button class="scope-btn-mini" id="tabScopeBtn" title="Current Scope: All Tabs (Click to apply to This Tab Only)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          <span class="scope-tag" id="tabScopeTag">ALL</span>
+        </button>
+        <button class="settings-btn-mini" id="settingsBtn" title="Open Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
       </div>
     </div>
     
-    <div class="stats-row">
-      <div class="stat-box">
-        <div class="target-header">
-          <div class="stat-label">Images</div>
-          <label class="small-toggle"><input type="checkbox" id="targetImgEnabled" /><span class="small-toggle-slider"></span></label>
+    <!-- Target Strip -->
+    <div class="target-strip">
+      <div class="target-card">
+        <div class="target-info">
+          <span class="target-label">Images</span>
+          <span class="target-count" id="imgCount">0</span>
         </div>
-        <div class="stat-value" id="imgCount">0</div>
+        <label class="small-toggle"><input type="checkbox" id="targetImgEnabled" /><span class="small-toggle-slider"></span></label>
       </div>
-      <div class="stat-box">
-        <div class="target-header">
-          <div class="stat-label">Videos</div>
-          <label class="small-toggle"><input type="checkbox" id="targetVidEnabled" /><span class="small-toggle-slider"></span></label>
+      <div class="target-card">
+        <div class="target-info">
+          <span class="target-label">Videos</span>
+          <span class="target-count" id="vidCount">0</span>
         </div>
-        <div class="stat-value" id="vidCount">0</div>
-      </div>
-      <div class="stat-box settings-box" id="settingsBtn">
-        <div class="target-header" style="justify-content: center;">
-          <div class="stat-label">Settings</div>
-        </div>
-        <div class="stat-value" style="display:flex; justify-content:center; align-items:center; margin-top: 4px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="settings-icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        </div>
+        <label class="small-toggle"><input type="checkbox" id="targetVidEnabled" /><span class="small-toggle-slider"></span></label>
       </div>
     </div>
     
+    <!-- Features Grid (2 Columns) -->
     <div class="features-grid">
-      <div class="status-card" id="browserLockEnabledCard">
-        <div class="status-header">
-          <div class="status-dot" id="browserLockEnabledDot"></div>
-          <div class="status-label" id="browserLockEnabledLabel">LOCK OFF</div>
-        </div>
-        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="browserLockEnabled" /><label class="toggle-label" for="browserLockEnabled"><div class="toggle-track" id="browserLockEnabledTrack"><div class="toggle-thumb" id="browserLockEnabledThumb"></div></div></label></div>
-      </div>
-
+      <!-- Media Block -->
       <div class="status-card" id="mediaBlockEnabledCard">
-        <div class="status-header">
+        <div class="status-meta">
           <div class="status-dot" id="mediaBlockEnabledDot"></div>
-          <div class="status-label" id="mediaBlockEnabledLabel">BLOCK OFF</div>
+          <span class="status-label" id="mediaBlockEnabledLabel">BLOCK OFF</span>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaBlockEnabled" /><label class="toggle-label" for="mediaBlockEnabled"><div class="toggle-track" id="mediaBlockEnabledTrack"><div class="toggle-thumb" id="mediaBlockEnabledThumb"></div></div></label></div>
       </div>
 
+      <!-- Blur -->
       <div class="status-card" id="mediaBlurEnabledCard">
-        <div class="status-header">
+        <div class="status-meta">
           <div class="status-dot" id="mediaBlurEnabledDot"></div>
-          <div class="status-label" id="mediaBlurEnabledLabel">BLUR OFF</div>
+          <span class="status-label" id="mediaBlurEnabledLabel">BLUR OFF</span>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaBlurEnabled" /><label class="toggle-label" for="mediaBlurEnabled"><div class="toggle-track" id="mediaBlurEnabledTrack"><div class="toggle-thumb" id="mediaBlurEnabledThumb"></div></div></label></div>
       </div>
 
+      <!-- Invert -->
       <div class="status-card" id="mediaInvertEnabledCard">
-        <div class="status-header">
+        <div class="status-meta">
           <div class="status-dot" id="mediaInvertEnabledDot"></div>
-          <div class="status-label" id="mediaInvertEnabledLabel">INVERT OFF</div>
+          <span class="status-label" id="mediaInvertEnabledLabel">INVERT OFF</span>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaInvertEnabled" /><label class="toggle-label" for="mediaInvertEnabled"><div class="toggle-track" id="mediaInvertEnabledTrack"><div class="toggle-thumb" id="mediaInvertEnabledThumb"></div></div></label></div>
       </div>
 
+      <!-- Uniform Visuals -->
       <div class="status-card" id="mediaUniformEnabledCard">
-        <div class="status-header">
+        <div class="status-meta">
           <div class="status-dot" id="mediaUniformEnabledDot"></div>
-          <div class="status-label" id="mediaUniformEnabledLabel">UNIFORM OFF</div>
+          <span class="status-label" id="mediaUniformEnabledLabel">UNIFORM OFF</span>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaUniformEnabled" /><label class="toggle-label" for="mediaUniformEnabled"><div class="toggle-track" id="mediaUniformEnabledTrack"><div class="toggle-thumb" id="mediaUniformEnabledThumb"></div></div></label></div>
       </div>
 
+      <!-- Hover Reveal -->
       <div class="status-card" id="mediaHoverEnabledCard">
-        <div class="status-header">
+        <div class="status-meta">
           <div class="status-dot" id="mediaHoverEnabledDot"></div>
-          <div class="status-label" id="mediaHoverEnabledLabel">HOVER OFF</div>
+          <span class="status-label" id="mediaHoverEnabledLabel">HOVER OFF</span>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="mediaHoverEnabled" /><label class="toggle-label" for="mediaHoverEnabled"><div class="toggle-track" id="mediaHoverEnabledTrack"><div class="toggle-thumb" id="mediaHoverEnabledThumb"></div></div></label></div>
       </div>
 
+      <!-- Force Right-Click -->
       <div class="status-card" id="forceRightClickEnabledCard">
-        <div class="status-header">
+        <div class="status-meta">
           <div class="status-dot" id="forceRightClickEnabledDot"></div>
-          <div class="status-label" id="forceRightClickEnabledLabel">RIGHT-CLICK</div>
+          <span class="status-label" id="forceRightClickEnabledLabel">RIGHT-CLICK</span>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="forceRightClickEnabled" /><label class="toggle-label" for="forceRightClickEnabled"><div class="toggle-track" id="forceRightClickEnabledTrack"><div class="toggle-thumb" id="forceRightClickEnabledThumb"></div></div></label></div>
       </div>
 
+      <!-- Smart Dark Mode -->
       <div class="status-card" id="darkModeEnabledCard">
-        <div class="status-header">
+        <div class="status-meta">
           <div class="status-dot" id="darkModeEnabledDot"></div>
-          <div class="status-label" id="darkModeEnabledLabel">DARK OFF</div>
+          <span class="status-label" id="darkModeEnabledLabel">DARK OFF</span>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="darkModeEnabled" /><label class="toggle-label" for="darkModeEnabled"><div class="toggle-track" id="darkModeEnabledTrack"><div class="toggle-thumb" id="darkModeEnabledThumb"></div></div></label></div>
       </div>
 
+      <!-- Stable Volume -->
       <div class="status-card" id="stableVolumeEnabledCard">
-        <div class="status-header">
+        <div class="status-meta">
           <div class="status-dot" id="stableVolumeEnabledDot"></div>
-          <div class="status-label" id="stableVolumeEnabledLabel">STABLE VOL</div>
+          <span class="status-label" id="stableVolumeEnabledLabel">STABLE VOL</span>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="stableVolumeEnabled" /><label class="toggle-label" for="stableVolumeEnabled"><div class="toggle-track" id="stableVolumeEnabledTrack"><div class="toggle-thumb" id="stableVolumeEnabledThumb"></div></div></label></div>
       </div>
 
+      <!-- Text Spoofing -->
       <div class="status-card" id="textSpoofingEnabledCard">
-        <div class="status-header">
+        <div class="status-meta">
           <div class="status-dot" id="textSpoofingEnabledDot"></div>
-          <div class="status-label" id="textSpoofingEnabledLabel">TEXT SPOOF</div>
+          <span class="status-label" id="textSpoofingEnabledLabel">TEXT SPOOF</span>
         </div>
         <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="textSpoofingEnabled" /><label class="toggle-label" for="textSpoofingEnabled"><div class="toggle-track" id="textSpoofingEnabledTrack"><div class="toggle-thumb" id="textSpoofingEnabledThumb"></div></div></label></div>
       </div>
 
-      <div class="status-card action-card-square btn-shorten" id="shortenUrlBtn">
-        <div class="status-header">
-          <div class="status-dot"></div>
-          <div class="status-label" id="shortenStatusLabel">SHORTEN URL</div>
+      <!-- Browser Lock -->
+      <div class="status-card" id="browserLockEnabledCard">
+        <div class="status-meta">
+          <div class="status-dot" id="browserLockEnabledDot"></div>
+          <span class="status-label" id="browserLockEnabledLabel">LOCK OFF</span>
         </div>
-        <div class="action-icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        </div>
-      </div>
-
-      <div class="status-card action-card-square btn-search" id="searchImageBtn">
-        <div class="status-header">
-          <div class="status-dot"></div>
-          <div class="status-label" id="searchImageStatusLabel">SEARCH IMAGE</div>
-        </div>
-        <div class="action-icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            <line x1="11" y1="8" x2="11" y2="14"></line>
-            <line x1="8" y1="11" x2="14" y2="11"></line>
-          </svg>
-        </div>
+        <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="browserLockEnabled" /><label class="toggle-label" for="browserLockEnabled"><div class="toggle-track" id="browserLockEnabledTrack"><div class="toggle-thumb" id="browserLockEnabledThumb"></div></div></label></div>
       </div>
     </div>
 
-    <div class="qr-gen-card">
-      <div class="qr-gen-header">
-        <div class="status-label">INSTANT QR GENERATOR</div>
+    <!-- Actions Row -->
+    <div class="actions-row">
+      <div class="action-btn-compact btn-shorten" id="shortenUrlBtn">
+        <span class="status-label" id="shortenStatusLabel">SHORTEN URL</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
       </div>
-      <div class="qr-input-group">
-        <input type="text" id="customUrlInput" placeholder="Paste any text or URL here..." spellcheck="false" />
+
+      <div class="action-btn-compact btn-search" id="searchImageBtn">
+        <span class="status-label" id="searchImageStatusLabel">SEARCH IMAGE</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <line x1="11" y1="8" x2="11" y2="14"></line>
+          <line x1="8" y1="11" x2="14" y2="11"></line>
+        </svg>
+      </div>
+    </div>
+
+    <!-- QR Generator -->
+    <div class="qr-card-compact">
+      <div class="qr-input-wrap">
+        <input type="text" id="customUrlInput" placeholder="Paste link to generate QR..." spellcheck="false" />
         <button id="generateQrBtn" title="Generate QR Code">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <rect x="7" y="7" width="3" height="3"></rect>
             <rect x="14" y="7" width="3" height="3"></rect>
@@ -278,12 +697,13 @@
           </svg>
         </button>
       </div>
-      <div id="customQrContainer" style="display: none; justify-content: center; margin-top: 12px; padding-bottom: 4px;">
-         <img id="customQrImage" src="" alt="QR Code" style="width: 140px; height: 140px; border-radius: 8px; background: #fff; padding: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+      <div id="customQrContainer" style="display: none; justify-content: center; padding: 6px 0;">
+        <img id="customQrImage" src="" alt="QR Code" style="width: 120px; height: 120px; border-radius: 6px; background: #fff; padding: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
       </div>
     </div>
     
-    <div class="footer"><span id="appVersion"></span> <span>•</span> <span>ACTIVE ON ALL WEBSITES</span></div>
+    <!-- Footer -->
+    <div class="footer"><span id="appVersion"></span> <span>•</span> <span>ACTIVE ON ALL SITES</span></div>
   </div>
   <script src="popup.js"></script>
 </body>

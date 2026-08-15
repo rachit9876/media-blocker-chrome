@@ -7,7 +7,6 @@
   const IMG_SELECTORS = 'img, picture, canvas, svg image, object[type^="image"], embed[type^="image"], [role="img"]';
   const BG_SELECTORS = '[style*="background-image"], [style*="url("]';
   const VID_SELECTORS = 'video, iframe[src*="youtube"], iframe[src*="vimeo"], iframe[src*="dailymotion"], iframe[src*="twitch"], iframe[src*="tiktok"], iframe[src*="facebook"], iframe[src*="instagram"], iframe[src*="twitter"], iframe[src*="x.com"], object[type^="video"], embed[type^="video"]';
-  const IMG_ALL = IMG_SELECTORS; // Exclude BG_SELECTORS from general blur/invert filters
   
   const prefix = (parent, selectors) => selectors.split(',').map(s => `${parent} ${s.trim()}`).join(', ');
 
@@ -15,7 +14,7 @@
 
   const DARK_MODE_CSS = ` html[data-mb-darkmode="true"] { background-color: #ffffff !important; filter: invert(1) hue-rotate(180deg) !important; } html[data-mb-darkmode="true"] body { background-color: #ffffff !important; } html[data-mb-darkmode="true"] img, html[data-mb-darkmode="true"] picture, html[data-mb-darkmode="true"] video, html[data-mb-darkmode="true"] canvas, html[data-mb-darkmode="true"] object, html[data-mb-darkmode="true"] embed, html[data-mb-darkmode="true"] svg image { filter: invert(1) hue-rotate(180deg) var(--mb-filter-func) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important; } `;
 
-  const MASTER_CSS = `:root { --mb-filter-func: blur(25px); --mb-grayscale: 0%; --mb-invert: 0; --mb-hue: 0deg; --mb-opacity: 1; } :root[data-mb-invert="true"] { --mb-invert: 1; --mb-hue: 180deg; } :root[data-mb-uniform="true"] { --mb-grayscale: 100%; } :root[data-mb-block="true"] { --mb-opacity: 0; } ${prefix(':root', IMG_ALL)}, ${prefix(':root', VID_SELECTORS)} { will-change: filter, opacity; } ${prefix(':root[data-mb-target-img="true"]', IMG_ALL)}, ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} { filter: var(--mb-filter-func) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important; opacity: var(--mb-opacity) !important; } ${prefix(':root[data-mb-ready="true"][data-mb-target-img="true"]', IMG_ALL)}, ${prefix(':root[data-mb-ready="true"][data-mb-target-vid="true"]', VID_SELECTORS)} { transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease !important; } ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} { transform: translateZ(0); } ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL).split(',').map(s => `${s.trim()}:hover`).join(', ')}, ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS).split(',').map(s => `${s.trim()}:hover`).join(', ')} { --mb-filter-func: blur(0px) !important; --mb-grayscale: 0% !important; --mb-invert: 0 !important; --mb-hue: 0deg !important; --mb-opacity: 1 !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_ALL)}, ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS)} { cursor: pointer !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', 'img')} { position: relative !important; visibility: hidden !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', 'img')}::after { content: attr(alt) " (Media Blocked)" !important; visibility: visible !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: #1a1a1f !important; color: #a0a0b0 !important; font-size: 13px !important; font-family: sans-serif !important; display: flex !important; align-items: center !important; justify-content: center !important; text-align: center !important; padding: 8px !important; box-sizing: border-box !important; border: 1px dashed #3a3a4a !important; overflow: hidden !important; text-overflow: ellipsis !important; } ${prefix(':root[data-mb-target-vid="true"][data-mb-block="true"]', VID_SELECTORS)} { pointer-events: none !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', BG_SELECTORS)} { background-image: none !important; } ${DARK_MODE_CSS}`;
+  const MASTER_CSS = `:root { --mb-filter-func: blur(25px); --mb-grayscale: 0%; --mb-invert: 0; --mb-hue: 0deg; --mb-opacity: 1; } :root[data-mb-invert="true"] { --mb-invert: 1; --mb-hue: 180deg; } :root[data-mb-uniform="true"] { --mb-grayscale: 100%; } :root[data-mb-block="true"] { --mb-opacity: 0; } ${prefix(':root', IMG_SELECTORS)}, ${prefix(':root', VID_SELECTORS)} { will-change: filter, opacity; } ${prefix(':root[data-mb-target-img="true"]', IMG_SELECTORS)}, ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} { filter: var(--mb-filter-func) grayscale(var(--mb-grayscale)) invert(var(--mb-invert)) hue-rotate(var(--mb-hue)) !important; opacity: var(--mb-opacity) !important; } ${prefix(':root[data-mb-ready="true"][data-mb-target-img="true"]', IMG_SELECTORS)}, ${prefix(':root[data-mb-ready="true"][data-mb-target-vid="true"]', VID_SELECTORS)} { transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease !important; } ${prefix(':root[data-mb-target-vid="true"]', VID_SELECTORS)} { transform: translateZ(0); } ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_SELECTORS).split(',').map(s => `${s.trim()}:hover`).join(', ')}, ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS).split(',').map(s => `${s.trim()}:hover`).join(', ')} { --mb-filter-func: blur(0px) !important; --mb-grayscale: 0% !important; --mb-invert: 0 !important; --mb-hue: 0deg !important; --mb-opacity: 1 !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-hover="true"]', IMG_SELECTORS)}, ${prefix(':root[data-mb-target-vid="true"][data-mb-hover="true"]', VID_SELECTORS)} { cursor: pointer !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', 'img')} { position: relative !important; visibility: hidden !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', 'img')}::after { content: attr(alt) " (Media Blocked)" !important; visibility: visible !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: #1a1a1f !important; color: #a0a0b0 !important; font-size: 13px !important; font-family: sans-serif !important; display: flex !important; align-items: center !important; justify-content: center !important; text-align: center !important; padding: 8px !important; box-sizing: border-box !important; border: 1px dashed #3a3a4a !important; overflow: hidden !important; text-overflow: ellipsis !important; } ${prefix(':root[data-mb-target-vid="true"][data-mb-block="true"]', VID_SELECTORS)} { pointer-events: none !important; } ${prefix(':root[data-mb-target-img="true"][data-mb-block="true"]', BG_SELECTORS)} { background-image: none !important; } ${DARK_MODE_CSS}`;
 
   function injectMasterStyle() {
     if (!document.getElementById("__mb_svg_filters__")) {
@@ -287,13 +286,14 @@
   function shouldSkipTextNode(node) {
     if (shouldIgnoreTextNode(node)) return true;
     const parent = node.parentElement;
+    if (!parent) return true;
 
     const style = window.getComputedStyle(parent);
     return style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0;
   }
 
-  function spoofTextNode(node) {
-    if (shouldSkipTextNode(node)) return;
+  function spoofTextNode(node, alreadyValidated = false) {
+    if (!alreadyValidated && shouldSkipTextNode(node)) return;
 
     const existing = textSpoofState.get(node);
     const original = existing ? existing.original : node.nodeValue;
@@ -325,7 +325,7 @@
     if (!root) return;
 
     if (root.nodeType === Node.TEXT_NODE) {
-      if (includeHidden ? !shouldIgnoreTextNode(root) : !shouldSkipTextNode(root)) callback(root);
+      if (includeHidden ? !shouldIgnoreTextNode(root) : !shouldSkipTextNode(root)) callback(root, true);
       return;
     }
 
@@ -341,7 +341,7 @@
     });
 
     let node;
-    while ((node = walker.nextNode())) callback(node);
+    while ((node = walker.nextNode())) callback(node, true);
   }
 
   function applyTextSpoofingToPage() {
@@ -429,7 +429,11 @@
     else { root.style.setProperty("--mb-filter-func", `blur(${currentBlurVal}px)`); }
   }
 
+  let isTabScoped = false;
+  let currentActiveState = {};
+
   function applyState(key, value) {
+    currentActiveState[key] = value;
     const root = document.documentElement;
     if (key === "blurIntensity") { currentBlurVal = value; updateVisualFilter(); }
     else if (key === "blurMode") { currentBlurMode = value; updateVisualFilter(); }
@@ -549,7 +553,7 @@
     stableVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
     blurIntensity: 25, blurMode: "blur", audioEqMode: "stable", audioLufs: "-12",
     shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
-    textAlternativesEnabled: false, textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
+    textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
     domainLockEnabled: false, lockedDomains: []
   };
 
@@ -570,10 +574,44 @@
 
   chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'local') {
-      Object.keys(changes).forEach(key => applyState(key, changes[key].newValue));
-      if (changes.lockedDomains || changes.browserLockPassword || changes.domainLockEnabled) {
-          chrome.storage.local.get(DEFAULTS, (state) => checkDomainLock(state));
+      if (!isTabScoped) {
+        Object.keys(changes).forEach(key => {
+          if (changes[key] !== undefined) {
+            applyState(key, changes[key].newValue);
+          }
+        });
       }
+      if (changes.lockedDomains || changes.browserLockPassword || changes.domainLockEnabled) {
+        chrome.storage.local.get(DEFAULTS, (state) => checkDomainLock(state));
+      }
+    }
+  });
+
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "GET_PAGE_TAB_SCOPE") {
+      sendResponse({ isScoped: isTabScoped, localState: currentActiveState });
+      return true;
+    }
+
+    if (message.type === "TOGGLE_PAGE_TAB_SCOPE") {
+      isTabScoped = !isTabScoped;
+      if (!isTabScoped) {
+        chrome.storage.local.get(DEFAULTS, (state) => {
+          if (state) {
+            Object.keys(state).forEach(key => applyState(key, state[key]));
+          }
+          sendResponse({ isScoped: false, localState: currentActiveState });
+        });
+        return true;
+      }
+      sendResponse({ isScoped: true, localState: currentActiveState });
+      return true;
+    }
+
+    if (message.type === "UPDATE_PAGE_TAB_SETTING") {
+      applyState(message.key, message.value);
+      sendResponse({ success: true, localState: currentActiveState });
+      return true;
     }
   });
 

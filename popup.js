@@ -6,9 +6,9 @@
     mediaBlockEnabled: { color: "var(--on-accent)", labelPrefix: "BLOCK" },
     mediaBlurEnabled: { color: "var(--blur-accent)", labelPrefix: "BLUR" },
     mediaInvertEnabled: { color: "var(--invert-accent)", labelPrefix: "INVERT" },
-    mediaUniformEnabled: { color: "var(--uniform-accent)", labelPrefix: "UNIFORM VISUALS" },
-    mediaHoverEnabled: { color: "var(--hover-accent)", labelPrefix: "HOVER REVEAL" },
-    forceRightClickEnabled: { color: "var(--frc-accent)", labelPrefix: "FORCE RIGHT-CLICK" },
+    mediaUniformEnabled: { color: "var(--uniform-accent)", labelPrefix: "UNIFORM" },
+    mediaHoverEnabled: { color: "var(--hover-accent)", labelPrefix: "HOVER" },
+    forceRightClickEnabled: { color: "var(--frc-accent)", labelPrefix: "RIGHT-CLICK" },
     stableVolumeEnabled: { color: "var(--vol-accent)", labelPrefix: "STABLE VOL" },
     darkModeEnabled: { color: "var(--dark-accent)", labelPrefix: "DARK MODE" },
     textSpoofingEnabled: { color: "var(--textspoof-accent)", labelPrefix: "TEXT SPOOF" },
@@ -24,7 +24,7 @@
 
     const config = configMap[key];
     const toggleEl = document.getElementById(key);
-    if(toggleEl) toggleEl.checked = enabled;
+    if (toggleEl) toggleEl.checked = enabled;
     
     const card = document.getElementById(`${key}Card`);
     const label = document.getElementById(`${key}Label`);
@@ -37,10 +37,10 @@
     label.textContent = enabled ? `${config.labelPrefix} ON` : `${config.labelPrefix} OFF`;
     dot.style.background = enabled ? config.color : "var(--text-dim)";
     dot.style.boxShadow = enabled ? `0 0 6px ${config.color}` : "none";
-    track.style.background = enabled ? config.color : "#1e1e26";
-    track.style.borderColor = enabled ? config.color : "var(--off-border)";
+    track.style.background = enabled ? config.color : "#1a1a20";
+    track.style.borderColor = enabled ? config.color : "var(--border)";
     
-    thumb.style.left = enabled ? "calc(100% - 20px)" : "2px";
+    thumb.style.left = enabled ? "calc(100% - 14px)" : "2px";
     thumb.style.background = enabled ? "#fff" : "var(--text-dim)";
     
     card.classList.toggle(`active-${key}`, enabled);
@@ -159,10 +159,32 @@
     });
   }
 
+  let currentActiveTabId = null;
+  let isTabScoped = false;
+
+  function updateScopeUI(scoped) {
+    const btn = document.getElementById('tabScopeBtn');
+    const tag = document.getElementById('tabScopeTag');
+    if (!btn || !tag) return;
+
+    btn.classList.toggle('active-tab-scope', scoped);
+    tag.textContent = scoped ? 'THIS TAB' : 'ALL';
+    btn.title = scoped ? 'Scope: This Tab Only (Changes apply only to this open page)' : 'Scope: All Tabs (Click to apply to This Tab Only)';
+  }
+
+  function sendSettingUpdate(key, value) {
+    if (isTabScoped && currentActiveTabId) {
+      chrome.tabs.sendMessage(currentActiveTabId, { type: "UPDATE_PAGE_TAB_SETTING", key, value });
+    } else {
+      chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value });
+    }
+  }
+
   async function init() {
     const lockPw = document.getElementById('popupLockPw');
     const lockErr = document.getElementById('popupLockErr');
     const lockScreen = document.getElementById('popupLockScreen');
+    const tabScopeBtn = document.getElementById('tabScopeBtn');
     
     let isTogglingOff = false; 
     
@@ -198,8 +220,47 @@
     lockPw.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitUnlock(); });
     document.getElementById("appVersion").textContent = `v${chrome.runtime.getManifest().version}`;
     
+    // Check initial active tab scope
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab?.id) {
+        currentActiveTabId = tab.id;
+        chrome.tabs.sendMessage(tab.id, { type: "GET_PAGE_TAB_SCOPE" }, (res) => {
+          if (!chrome.runtime.lastError && res && res.isScoped) {
+            isTabScoped = true;
+            updateScopeUI(true);
+            if (res.localState) {
+              Object.keys(res.localState).forEach(key => updateSubUI(key, res.localState[key]));
+            }
+          }
+        });
+      }
+    } catch (_) {}
+
+    if (tabScopeBtn) {
+      tabScopeBtn.addEventListener('click', async () => {
+        if (!currentActiveTabId) {
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (tab?.id) currentActiveTabId = tab.id;
+        }
+        if (!currentActiveTabId) return;
+
+        chrome.tabs.sendMessage(currentActiveTabId, { type: "TOGGLE_PAGE_TAB_SCOPE" }, (res) => {
+          if (chrome.runtime.lastError || !res) {
+            alert("This Tab Only mode is available on standard web pages.");
+            return;
+          }
+          isTabScoped = res.isScoped;
+          updateScopeUI(isTabScoped);
+          if (res.localState) {
+            Object.keys(res.localState).forEach(key => updateSubUI(key, res.localState[key]));
+          }
+        });
+      });
+    }
+
     chrome.runtime.sendMessage({ type: "GET_ALL_STATE" }, (state) => {
-      if(!state) return;
+      if (!state) return;
       
       if (state.browserLockEnabled) {
         lockScreen.style.display = 'flex';
@@ -211,7 +272,7 @@
       const lockLabel = document.getElementById('browserLockEnabledLabel');
       
       if (!state.browserLockPassword) {
-        if(lockToggle) {
+        if (lockToggle) {
            lockToggle.disabled = true;
            lockToggle.parentElement.style.cursor = 'not-allowed';
            document.getElementById('browserLockEnabledTrack').style.opacity = '0.4';
@@ -221,7 +282,9 @@
         }
       }
 
-      Object.keys(state).forEach(key => updateSubUI(key, state[key]));
+      if (!isTabScoped) {
+        Object.keys(state).forEach(key => updateSubUI(key, state[key]));
+      }
     });
 
     fetchMediaCounts();
@@ -232,12 +295,12 @@
     const lockToggle = document.getElementById('browserLockEnabled');
     if (lockToggle) {
       lockToggle.addEventListener('change', (e) => {
-        if(lockToggle.disabled) { e.preventDefault(); return; }
+        if (lockToggle.disabled) { e.preventDefault(); return; }
         const isTurningOn = e.target.checked;
         updateSubUI('browserLockEnabled', isTurningOn);
         
         if (isTurningOn) {
-           chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key: "browserLockEnabled", value: true });
+           sendSettingUpdate("browserLockEnabled", true);
         } else {
            isTogglingOff = true;
            lockScreen.style.display = 'flex';
@@ -249,10 +312,10 @@
     Object.keys(configMap).concat(['targetImgEnabled', 'targetVidEnabled']).forEach(key => {
       if (key === 'browserLockEnabled') return;
       const el = document.getElementById(key);
-      if(el) {
+      if (el) {
         el.addEventListener('change', (e) => {
           updateSubUI(key, e.target.checked);
-          chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value: e.target.checked });
+          sendSettingUpdate(key, e.target.checked);
         });
       }
     });
@@ -263,7 +326,7 @@
   init();
 
   chrome.storage.onChanged.addListener((changes, namespace) => {
-    if (namespace === 'local') {
+    if (namespace === 'local' && !isTabScoped) {
       Object.keys(changes).forEach(key => {
         if (changes[key] !== undefined) {
           updateSubUI(key, changes[key].newValue);

@@ -1,12 +1,68 @@
-/* Change cursor to crosshair */
-body.sbi-selecting * {
+/* MediaBlock Pro - Area Snipping / Screenshot Selector Styles */
+
+#mb-snip-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483646 !important;
   cursor: crosshair !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  background: rgba(0, 0, 0, 0.35) !important;
 }
 
-/* Red outline and slight dim effect on hover */
-body.sbi-selecting img:hover {
-  outline: 3px solid #ff0000 !important;
-  outline-offset: -3px !important;
-  filter: brightness(0.8) !important;
-  transition: all 0.1s ease-in-out;
+#mb-snip-banner {
+  position: fixed !important;
+  top: 18px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: #141418 !important;
+  border: 1px solid #2a2a34 !important;
+  color: #f0f0f5 !important;
+  padding: 8px 16px !important;
+  border-radius: 100px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+  pointer-events: none !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+#mb-snip-banner .snip-key {
+  background: #252530 !important;
+  border: 1px solid #3a3a48 !important;
+  color: #a0a0b0 !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+}
+
+#mb-snip-box {
+  position: fixed !important;
+  border: 2px solid #3b82f6 !important;
+  background: transparent !important;
+  box-shadow: 0 0 0 99999px rgba(0, 0, 0, 0.45) !important;
+  pointer-events: none !important;
+  z-index: 2147483647 !important;
+  box-sizing: border-box !important;
+  display: none;
+}
+
+#mb-snip-dim {
+  position: absolute !important;
+  bottom: -24px !important;
+  right: 0 !important;
+  background: #141418 !important;
+  border: 1px solid #3b82f6 !important;
+  color: #fff !important;
+  font-size: 10px !important;
+  font-family: monospace !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  white-space: nowrap !important;
 }
