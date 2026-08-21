@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     blurMode: document.getElementById('blurMode'),
     blurIntensity: document.getElementById('blurIntensity'),
     stableVolumeEnabled: document.getElementById('stableVolumeEnabled'),
+    monoAudioEnabled: document.getElementById('monoAudioEnabled'),
     audioEqMode: document.getElementById('audioEqMode'),
     audioLufs: document.getElementById('audioLufs'),
     shortcutAction: document.getElementById('shortcutAction'),
@@ -134,18 +135,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const div = document.createElement('div');
       div.style.cssText = "display: flex; justify-content: space-between; background: #1e1e26; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--off-border); font-size: 13px; align-items: center;";
       const safeDomain = escapeHtml(domain);
-      div.innerHTML = `<span>${safeDomain}</span> <button data-domain="${safeDomain}" class="remove-domain-btn" style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-weight:bold; transition: 0.2s;">X</button>`;
-      container.appendChild(div);
-    });
-    
-    document.querySelectorAll('.remove-domain-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const toRemove = e.target.getAttribute('data-domain');
-        chrome.storage.local.get(['lockedDomains'], (res) => {
-          const updated = (res.lockedDomains || []).filter(d => d !== toRemove);
-          updateSetting("lockedDomains", updated);
+      div.innerHTML = `<span>${safeDomain}</span> <button class="remove-domain-btn" style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-weight:bold; transition: 0.2s;">X</button>`;
+      
+      const removeBtn = div.querySelector('.remove-domain-btn');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+          chrome.storage.local.get(['lockedDomains'], (res) => {
+            const updated = (res.lockedDomains || []).filter(d => d !== domain);
+            updateSetting("lockedDomains", updated);
+          });
         });
-      });
+      }
+      
+      container.appendChild(div);
     });
   }
 
@@ -163,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
       inputs.blurMode.value = state.blurMode;
       inputs.blurIntensity.value = state.blurIntensity;
       inputs.stableVolumeEnabled.checked = state.stableVolumeEnabled;
+      if (inputs.monoAudioEnabled) inputs.monoAudioEnabled.checked = state.monoAudioEnabled || false;
       inputs.audioEqMode.value = state.audioEqMode;
       if (inputs.audioLufs) inputs.audioLufs.value = state.audioLufs || "-12";
       inputs.shortcutAction.value = state.shortcutAction;
@@ -204,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value });
   }
 
-  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'darkModeEnabled', 'textSpoofingEnabled', 'domainLockEnabled'].forEach(key => {
+  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'monoAudioEnabled', 'darkModeEnabled', 'textSpoofingEnabled', 'domainLockEnabled'].forEach(key => {
     if (inputs[key]) {
       inputs[key].addEventListener('change', (e) => {
         updateSetting(key, e.target.checked);

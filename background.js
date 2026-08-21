@@ -2,11 +2,18 @@
 const DEFAULTS = {
   mediaBlockEnabled: false, mediaInvertEnabled: false, mediaBlurEnabled: false,
   mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,
-  stableVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
+  stableVolumeEnabled: false, monoAudioEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
   blurIntensity: 25, blurMode: "blur", audioEqMode: "stable", audioLufs: "-12",
   shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
   textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
   domainLockEnabled: false, lockedDomains: []
+};
+
+// Search engine endpoints for context menu and snippet area visual search
+const ENGINES = {
+  google: { name: "Google", url: "https://lens.google.com/upload?url=" },
+  yandex: { name: "Yandex", url: "https://yandex.com/images/search?rpt=imageview&url=" },
+  tineye: { name: "TinEye", url: "https://www.tineye.com/search/?url=" }
 };
 
 async function hashPassword(password) {
@@ -29,11 +36,11 @@ init();
 async function updateDNR() {
   try {
     const data = await chrome.storage.local.get(['mediaBlockEnabled', 'targetImgEnabled', 'targetVidEnabled']);
-    const blockOn = data.mediaBlockEnabled;
+    const blockOn = Boolean(data.mediaBlockEnabled);
     
     const enableRulesetIds = [];
-    if (blockOn && data.targetImgEnabled) enableRulesetIds.push("block_images");
-    if (blockOn && data.targetVidEnabled) enableRulesetIds.push("block_videos");
+    if (blockOn && data.targetImgEnabled !== false) enableRulesetIds.push("block_images");
+    if (blockOn && data.targetVidEnabled !== false) enableRulesetIds.push("block_videos");
     
     const disableRulesetIds = ["block_images", "block_videos"].filter(id => !enableRulesetIds.includes(id));
     
@@ -88,18 +95,14 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Capture visible viewport for area snipping tool
   if (message.action === "capture_visible_tab") {
-    const windowId = sender.tab ? sender.tab.windowId : chrome.windows.WINDOW_ID_CURRENT;
+    const windowId = sender.tab?.windowId ?? chrome.windows.WINDOW_ID_CURRENT;
     chrome.tabs.captureVisibleTab(windowId, { format: 'png' })
       .then(dataUrl => sendResponse({ dataUrl }))
       .catch(err => sendResponse({ error: err ? err.message : "Capture failed" }));
     return true;
   }
 
-  // ============================================================================
-  // CRITICAL SEARCH BY IMAGE API ENGINE
-  // NOTE: Keep these exact endpoints, form submissions, and message formats
-  // unchanged to ensure both context menu and snippet area search function properly.
-  // ============================================================================
+  // Visual Image Search API Engine
   if (message.action === "search_image") {
     searchImage(message.imgUrl, sender.tab, "all"); 
     return true;
@@ -144,14 +147,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         } else {
            sendResponse({ success: true });
         }
-      } else { sendResponse({ success: false }); }
+      } else { 
+        sendResponse({ success: false }); 
+      }
     });
     return true;
   }
   
   if (message.type === "CLEAR_HISTORY") {
-      chrome.storage.local.set({ urlHistory: [] }).then(() => sendResponse({success: true}));
-      return true;
+    chrome.storage.local.set({ urlHistory: [] }).then(() => sendResponse({ success: true }));
+    return true;
   }
 });
 
@@ -161,15 +166,16 @@ chrome.commands.onCommand.addListener(async (command) => {
     const action = data.shortcutAction;
 
     if (action === "open_settings") chrome.runtime.openOptionsPage();
-    else if (action === "toggle_block") await chrome.storage.local.set({mediaBlockEnabled: !data.mediaBlockEnabled});
-    else if (action === "toggle_blur") await chrome.storage.local.set({mediaBlurEnabled: !data.mediaBlurEnabled});
-    else if (action === "toggle_invert") await chrome.storage.local.set({mediaInvertEnabled: !data.mediaInvertEnabled});
-    else if (action === "toggle_uniform") await chrome.storage.local.set({mediaUniformEnabled: !data.mediaUniformEnabled});
-    else if (action === "toggle_hover") await chrome.storage.local.set({mediaHoverEnabled: !data.mediaHoverEnabled});
-    else if (action === "toggle_rightclick") await chrome.storage.local.set({forceRightClickEnabled: !data.forceRightClickEnabled});
-    else if (action === "toggle_stablevolume") await chrome.storage.local.set({stableVolumeEnabled: !data.stableVolumeEnabled});
-    else if (action === "toggle_darkmode") await chrome.storage.local.set({darkModeEnabled: !data.darkModeEnabled});
-    else if (action === "toggle_textspoof") await chrome.storage.local.set({textSpoofingEnabled: !data.textSpoofingEnabled});
+    else if (action === "toggle_block") await chrome.storage.local.set({ mediaBlockEnabled: !data.mediaBlockEnabled });
+    else if (action === "toggle_blur") await chrome.storage.local.set({ mediaBlurEnabled: !data.mediaBlurEnabled });
+    else if (action === "toggle_invert") await chrome.storage.local.set({ mediaInvertEnabled: !data.mediaInvertEnabled });
+    else if (action === "toggle_uniform") await chrome.storage.local.set({ mediaUniformEnabled: !data.mediaUniformEnabled });
+    else if (action === "toggle_hover") await chrome.storage.local.set({ mediaHoverEnabled: !data.mediaHoverEnabled });
+    else if (action === "toggle_rightclick") await chrome.storage.local.set({ forceRightClickEnabled: !data.forceRightClickEnabled });
+    else if (action === "toggle_stablevolume") await chrome.storage.local.set({ stableVolumeEnabled: !data.stableVolumeEnabled });
+    else if (action === "toggle_monoaudio") await chrome.storage.local.set({ monoAudioEnabled: !data.monoAudioEnabled });
+    else if (action === "toggle_darkmode") await chrome.storage.local.set({ darkModeEnabled: !data.darkModeEnabled });
+    else if (action === "toggle_textspoof") await chrome.storage.local.set({ textSpoofingEnabled: !data.textSpoofingEnabled });
   }
 });
 
@@ -203,8 +209,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
   // Handle QR Code
   if (info.menuItemId.toString().startsWith("qr_")) {
-    let targetUrl = info.menuItemId === "qr_page" ? info.pageUrl : info.menuItemId === "qr_media" ? info.srcUrl : info.linkUrl;
-    if (targetUrl) {
+    const targetUrl = info.menuItemId === "qr_page" ? info.pageUrl : info.menuItemId === "qr_media" ? info.srcUrl : info.linkUrl;
+    if (targetUrl && tab?.id) {
       if (!targetUrl.startsWith('http')) {
         chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => alert("Cannot generate QR for a non-HTTP/HTTPS URI.") });
         return; 
@@ -215,8 +221,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 
   // Handle URL Shortener
-  let targetUrl = info.menuItemId === "shorten_page" ? info.pageUrl : info.menuItemId === "shorten_media" ? info.srcUrl : info.linkUrl;
-  if (targetUrl) {
+  const targetUrl = info.menuItemId === "shorten_page" ? info.pageUrl : info.menuItemId === "shorten_media" ? info.srcUrl : info.linkUrl;
+  if (targetUrl && tab?.id) {
     if (!targetUrl.startsWith('http')) {
       chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => alert("Cannot shorten a non-HTTP/HTTPS URI.") });
       return; 
@@ -273,7 +279,7 @@ async function generateAndCopyShortUrl(longUrl, tabId) {
       let history = res.urlHistory || [];
       history.unshift(historyItem);
       if (history.length > 20) history = history.slice(0, 20);
-      await chrome.storage.local.set({urlHistory: history});
+      await chrome.storage.local.set({ urlHistory: history });
 
       chrome.scripting.executeScript({
         target: { tabId: tabId },
@@ -288,18 +294,6 @@ async function generateAndCopyShortUrl(longUrl, tabId) {
   }
 }
 
-// ============================================================================
-// CRITICAL SEARCH BY IMAGE API ENGINE
-// NOTE: These search engine endpoints, reverse image lookup URLs, and multipart
-// form upload implementations are shared between right-click context menus
-// and the visual screenshot area snipping tool. DO NOT modify parameters or endpoints.
-// ============================================================================
-const ENGINES = {
-  google: { name: "Google", url: "https://lens.google.com/upload?url=" },
-  yandex: { name: "Yandex", url: "https://yandex.com/images/search?rpt=imageview&url=" },
-  tineye: { name: "TinEye", url: "https://www.tineye.com/search/?url=" }
-};
-
 // Handles image searching for both external URLs and Base64 cropped screenshots
 function searchImage(imgUrl, tab, engineId) {
   if (!imgUrl) return;
@@ -310,12 +304,14 @@ function searchImage(imgUrl, tab, engineId) {
   }
 
   const encodedUrl = encodeURIComponent(imgUrl);
+  const tabIndex = typeof tab?.index === 'number' ? tab.index : 0;
+
   if (engineId === "all") {
     Object.values(ENGINES).forEach((engine, i) => {
-      chrome.tabs.create({ url: engine.url + encodedUrl, index: tab.index + 1 + i, active: i === 0 });
+      chrome.tabs.create({ url: engine.url + encodedUrl, index: tabIndex + 1 + i, active: i === 0 });
     });
   } else if (ENGINES[engineId]) {
-    chrome.tabs.create({ url: ENGINES[engineId].url + encodedUrl, index: tab.index + 1 });
+    chrome.tabs.create({ url: ENGINES[engineId].url + encodedUrl, index: tabIndex + 1 });
   }
 }
 
@@ -338,7 +334,6 @@ async function handleBase64Upload(base64, tab, engineId) {
           .then(r => r.blob())
           .then(blob => {
             const form = document.createElement('form');
-            // Use Google Lens official web upload endpoint
             form.action = 'https://lens.google.com/v3/upload';
             form.method = 'POST';
             form.enctype = 'multipart/form-data';
@@ -386,8 +381,10 @@ async function handleBase64Upload(base64, tab, engineId) {
         body: fd
       });
       const apiRes = await apiReq.json();
-      const cbirId = apiRes.blocks[0].params.cbirId;
-      chrome.tabs.create({ url: `https://yandex.com/images/search?rpt=imageview&cbir_id=${cbirId}`, index: tabIndex + 2 });
+      const cbirId = apiRes?.blocks?.[0]?.params?.cbirId;
+      if (cbirId) {
+        chrome.tabs.create({ url: `https://yandex.com/images/search?rpt=imageview&cbir_id=${cbirId}`, index: tabIndex + 2 });
+      }
     } catch (e) {
       console.error("Yandex Base64 upload failed", e);
     }
@@ -395,7 +392,8 @@ async function handleBase64Upload(base64, tab, engineId) {
 
   if (engineId === 'tineye' || engineId === 'all') {
     chrome.tabs.create({ url: 'https://tineye.com/', index: tabIndex + 3 }, (newTab) => {
-      chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
+      if (!newTab?.id) return;
+      const listener = (tabId, info) => {
         if (tabId === newTab.id && info.status === 'complete') {
           chrome.tabs.onUpdated.removeListener(listener);
           chrome.scripting.executeScript({
@@ -404,7 +402,7 @@ async function handleBase64Upload(base64, tab, engineId) {
             func: (b64) => {
               fetch(b64).then(r => r.blob()).then(blob => {
                 const dt = new DataTransfer();
-                dt.items.add(new File([blob], "image.jpg", { type: blob.type }));
+                dt.items.add(new File([blob], "image.jpg", { type: blob.type || "image/jpeg" }));
                 const input = document.querySelector("input#upload-box") || document.querySelector('input[type="file"]');
                 if (input) {
                   input.files = dt.files;
@@ -414,7 +412,8 @@ async function handleBase64Upload(base64, tab, engineId) {
             }
           });
         }
-      });
+      };
+      chrome.tabs.onUpdated.addListener(listener);
     });
   }
 }

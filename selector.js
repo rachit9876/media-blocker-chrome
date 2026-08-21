@@ -116,6 +116,10 @@
     canvas.height = Math.round(height * dpr);
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
     const img = new Image();
 
     img.onload = () => {
@@ -134,10 +138,7 @@
       // Export cropped area as Base64 JPEG data URL
       const croppedBase64 = canvas.toDataURL('image/jpeg', 0.95);
 
-      // ============================================================================
-      // EXACT SAME SEARCH API:
       // Send cropped Base64 to background.js for multi-engine visual search
-      // ============================================================================
       chrome.runtime.sendMessage({ action: "search_image", imgUrl: croppedBase64 });
     };
 

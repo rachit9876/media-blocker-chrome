@@ -47,12 +47,26 @@
   }
 
   let isStableVolumeOn = false; 
+  let isMonoAudioOn = false;
   let audioEqMode = 'stable'; 
   let currentAudioLufs = -12;
   let audioCtx = null; 
   const processedMedia = new WeakMap();
 
-  function attachStableVolume(mediaEl) {
+  function updateMonoNodeState(monoNode, enabled) {
+    if (!monoNode) return;
+    if (enabled) {
+      monoNode.channelCount = 1;
+      monoNode.channelCountMode = "explicit";
+      monoNode.channelInterpretation = "speakers";
+    } else {
+      monoNode.channelCount = 2;
+      monoNode.channelCountMode = "max";
+      monoNode.channelInterpretation = "speakers";
+    }
+  }
+
+  function attachAudioProcessing(mediaEl) {
     if (processedMedia.has(mediaEl)) return;
     
     try {
@@ -68,6 +82,10 @@
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const source = audioCtx.createMediaElementSource(mediaEl);
+
+      // Mono Audio Downmixer Node
+      const monoNode = audioCtx.createGain();
+      updateMonoNodeState(monoNode, isMonoAudioOn);
       
       const lowEQ = audioCtx.createBiquadFilter(); 
       lowEQ.type = "lowshelf"; 
@@ -82,15 +100,25 @@
       highEQ.type = "highshelf";
       highEQ.frequency.value = 6000;
       
+      // Stage 1: Dynamic Range Leveler (brings up quiet sounds while taming high dynamic swings)
       const compressor = audioCtx.createDynamicsCompressor(); 
       compressor.threshold.value = currentAudioLufs; 
-      compressor.knee.value = 30; 
-      compressor.ratio.value = 4; 
-      compressor.attack.value = 0.01; 
-      compressor.release.value = 0.25;   
+      compressor.knee.value = 12; 
+      compressor.ratio.value = 12; 
+      compressor.attack.value = 0.003; 
+      compressor.release.value = 0.20;   
       
+      // Makeup gain to boost low dialogue/sounds into clear audibility
       const makeupGain = audioCtx.createGain(); 
-      makeupGain.gain.value = 2.5; 
+      makeupGain.gain.value = 1.8; 
+
+      // Stage 2: Fast Brickwall Peak Limiter (clamps loud screams, explosions & crashes to prevent jerks)
+      const limiter = audioCtx.createDynamicsCompressor();
+      limiter.threshold.value = -1.5;
+      limiter.knee.value = 0;
+      limiter.ratio.value = 20;
+      limiter.attack.value = 0.001;
+      limiter.release.value = 0.05;
       
       const effectGain = audioCtx.createGain(); 
       effectGain.gain.value = isStableVolumeOn ? 1 : 0;
@@ -98,18 +126,24 @@
       const bypassGain = audioCtx.createGain(); 
       bypassGain.gain.value = isStableVolumeOn ? 0 : 1;
       
-      source.connect(lowEQ); 
+      // Source feeds mono downmixer first
+      source.connect(monoNode);
+
+      // Effect Path (EQ + Compressor + Limiter)
+      monoNode.connect(lowEQ); 
       lowEQ.connect(midEQ); 
       midEQ.connect(highEQ);
       highEQ.connect(compressor); 
       compressor.connect(makeupGain); 
-      makeupGain.connect(effectGain); 
+      makeupGain.connect(limiter);
+      limiter.connect(effectGain); 
       effectGain.connect(audioCtx.destination); 
       
-      source.connect(bypassGain); 
+      // Bypass Path
+      monoNode.connect(bypassGain); 
       bypassGain.connect(audioCtx.destination);
       
-      processedMedia.set(mediaEl, { effectGain, bypassGain, lowEQ, midEQ, highEQ, compressor });
+      processedMedia.set(mediaEl, { effectGain, bypassGain, lowEQ, midEQ, highEQ, compressor, limiter, monoNode });
       updateEQNodes(processedMedia.get(mediaEl));
     } catch (e) { }
   }
@@ -140,14 +174,41 @@
     }
   }
 
+  function toggleMonoAudioLive(enabled) {
+    isMonoAudioOn = enabled; 
+    const mediaEls = document.querySelectorAll('video, audio'); 
+    if (enabled) mediaEls.forEach(attachAudioProcessing);
+    mediaEls.forEach(el => { 
+      const nodes = processedMedia.get(el); 
+      if (nodes && nodes.monoNode) updateMonoNodeState(nodes.monoNode, enabled); 
+    });
+    if (enabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
   function toggleStableVolumeLive(enabled) {
-    isStableVolumeOn = enabled; const mediaEls = document.querySelectorAll('video, audio'); 
-    if (enabled) mediaEls.forEach(attachStableVolume);
-    mediaEls.forEach(el => { const nodes = processedMedia.get(el); if (nodes) { nodes.effectGain.gain.setTargetAtTime(enabled ? 1 : 0, audioCtx.currentTime, 0.05); nodes.bypassGain.gain.setTargetAtTime(enabled ? 0 : 1, audioCtx.currentTime, 0.05); updateEQNodes(nodes); } });
+    isStableVolumeOn = enabled; 
+    const mediaEls = document.querySelectorAll('video, audio'); 
+    if (enabled) mediaEls.forEach(attachAudioProcessing);
+    mediaEls.forEach(el => { 
+      const nodes = processedMedia.get(el); 
+      if (nodes) { 
+        const ctxTime = audioCtx ? audioCtx.currentTime : 0;
+        nodes.effectGain.gain.setTargetAtTime(enabled ? 1 : 0, ctxTime, 0.05); 
+        nodes.bypassGain.gain.setTargetAtTime(enabled ? 0 : 1, ctxTime, 0.05); 
+        updateEQNodes(nodes); 
+      } 
+    });
     if (enabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   }
   
-  document.addEventListener('play', (e) => { if (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') { if (isStableVolumeOn) { attachStableVolume(e.target); if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } } }, true);
+  document.addEventListener('play', (e) => { 
+    if (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') { 
+      if (isStableVolumeOn || isMonoAudioOn) { 
+        attachAudioProcessing(e.target); 
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); 
+      } 
+    } 
+  }, true);
 
   let darkModeEnabled = false;
   let darkObserver = null;
@@ -440,12 +501,15 @@
     else if (key === "mediaBlurEnabled") { value ? root.setAttribute("data-mb-blur", "true") : root.removeAttribute("data-mb-blur"); updateVisualFilter(); }
     else if (key === "forceRightClickEnabled") { isForceRightClickOn = value; toggleForceRightClickStyle(value); }
     else if (key === "stableVolumeEnabled") { toggleStableVolumeLive(value); }
+    else if (key === "monoAudioEnabled") { toggleMonoAudioLive(value); }
     else if (key === "audioEqMode") { audioEqMode = value; document.querySelectorAll('video, audio').forEach(el => updateEQNodes(processedMedia.get(el))); }
     else if (key === "audioLufs") { 
-        currentAudioLufs = parseInt(value); 
+        currentAudioLufs = parseInt(value, 10) || -12; 
         document.querySelectorAll('video, audio').forEach(el => {
             const nodes = processedMedia.get(el);
-            if (nodes && nodes.compressor) nodes.compressor.threshold.setTargetAtTime(currentAudioLufs, audioCtx.currentTime, 0.1);
+            if (nodes && nodes.compressor && audioCtx) {
+              nodes.compressor.threshold.setTargetAtTime(currentAudioLufs, audioCtx.currentTime, 0.1);
+            }
         });
     }
     else if (key === "darkModeEnabled") { toggleDarkMode(value); }
@@ -461,8 +525,11 @@
     if (!state.lockedDomains || state.lockedDomains.length === 0) return;
     if (!state.browserLockPassword) return; 
     
-    const currentHost = window.location.hostname;
-    const isLocked = state.lockedDomains.some(d => currentHost === d || currentHost.endsWith('.' + d));
+    const currentHost = window.location.hostname.toLowerCase();
+    const isLocked = state.lockedDomains.some(d => {
+      const lockDomain = (d || '').toLowerCase().trim();
+      return lockDomain && (currentHost === lockDomain || currentHost.endsWith('.' + lockDomain));
+    });
     
     if (isLocked) {
         const sessionKey = 'mb_unlocked_' + currentHost;
@@ -550,7 +617,7 @@
   const DEFAULTS = {
     mediaBlockEnabled: false, mediaInvertEnabled: false, mediaBlurEnabled: false,
     mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,
-    stableVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
+    stableVolumeEnabled: false, monoAudioEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
     blurIntensity: 25, blurMode: "blur", audioEqMode: "stable", audioLufs: "-12",
     shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
     textSpoofingEnabled: false, textSpoofingSeed: "mediablock",

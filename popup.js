@@ -3,16 +3,17 @@
   "use strict";
 
   const configMap = {
-    mediaBlockEnabled: { color: "var(--on-accent)", labelPrefix: "BLOCK" },
+    mediaBlockEnabled: { color: "var(--block-accent)", labelPrefix: "BLOCK" },
     mediaBlurEnabled: { color: "var(--blur-accent)", labelPrefix: "BLUR" },
     mediaInvertEnabled: { color: "var(--invert-accent)", labelPrefix: "INVERT" },
     mediaUniformEnabled: { color: "var(--uniform-accent)", labelPrefix: "UNIFORM" },
     mediaHoverEnabled: { color: "var(--hover-accent)", labelPrefix: "HOVER" },
     forceRightClickEnabled: { color: "var(--frc-accent)", labelPrefix: "RIGHT-CLICK" },
     stableVolumeEnabled: { color: "var(--vol-accent)", labelPrefix: "STABLE VOL" },
+    monoAudioEnabled: { color: "var(--mono-accent)", labelPrefix: "MONO" },
     darkModeEnabled: { color: "var(--dark-accent)", labelPrefix: "DARK MODE" },
     textSpoofingEnabled: { color: "var(--textspoof-accent)", labelPrefix: "TEXT SPOOF" },
-    browserLockEnabled: { color: "var(--on-accent)", labelPrefix: "LOCK" }
+    browserLockEnabled: { color: "var(--lock-accent)", labelPrefix: "LOCK" }
   };
 
   function updateSubUI(key, enabled) {
@@ -28,23 +29,29 @@
     
     const card = document.getElementById(`${key}Card`);
     const label = document.getElementById(`${key}Label`);
-    const dot = document.getElementById(`${key}Dot`);
     const track = document.getElementById(`${key}Track`);
     const thumb = document.getElementById(`${key}Thumb`);
 
     if (key === 'browserLockEnabled' && toggleEl && toggleEl.disabled) return; 
 
-    label.textContent = enabled ? `${config.labelPrefix} ON` : `${config.labelPrefix} OFF`;
-    dot.style.background = enabled ? config.color : "var(--text-dim)";
-    dot.style.boxShadow = enabled ? `0 0 6px ${config.color}` : "none";
-    track.style.background = enabled ? config.color : "#1a1a20";
-    track.style.borderColor = enabled ? config.color : "var(--border)";
+    if (label) {
+      label.textContent = enabled ? "ON" : "OFF";
+      label.style.color = enabled ? config.color : "var(--text-secondary)";
+    }
     
-    thumb.style.left = enabled ? "calc(100% - 14px)" : "2px";
-    thumb.style.background = enabled ? "#fff" : "var(--text-dim)";
+    if (track) {
+      track.style.background = enabled ? config.color : "#1f1f28";
+      track.style.borderColor = enabled ? config.color : "var(--border)";
+    }
     
-    card.classList.toggle(`active-${key}`, enabled);
-    label.style.color = enabled ? config.color : "var(--text-secondary)";
+    if (thumb) {
+      thumb.style.left = enabled ? "calc(100% - 14px)" : "2px";
+      thumb.style.background = enabled ? "#ffffff" : "var(--text-dim)";
+    }
+    
+    if (card) {
+      card.classList.toggle(`active-${key}`, enabled);
+    }
   }
 
   async function fetchMediaCounts() {
@@ -55,14 +62,14 @@
       const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: () => ({
-          images: document.querySelectorAll("img, picture, svg image").length,
+          images: document.querySelectorAll("img, picture, svg image, canvas, [role='img']").length,
           videos: document.querySelectorAll("video, iframe[src*='youtube'], iframe[src*='vimeo']").length
         })
       });
 
       if (results?.[0]?.result) {
-        document.getElementById("imgCount").textContent = results[0].result.images;
-        document.getElementById("vidCount").textContent = results[0].result.videos;
+        document.getElementById("imgCount").textContent = `${results[0].result.images} found`;
+        document.getElementById("vidCount").textContent = `${results[0].result.videos} found`;
       }
     } catch (_) {
       document.getElementById("imgCount").textContent = "-";
@@ -78,42 +85,42 @@
       if (statusText.textContent === 'GENERATING...') return;
 
       try {
-        statusText.textContent = 'GENERATING...';
+        statusText.textContent = 'Generating...';
         statusText.style.color = 'var(--text-secondary)';
 
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         
         if (!tab?.url || !tab.url.startsWith("http")) {
-            statusText.textContent = 'HTTP/HTTPS SITES ONLY';
+            statusText.textContent = 'HTTP/HTTPS only';
             statusText.style.color = '#ff3b3b';
-            setTimeout(() => { statusText.textContent = 'SHORTEN URL'; statusText.style.color = 'var(--text-secondary)'; }, 3000);
+            setTimeout(() => { statusText.textContent = 'Shorten URL'; statusText.style.color = 'var(--text-primary)'; }, 3000);
             return;
         }
 
         chrome.runtime.sendMessage({ type: "SHORTEN_URL", url: tab.url }, async (data) => {
           if (chrome.runtime.lastError || !data) {
-            statusText.textContent = 'NETWORK ERROR';
+            statusText.textContent = 'Network Error';
             statusText.style.color = '#ff3b3b';
             return;
           }
 
           if (data.status === 200) {
             await navigator.clipboard.writeText(data.shorturl);
-            statusText.textContent = 'COPIED TO CLIPBOARD!';
+            statusText.textContent = 'Copied Link!';
             statusText.style.color = '#10b981';
           } else {
-            statusText.textContent = `ERROR ${data.status}`;
+            statusText.textContent = `Error ${data.status}`;
             statusText.style.color = '#ff3b3b';
           }
         });
       } catch (err) {
-        statusText.textContent = 'NETWORK ERROR';
+        statusText.textContent = 'Network Error';
         statusText.style.color = '#ff3b3b';
       }
 
       setTimeout(() => {
-        statusText.textContent = 'SHORTEN URL';
-        statusText.style.color = 'var(--text-secondary)';
+        statusText.textContent = 'Shorten URL';
+        statusText.style.color = 'var(--text-primary)';
       }, 3000);
     });
   }
@@ -168,7 +175,7 @@
     if (!btn || !tag) return;
 
     btn.classList.toggle('active-tab-scope', scoped);
-    tag.textContent = scoped ? 'THIS TAB' : 'ALL';
+    tag.textContent = scoped ? 'THIS TAB' : 'ALL TABS';
     btn.title = scoped ? 'Scope: This Tab Only (Changes apply only to this open page)' : 'Scope: All Tabs (Click to apply to This Tab Only)';
   }
 
@@ -274,10 +281,13 @@
       if (!state.browserLockPassword) {
         if (lockToggle) {
            lockToggle.disabled = true;
-           lockToggle.parentElement.style.cursor = 'not-allowed';
+           const lockCard = document.getElementById('browserLockEnabledCard');
+           if (lockCard) {
+             lockCard.style.cursor = 'not-allowed';
+             lockCard.style.opacity = '0.6';
+           }
            document.getElementById('browserLockEnabledTrack').style.opacity = '0.4';
-           document.getElementById('browserLockEnabledCard').style.opacity = '0.6';
-           lockLabel.textContent = "SET PASSWORD FIRST";
+           lockLabel.textContent = "PASSWORD REQUIRED";
            lockLabel.style.color = "var(--text-secondary)";
         }
       }
@@ -292,32 +302,51 @@
     initImageSearch();
     initQrGenerator(); 
 
-    const lockToggle = document.getElementById('browserLockEnabled');
-    if (lockToggle) {
-      lockToggle.addEventListener('change', (e) => {
-        if (lockToggle.disabled) { e.preventDefault(); return; }
-        const isTurningOn = e.target.checked;
-        updateSubUI('browserLockEnabled', isTurningOn);
-        
-        if (isTurningOn) {
-           sendSettingUpdate("browserLockEnabled", true);
-        } else {
-           isTogglingOff = true;
-           lockScreen.style.display = 'flex';
-           setTimeout(() => lockPw.focus(), 100);
-        }
-      });
-    }
-
-    Object.keys(configMap).concat(['targetImgEnabled', 'targetVidEnabled']).forEach(key => {
-      if (key === 'browserLockEnabled') return;
-      const el = document.getElementById(key);
-      if (el) {
-        el.addEventListener('change', (e) => {
-          updateSubUI(key, e.target.checked);
-          sendSettingUpdate(key, e.target.checked);
+    // Target cards full-card click handlers
+    ['targetImg', 'targetVid'].forEach(prefix => {
+      const card = document.getElementById(`${prefix}Card`);
+      const key = `${prefix}Enabled`;
+      if (card) {
+        card.addEventListener('click', () => {
+          const toggle = document.getElementById(key);
+          if (toggle) {
+            const nextState = !toggle.checked;
+            toggle.checked = nextState;
+            sendSettingUpdate(key, nextState);
+          }
         });
       }
+    });
+
+    // Feature cards full-card click handlers
+    Object.keys(configMap).forEach(key => {
+      const card = document.getElementById(`${key}Card`);
+      if (!card) return;
+
+      card.addEventListener('click', (e) => {
+        if (key === 'browserLockEnabled') {
+          const lockToggle = document.getElementById('browserLockEnabled');
+          if (lockToggle && lockToggle.disabled) return;
+          const nextState = !lockToggle.checked;
+          updateSubUI('browserLockEnabled', nextState);
+          
+          if (nextState) {
+            sendSettingUpdate("browserLockEnabled", true);
+          } else {
+            isTogglingOff = true;
+            lockScreen.style.display = 'flex';
+            setTimeout(() => lockPw.focus(), 100);
+          }
+          return;
+        }
+
+        const toggle = document.getElementById(key);
+        if (toggle) {
+          const nextState = !toggle.checked;
+          updateSubUI(key, nextState);
+          sendSettingUpdate(key, nextState);
+        }
+      });
     });
 
     document.getElementById('settingsBtn').addEventListener('click', () => { chrome.runtime.openOptionsPage(); });
