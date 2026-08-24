@@ -107,4 +107,4 @@ The Options page includes:
 
 ## Version
 
-Current manifest version: `4.3.0`.
+Current manifest version: `4.4.0`.

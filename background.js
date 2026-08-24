@@ -165,17 +165,36 @@ chrome.commands.onCommand.addListener(async (command) => {
     const data = await chrome.storage.local.get(DEFAULTS);
     const action = data.shortcutAction;
 
-    if (action === "open_settings") chrome.runtime.openOptionsPage();
-    else if (action === "toggle_block") await chrome.storage.local.set({ mediaBlockEnabled: !data.mediaBlockEnabled });
-    else if (action === "toggle_blur") await chrome.storage.local.set({ mediaBlurEnabled: !data.mediaBlurEnabled });
-    else if (action === "toggle_invert") await chrome.storage.local.set({ mediaInvertEnabled: !data.mediaInvertEnabled });
-    else if (action === "toggle_uniform") await chrome.storage.local.set({ mediaUniformEnabled: !data.mediaUniformEnabled });
-    else if (action === "toggle_hover") await chrome.storage.local.set({ mediaHoverEnabled: !data.mediaHoverEnabled });
-    else if (action === "toggle_rightclick") await chrome.storage.local.set({ forceRightClickEnabled: !data.forceRightClickEnabled });
-    else if (action === "toggle_stablevolume") await chrome.storage.local.set({ stableVolumeEnabled: !data.stableVolumeEnabled });
-    else if (action === "toggle_monoaudio") await chrome.storage.local.set({ monoAudioEnabled: !data.monoAudioEnabled });
-    else if (action === "toggle_darkmode") await chrome.storage.local.set({ darkModeEnabled: !data.darkModeEnabled });
-    else if (action === "toggle_textspoof") await chrome.storage.local.set({ textSpoofingEnabled: !data.textSpoofingEnabled });
+    if (action === "open_settings") {
+      chrome.runtime.openOptionsPage();
+      return;
+    }
+
+    const actionMap = {
+      "toggle_block": "mediaBlockEnabled", "toggle_blur": "mediaBlurEnabled",
+      "toggle_invert": "mediaInvertEnabled", "toggle_uniform": "mediaUniformEnabled",
+      "toggle_hover": "mediaHoverEnabled", "toggle_rightclick": "forceRightClickEnabled",
+      "toggle_stablevolume": "stableVolumeEnabled", "toggle_monoaudio": "monoAudioEnabled",
+      "toggle_darkmode": "darkModeEnabled", "toggle_textspoof": "textSpoofingEnabled"
+    };
+
+    const key = actionMap[action];
+    if (!key) return;
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0] && tabs[0].id) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: "GET_PAGE_TAB_SCOPE" }, async (res) => {
+          if (!chrome.runtime.lastError && res && res.isScoped) {
+            const nextState = res.localState[key] !== undefined ? !res.localState[key] : !data[key];
+            chrome.tabs.sendMessage(tabs[0].id, { type: "UPDATE_PAGE_TAB_SETTING", key, value: nextState });
+          } else {
+            await chrome.storage.local.set({ [key]: !data[key] });
+          }
+        });
+      } else {
+        chrome.storage.local.set({ [key]: !data[key] });
+      }
+    });
   }
 });
 
