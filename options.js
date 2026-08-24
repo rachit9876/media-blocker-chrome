@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     blurIntensity: document.getElementById('blurIntensity'),
     stableVolumeEnabled: document.getElementById('stableVolumeEnabled'),
     monoAudioEnabled: document.getElementById('monoAudioEnabled'),
+    smoothVolumeEnabled: document.getElementById('smoothVolumeEnabled'),
     audioEqMode: document.getElementById('audioEqMode'),
     audioLufs: document.getElementById('audioLufs'),
     shortcutAction: document.getElementById('shortcutAction'),
@@ -176,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
       inputs.blurIntensity.value = state.blurIntensity;
       inputs.stableVolumeEnabled.checked = state.stableVolumeEnabled;
       if (inputs.monoAudioEnabled) inputs.monoAudioEnabled.checked = state.monoAudioEnabled || false;
+      if (inputs.smoothVolumeEnabled) inputs.smoothVolumeEnabled.checked = state.smoothVolumeEnabled || false;
       inputs.audioEqMode.value = state.audioEqMode;
       if (inputs.audioLufs) inputs.audioLufs.value = state.audioLufs || "-12";
       inputs.shortcutAction.value = state.shortcutAction;
@@ -221,11 +223,19 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value });
   }
 
-  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'monoAudioEnabled', 'darkModeEnabled', 'textSpoofingEnabled', 'domainLockEnabled'].forEach(key => {
+  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'monoAudioEnabled', 'smoothVolumeEnabled', 'darkModeEnabled', 'textSpoofingEnabled', 'domainLockEnabled'].forEach(key => {
     if (inputs[key]) {
       inputs[key].addEventListener('change', (e) => {
         updateSetting(key, e.target.checked);
         if (key === 'textSpoofingEnabled') updateSpoofPreview();
+        
+        if (key === 'stableVolumeEnabled' && e.target.checked && inputs.smoothVolumeEnabled) {
+          inputs.smoothVolumeEnabled.checked = false;
+          updateSetting('smoothVolumeEnabled', false);
+        } else if (key === 'smoothVolumeEnabled' && e.target.checked && inputs.stableVolumeEnabled) {
+          inputs.stableVolumeEnabled.checked = false;
+          updateSetting('stableVolumeEnabled', false);
+        }
       });
     }
   });

@@ -11,6 +11,7 @@
     forceRightClickEnabled: { color: "var(--frc-accent)", labelPrefix: "RIGHT-CLICK" },
     stableVolumeEnabled: { color: "var(--vol-accent)", labelPrefix: "STABLE VOL" },
     monoAudioEnabled: { color: "var(--mono-accent)", labelPrefix: "MONO" },
+    smoothVolumeEnabled: { color: "var(--search-accent)", labelPrefix: "SMOOTH VOL" },
     darkModeEnabled: { color: "var(--dark-accent)", labelPrefix: "DARK MODE" },
     textSpoofingEnabled: { color: "var(--textspoof-accent)", labelPrefix: "TEXT SPOOF" },
     browserLockEnabled: { color: "var(--lock-accent)", labelPrefix: "LOCK" }
@@ -345,6 +346,14 @@
           const nextState = !toggle.checked;
           updateSubUI(key, nextState);
           sendSettingUpdate(key, nextState);
+          
+          if (key === 'stableVolumeEnabled' && nextState) {
+             updateSubUI('smoothVolumeEnabled', false);
+             sendSettingUpdate('smoothVolumeEnabled', false);
+          } else if (key === 'smoothVolumeEnabled' && nextState) {
+             updateSubUI('stableVolumeEnabled', false);
+             sendSettingUpdate('stableVolumeEnabled', false);
+          }
         }
       });
     });

@@ -2,7 +2,7 @@
 const DEFAULTS = {
   mediaBlockEnabled: false, mediaInvertEnabled: false, mediaBlurEnabled: false,
   mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,
-  stableVolumeEnabled: false, monoAudioEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
+  stableVolumeEnabled: false, monoAudioEnabled: false, smoothVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
   blurIntensity: 25, blurMode: "blur", audioEqMode: "stable", audioLufs: "-12",
   shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
   textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
@@ -70,6 +70,8 @@ async function updateBadge() {
     
     if (data.darkModeEnabled) activeEmojis.push("🌙");
     if (data.stableVolumeEnabled) activeEmojis.push("🔊");
+    if (data.monoAudioEnabled) activeEmojis.push("🎧");
+    if (data.smoothVolumeEnabled) activeEmojis.push("📈");
     if (data.forceRightClickEnabled) activeEmojis.push("🔓");
     if (data.mediaHoverEnabled) activeEmojis.push("👁️");
 
@@ -175,6 +177,7 @@ chrome.commands.onCommand.addListener(async (command) => {
       "toggle_invert": "mediaInvertEnabled", "toggle_uniform": "mediaUniformEnabled",
       "toggle_hover": "mediaHoverEnabled", "toggle_rightclick": "forceRightClickEnabled",
       "toggle_stablevolume": "stableVolumeEnabled", "toggle_monoaudio": "monoAudioEnabled",
+      "toggle_smoothvolume": "smoothVolumeEnabled",
       "toggle_darkmode": "darkModeEnabled", "toggle_textspoof": "textSpoofingEnabled"
     };
 

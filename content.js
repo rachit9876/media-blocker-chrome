@@ -48,6 +48,7 @@
 
   let isStableVolumeOn = false; 
   let isMonoAudioOn = false;
+  let isSmoothVolumeOn = false;
   let audioEqMode = 'stable'; 
   let currentAudioLufs = -12;
   let audioCtx = null; 
@@ -100,7 +101,7 @@
       highEQ.type = "highshelf";
       highEQ.frequency.value = 6000;
       
-      // Stage 1: Dynamic Range Leveler (brings up quiet sounds while taming high dynamic swings)
+      // Stage 1: Dynamic Range Leveler
       const compressor = audioCtx.createDynamicsCompressor(); 
       compressor.threshold.value = currentAudioLufs; 
       compressor.knee.value = 12; 
@@ -108,11 +109,10 @@
       compressor.attack.value = 0.003; 
       compressor.release.value = 0.20;   
       
-      // Makeup gain to boost low dialogue/sounds into clear audibility
       const makeupGain = audioCtx.createGain(); 
       makeupGain.gain.value = 1.8; 
 
-      // Stage 2: Fast Brickwall Peak Limiter (clamps loud screams, explosions & crashes to prevent jerks)
+      // Stage 2: Fast Brickwall Peak Limiter
       const limiter = audioCtx.createDynamicsCompressor();
       limiter.threshold.value = -1.5;
       limiter.knee.value = 0;
@@ -126,6 +126,9 @@
       const bypassGain = audioCtx.createGain(); 
       bypassGain.gain.value = isStableVolumeOn ? 0 : 1;
       
+      const fadeGain = audioCtx.createGain();
+      fadeGain.gain.value = isSmoothVolumeOn ? 0 : 1; // Start at 0 if smooth volume is active during creation
+      
       // Source feeds mono downmixer first
       source.connect(monoNode);
 
@@ -137,13 +140,15 @@
       compressor.connect(makeupGain); 
       makeupGain.connect(limiter);
       limiter.connect(effectGain); 
-      effectGain.connect(audioCtx.destination); 
+      effectGain.connect(fadeGain); 
       
       // Bypass Path
       monoNode.connect(bypassGain); 
-      bypassGain.connect(audioCtx.destination);
+      bypassGain.connect(fadeGain);
       
-      processedMedia.set(mediaEl, { effectGain, bypassGain, lowEQ, midEQ, highEQ, compressor, limiter, monoNode });
+      fadeGain.connect(audioCtx.destination);
+      
+      processedMedia.set(mediaEl, { effectGain, bypassGain, lowEQ, midEQ, highEQ, compressor, limiter, monoNode, fadeGain });
       updateEQNodes(processedMedia.get(mediaEl));
     } catch (e) { }
   }
@@ -201,12 +206,35 @@
     if (enabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   }
   
+  function toggleSmoothVolumeLive(enabled) {
+    isSmoothVolumeOn = enabled;
+    const mediaEls = document.querySelectorAll('video, audio'); 
+    if (enabled) mediaEls.forEach(attachAudioProcessing);
+    mediaEls.forEach(el => { 
+      const nodes = processedMedia.get(el); 
+      if (nodes && audioCtx) {
+        nodes.fadeGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        nodes.fadeGain.gain.setTargetAtTime(1, audioCtx.currentTime, 0.05); 
+      }
+    });
+    if (enabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  
   document.addEventListener('play', (e) => { 
     if (e.target.tagName === 'VIDEO' || e.target.tagName === 'AUDIO') { 
-      if (isStableVolumeOn || isMonoAudioOn) { 
+      if (isStableVolumeOn || isMonoAudioOn || isSmoothVolumeOn) { 
         attachAudioProcessing(e.target); 
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); 
       } 
+      
+      if (isSmoothVolumeOn) {
+        const nodes = processedMedia.get(e.target);
+        if (nodes && audioCtx) {
+           nodes.fadeGain.gain.cancelScheduledValues(audioCtx.currentTime);
+           nodes.fadeGain.gain.setValueAtTime(0.01, audioCtx.currentTime); // Exponential ramp cannot start at 0
+           nodes.fadeGain.gain.exponentialRampToValueAtTime(1, audioCtx.currentTime + 5); // 5 seconds exponential fade
+        }
+      }
     } 
   }, true);
 
@@ -618,7 +646,7 @@
   const DEFAULTS = {
     mediaBlockEnabled: false, mediaInvertEnabled: false, mediaBlurEnabled: false,
     mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,
-    stableVolumeEnabled: false, monoAudioEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
+    stableVolumeEnabled: false, monoAudioEnabled: false, smoothVolumeEnabled: false, darkModeEnabled: false, targetImgEnabled: true, targetVidEnabled: true,
     blurIntensity: 25, blurMode: "blur", audioEqMode: "stable", audioLufs: "-12",
     shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
     textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
