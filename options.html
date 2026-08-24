@@ -2,128 +2,766 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>MediaBlock Pro - Advanced Settings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediaBlock Pro - Settings</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Alata&display=swap');
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Alata', sans-serif !important; }
-
-    :root {
-      --off-bg: #0f0f11; --off-card: #1a1a1f; --off-border: #2a2a32;
-      --text-primary: #f0f0f5; --text-secondary: #7a7a8a; --text-dim: #3a3a4a;
-      --accent: #3b82f6; --accent-hover: #2563eb; --danger: #ff3b3b; --danger-hover: #dc2626;
-      --purplish: #a855f7; --purplish-light: #d8b4fe;
-      --radius: 14px; --transition: 0.3s ease;
+    
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Alata', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     }
 
-    body { background: var(--off-bg); color: var(--text-primary); padding: 20px 16px; display: flex; justify-content: center; min-height: 100vh; }
-    .container { position: relative; z-index: 1; max-width: 960px; width: 100%; display: flex; flex-direction: column; gap: 16px; }
-    
-    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
-    .column-group { display: flex; flex-direction: column; gap: 12px; }
-    
-    @media (max-width: 850px) { .grid-layout { grid-template-columns: 1fr; } }
+    :root {
+      --bg: #0b0b0f;
+      --card-bg: #14141a;
+      --card-hover: #1b1b22;
+      --card-inner: #0f0f14;
+      --border: #22222d;
+      --border-focus: #3b3b4e;
+      
+      --block-accent: #ef4444;
+      --blur-accent: #3b82f6;
+      --invert-accent: #a855f7;
+      --hover-accent: #10b981;
+      --uniform-accent: #f59e0b;
+      --frc-accent: #14b8a6;
+      --vol-accent: #ec4899;
+      --mono-accent: #06b6d4;
+      --dark-accent: #6366f1;
+      --textspoof-accent: #22c55e;
+      --lock-accent: #f43f5e;
+      --short-accent: #8b5cf6;
+      --search-accent: #eab308;
+      
+      --text-primary: #f3f3f8;
+      --text-secondary: #858598;
+      --text-dim: #444456;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-    h1 { font-weight: 800; font-size: 24px; margin-bottom: 2px; }
-    h2 { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-left: 4px; margin-bottom: 4px; }
-    
-    .card { background: var(--off-card); border: 1px solid var(--off-border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
-    
-    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--off-border); gap: 12px; flex-wrap: wrap; }
-    .list-item:last-child { border-bottom: none; }
-    .list-item-text { display: flex; flex-direction: column; flex-grow: 1; min-width: 150px; }
-    
-    .item-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
-    .item-desc { font-size: 11px; color: var(--text-secondary); margin-top: 1px; line-height: 1.25; }
-    
-    .small-toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
-    .small-toggle input { opacity: 0; width: 0; height: 0; }
-    .small-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e1e26; border: 2px solid var(--off-border); transition: all var(--transition); border-radius: 100px; }
-    .small-toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: var(--text-dim); transition: all var(--transition); border-radius: 50%; }
-    .small-toggle input:checked + .small-toggle-slider { background-color: var(--text-primary); border-color: var(--text-primary); }
-    .small-toggle input:checked + .small-toggle-slider:before { transform: translateX(20px); background-color: var(--off-bg); }
+    body {
+      background: var(--bg);
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 85% 90%, rgba(168, 85, 247, 0.05) 0%, transparent 40%);
+      color: var(--text-primary);
+      padding: 32px 20px 48px 20px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
 
-    input[type=range] { -webkit-appearance: none; width: 120px; background: transparent; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--text-primary); cursor: pointer; margin-top: -6px; }
-    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: var(--off-border); border-radius: 2px; }
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-focus);
+    }
 
-    select, input[type=password], input[type=text] { padding: 6px 10px; font-size: 12px; border: 2px solid var(--off-border); border-radius: 6px; background: #1e1e26; color: var(--text-primary); outline: none; transition: all 0.2s; width: auto; max-width: 100%; flex-shrink: 1; }
-    select:focus, input[type=password]:focus, input[type=text]:focus { border-color: var(--text-primary); }
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-    .btn { padding: 6px 16px; font-size: 12px; font-weight: 500; color: var(--danger); background: transparent; border: 2px solid var(--off-border); border-radius: 6px; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
-    .btn:hover { border-color: var(--danger); background: rgba(255, 59, 59, 0.1); }
-    .btn-save { padding: 6px 14px; font-weight: 600; font-size: 12px; color: #fff; background: var(--accent); border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
-    
-    .history-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; border-bottom: 1px solid var(--off-border); gap: 14px; background: #1e1e26; }
-    .history-item:last-child { border-bottom: none; }
-    .qr-box { width: 40px; height: 40px; border-radius: 6px; background: #fff; padding: 2px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s; }
-    .qr-box:hover { transform: scale(1.05); }
-    .qr-box img { width: 100%; height: 100%; border-radius: 4px; }
-    
-    .link-info { flex-grow: 1; word-wrap: break-word; overflow-wrap: break-word; overflow: hidden; }
-    .link-short { font-size: 14px; color: var(--accent); font-weight: 600; text-decoration: none; display: block; margin-bottom: 2px; word-break: break-all; }
-    .link-original { font-size: 11px; color: var(--text-secondary); display: block; word-break: break-all; }
+    /* Header */
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
 
-    .skeleton-preview {
-      height: 90px;
-      border: 2px dashed var(--purplish);
-      border-radius: 8px;
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(90deg, #1e1e26 25%, #2a2a32 50%, #1e1e26 75%);
-      background-size: 200% 100%;
-      animation: mb-shimmer 2s infinite linear;
-      color: var(--purplish-light);
-      font-size: 13px;
-      font-weight: 500;
-      padding: 12px;
-      text-align: center;
-      font-style: italic;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
+
+    .logo-box img {
+      width: 22px;
+      height: 22px;
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .badge-pro {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #ff4757;
+      background: rgba(255, 71, 87, 0.12);
+      border: 1px solid rgba(255, 71, 87, 0.25);
+      border-radius: 4px;
+      padding: 1px 6px;
+      letter-spacing: 0.06em;
+    }
+
+    .brand-subtitle {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .meta-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 9px;
+      letter-spacing: 0.04em;
+    }
+
+    /* Grid Layout */
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .column-group {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    @media (max-width: 860px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Section Cards */
+    .section-title {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      margin-left: 2px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .section-title svg {
+      width: 13px;
+      height: 13px;
+      stroke: var(--text-secondary);
+      opacity: 0.9;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    /* List Items */
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      gap: 14px;
+      transition: background var(--transition);
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .list-item:hover {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .list-item-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .item-icon-box {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--text-secondary);
+    }
+
+    .item-icon-box svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+    }
+
+    .list-item-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .item-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.1px;
+    }
+
+    .item-desc {
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+
+    /* Toggle Switches */
+    .small-toggle {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 21px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .small-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .small-toggle-slider {
+      position: absolute;
+      inset: 0;
+      background-color: #1f1f28;
+      border: 1px solid var(--border);
+      transition: all var(--transition);
+      border-radius: 20px;
+    }
+
+    .small-toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 15px;
+      width: 15px;
+      left: 2px;
+      bottom: 2px;
+      background-color: var(--text-dim);
+      transition: all var(--transition);
+      border-radius: 50%;
+    }
+
+    .small-toggle input:checked + .small-toggle-slider {
+      background-color: var(--blur-accent);
+      border-color: var(--blur-accent);
+    }
+
+    .small-toggle input:checked + .small-toggle-slider:before {
+      transform: translateX(17px);
+      background-color: #ffffff;
+    }
+
+    /* Form Controls */
+    select, input[type=password], input[type=text] {
+      padding: 7px 11px;
+      font-size: 11.5px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card-inner);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      max-width: 100%;
+    }
+
+    select {
+      cursor: pointer;
+      padding-right: 24px;
+      appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%23858598" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    select:focus, input[type=password]:focus, input[type=text]:focus {
+      border-color: var(--blur-accent);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+    }
+
+    /* Range Slider */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 130px;
+      height: 6px;
+      background: #1f1f28;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: var(--blur-accent);
+      border: 2px solid #ffffff;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+      transition: transform 0.1s ease;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .range-val-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--blur-accent);
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: 4px;
+      padding: 2px 6px;
+      min-width: 36px;
+      text-align: center;
+    }
+
+    /* Buttons */
+    .btn-save {
+      padding: 7px 14px;
+      font-weight: 700;
+      font-size: 11.5px;
+      color: #fff;
+      background: var(--blur-accent);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .btn-save:hover {
+      background: #2563eb;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.35);
+    }
+
+    .btn-danger {
+      padding: 7px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--danger);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .btn-danger:hover {
+      background: var(--danger-hover);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);
+    }
+
+    /* Skeleton Preview */
+    .skeleton-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--card-inner);
+      padding: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .skeleton-preview {
+      min-height: 80px;
+      border: 1.5px dashed var(--invert-accent);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(90deg, #14141a 25%, #20202c 50%, #14141a 75%);
+      background-size: 200% 100%;
+      animation: mb-shimmer 2.2s infinite linear;
+      color: var(--purplish-light, #d8b4fe);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 14px;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
     @keyframes mb-shimmer {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
+    }
+
+    /* Shortened Links History */
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      background: var(--card-inner);
+      transition: background var(--transition);
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .history-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .qr-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      background: #fff;
+      padding: 2px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .qr-box:hover {
+      transform: scale(1.08);
+    }
+
+    .qr-box img {
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      display: block;
+    }
+
+    .link-info {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .link-short {
+      font-size: 12.5px;
+      color: var(--blur-accent);
+      font-weight: 700;
+      text-decoration: none;
+      display: block;
+      word-break: break-all;
+    }
+
+    .link-short:hover {
+      text-decoration: underline;
+    }
+
+    .link-original {
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* QR Modal */
+    #qrModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 11, 15, 0.92);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .qr-modal-card {
+      background: var(--card-bg);
+      padding: 26px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      text-align: center;
+      position: relative;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .qr-modal-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 18px;
+      transition: color 0.2s;
+    }
+
+    .qr-modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    /* Footer */
+    .footer {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      text-align: center;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding-top: 12px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Settings</h1>
+    
+    <!-- Top Header -->
+    <div class="header-bar">
+      <div class="brand-group">
+        <div class="logo-box">
+          <img src="icons/icon32.png" alt="MediaBlock Pro">
+        </div>
+        <div class="brand-title-wrap">
+          <div class="title-row">
+            <span class="brand-name">MediaBlock</span>
+            <span class="badge-pro">PRO</span>
+          </div>
+          <span class="brand-subtitle">Extension Settings & Preferences</span>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="meta-tag" id="appVersion">v4.3.0</span>
+        <span class="meta-tag">SHORTCUT: ALT + S</span>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
     <div class="grid-layout">
       
+      <!-- Column 1 -->
       <div class="column-group">
+        
+        <!-- Target Filters -->
         <div>
-          <h2>Targeting Details</h2>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+            <span>Media Targets & Filtering</span>
+          </div>
           <div class="card">
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Apply to Images</span><span class="item-desc">Affect all picture, canvas, and background images.</span></div><label class="small-toggle"><input type="checkbox" id="targetImgEnabled"><span class="small-toggle-slider"></span></label></div>
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Apply to Videos</span><span class="item-desc">Affect standard videos and embeds.</span></div><label class="small-toggle"><input type="checkbox" id="targetVidEnabled"><span class="small-toggle-slider"></span></label></div>
+            <div class="list-item">
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--blur-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Apply to Images</span>
+                  <span class="item-desc">Affect all standard images, pictures, canvases, and CSS backgrounds.</span>
+                </div>
+              </div>
+              <label class="small-toggle"><input type="checkbox" id="targetImgEnabled"><span class="small-toggle-slider"></span></label>
+            </div>
+            
+            <div class="list-item">
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--block-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Apply to Videos</span>
+                  <span class="item-desc">Affect video elements, HTML5 embeds, and video iframes.</span>
+                </div>
+              </div>
+              <label class="small-toggle"><input type="checkbox" id="targetVidEnabled"><span class="small-toggle-slider"></span></label>
+            </div>
           </div>
         </div>
 
+        <!-- Visual Privacy & Appearance -->
         <div>
-          <h2>Accessibility & Feedback</h2>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+            <span>Visual Adjustments & Theme</span>
+          </div>
           <div class="card">
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Force Right-Click & Copy</span><span class="item-desc">Unlock context menus on restrictive sites.</span></div><label class="small-toggle"><input type="checkbox" id="forceRightClickEnabled"><span class="small-toggle-slider"></span></label></div>
+            <div class="list-item">
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--dark-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Smart Dark Mode</span>
+                  <span class="item-desc">Force elegant dark themes on light websites dynamically.</span>
+                </div>
+              </div>
+              <label class="small-toggle"><input type="checkbox" id="darkModeEnabled"><span class="small-toggle-slider"></span></label>
+            </div>
+            
+            <div class="list-item">
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--blur-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Blur Style</span>
+                  <span class="item-desc">Switch between smooth Gaussian blur and pixelation mosaic.</span>
+                </div>
+              </div>
+              <select id="blurMode">
+                <option value="blur">Smooth Blur</option>
+                <option value="pixelate">Pixelation Filter</option>
+              </select>
+            </div>
+            
+            <div class="list-item">
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--uniform-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title" id="blurIntensityLabel">Blur Intensity</span>
+                  <span class="item-desc">Adjust the visual privacy filter strength.</span>
+                </div>
+              </div>
+              <div class="slider-wrap">
+                <input type="range" id="blurIntensity" min="5" max="50" step="1">
+                <span class="range-val-badge" id="blurIntensityVal">25px</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <!-- Text Privacy (Typoglycemia) -->
+        <div>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+            <span>Text Privacy & Anti-Shoulder Surfing</span>
+          </div>
+          <div class="card">
             <div class="list-item">
-              <div class="list-item-text">
-                <span class="item-title">Text Spoofing</span>
-                <span class="item-desc">Scramble page text into deterministic, seed-based typoglycemia.</span>
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--textspoof-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Text Spoofing</span>
+                  <span class="item-desc">Scramble page text into deterministic, seed-based typoglycemia.</span>
+                </div>
               </div>
-              <label class="small-toggle">
-                <input type="checkbox" id="textSpoofingEnabled">
-                <span class="small-toggle-slider"></span>
-              </label>
+              <label class="small-toggle"><input type="checkbox" id="textSpoofingEnabled"><span class="small-toggle-slider"></span></label>
             </div>
+            
             <div class="list-item">
-              <div class="list-item-text">
-                <span class="item-title">Spoofing Seed</span>
-                <span class="item-desc">The same seed always produces the same text pattern.</span>
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--invert-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Spoofing Seed</span>
+                  <span class="item-desc">The same seed produces the same readable scrambling pattern.</span>
+                </div>
               </div>
-              <input type="text" id="textSpoofingSeed" placeholder="mediablock" spellcheck="false">
+              <input type="text" id="textSpoofingSeed" placeholder="mediablock" spellcheck="false" style="width: 140px;">
             </div>
-            <div class="list-item" style="flex-direction: column; align-items: stretch; background: var(--off-bg); padding: 16px;">
-              <span class="item-desc" style="margin-bottom: 8px; color: var(--text-primary); font-weight: bold;">Skeleton Preview:</span>
+
+            <!-- Skeleton Live Preview -->
+            <div class="skeleton-wrap">
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Live Typoglycemia Preview:</span>
               <div class="skeleton-preview" id="textSpoofPreview">
                 alt: "A golden retriever puppy running through a field"
               </div>
@@ -131,48 +769,54 @@
           </div>
         </div>
 
-        <div>
-          <h2>Shortened Links History</h2>
-          <div class="card">
-            <div class="list-item" style="padding: 10px 18px;">
-              <span class="item-desc" style="margin:0;">Recent URLs & QR Codes</span>
-              <button id="clearHistoryBtn" style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:12px;">Clear All</button>
-            </div>
-            <div id="historyContainer" style="max-height: 200px; overflow-y: auto;">
-            </div>
-          </div>
-        </div>
       </div>
 
+      <!-- Column 2 -->
       <div class="column-group">
+        
+        <!-- Audio EQ Engine -->
         <div>
-          <h2>Visual Adjustments</h2>
-          <div class="card">
-            <div class="list-item">
-              <div class="list-item-text"><span class="item-title">Smart Dark Mode</span><span class="item-desc">Force dark themes on all websites dynamically.</span></div>
-              <label class="small-toggle"><input type="checkbox" id="darkModeEnabled"><span class="small-toggle-slider"></span></label>
-            </div>
-            <div class="list-item">
-              <div class="list-item-text"><span class="item-title">Blur Style</span><span class="item-desc">Switch to Pixelation on low-end devices.</span></div>
-              <select id="blurMode">
-                <option value="blur">Smooth Blur</option>
-                <option value="pixelate">Pixelation Filter</option>
-              </select>
-            </div>
-            <div class="list-item">
-              <div class="list-item-text"><span class="item-title" id="blurIntensityLabel">Blur Intensity</span><span class="item-desc">Adjust the strength of the visual filter.</span></div>
-              <input type="range" id="blurIntensity" min="5" max="50" step="1">
-            </div>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            <span>Audio Normalization & EQ Profiles</span>
           </div>
-        </div>
-
-        <div>
-          <h2>Audio EQ Engine</h2>
           <div class="card">
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Stable Volume Engine</span><span class="item-desc">Dynamic range compression to squash loud noises.</span></div><label class="small-toggle"><input type="checkbox" id="stableVolumeEnabled"><span class="small-toggle-slider"></span></label></div>
-            <div class="list-item"><div class="list-item-text"><span class="item-title">Mono Audio Downmix</span><span class="item-desc">Combine stereo channels into unified balanced mono.</span></div><label class="small-toggle"><input type="checkbox" id="monoAudioEnabled"><span class="small-toggle-slider"></span></label></div>
             <div class="list-item">
-              <div class="list-item-text"><span class="item-title">Audio Profile</span><span class="item-desc">Tune specific frequencies.</span></div>
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--vol-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Stable Volume Engine</span>
+                  <span class="item-desc">Dynamic compression to level quiet voices & clamp loud spikes.</span>
+                </div>
+              </div>
+              <label class="small-toggle"><input type="checkbox" id="stableVolumeEnabled"><span class="small-toggle-slider"></span></label>
+            </div>
+            
+            <div class="list-item">
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--mono-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Mono Audio Downmix</span>
+                  <span class="item-desc">Combine stereo channels into unified balanced mono.</span>
+                </div>
+              </div>
+              <label class="small-toggle"><input type="checkbox" id="monoAudioEnabled"><span class="small-toggle-slider"></span></label>
+            </div>
+            
+            <div class="list-item">
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--vol-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Audio Profile</span>
+                  <span class="item-desc">Tune specific dynamic frequency curves.</span>
+                </div>
+              </div>
               <select id="audioEqMode">
                 <option value="stable">Flat (Standard Compression)</option>
                 <option value="dialogue">Dialogue Boost (Clear Voices)</option>
@@ -182,8 +826,17 @@
                 <option value="cinema">Cinema (Immersive)</option>
               </select>
             </div>
+
             <div class="list-item">
-              <div class="list-item-text"><span class="item-title">Target Loudness (LUFS)</span><span class="item-desc">Adjust the volume normalization target.</span></div>
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--mono-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Target Loudness (LUFS)</span>
+                  <span class="item-desc">Volume normalization threshold target.</span>
+                </div>
+              </div>
               <select id="audioLufs">
                 <option value="-10">-10 LUFS</option>
                 <option value="-12">-12 LUFS (Default)</option>
@@ -198,36 +851,83 @@
           </div>
         </div>
 
+        <!-- Security & Domain Lock -->
         <div>
-          <h2>Security & Shortcuts</h2>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>Security & Access Locks</span>
+          </div>
           <div class="card">
-             <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-              <div class="list-item-text"><span class="item-title">Universal Password</span><span class="item-desc">Lock your browser from the popup.</span></div>
-              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
-                <div style="display: flex; gap: 8px; width: 100%;">
-                  <input type="password" id="browserLockPassword" placeholder="Enter password..." style="flex-grow: 1; width:auto;">
-                  <input type="password" id="browserLockPasswordConfirm" placeholder="Confirm password..." style="flex-grow: 1; width:auto;">
-                  <button id="savePasswordBtn" class="btn-save">Save</button>
-                  <button id="deletePasswordBtn" style="display: none; background:var(--danger); border:none; border-radius:8px; color:#fff; padding:0 12px; cursor:pointer;" title="Remove Password">X</button>
-                </div>
-                <span id="passwordFeedback" style="font-size: 11px; display: none; margin-top: 2px;"></span>
-              </div>
-            </div>
             
-            <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-              <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                <div class="list-item-text"><span class="item-title">Domain Lock</span><span class="item-desc">Require universal password for specific websites.</span></div>
-                <label class="small-toggle"><input type="checkbox" id="domainLockEnabled"><span class="small-toggle-slider"></span></label>
+            <!-- Force Right Click -->
+            <div class="list-item">
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--frc-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Force Right-Click & Copy</span>
+                  <span class="item-desc">Unlock context menus & selection on restrictive sites.</span>
+                </div>
               </div>
-              <div style="display: flex; gap: 8px; width: 100%;">
-                <input type="text" id="newLockedDomain" placeholder="e.g. reddit.com" style="flex-grow: 1; width:auto;">
-                <button id="addDomainBtn" class="btn-save">Add</button>
-              </div>
-              <div id="lockedDomainsList" style="width: 100%; max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;"></div>
+              <label class="small-toggle"><input type="checkbox" id="forceRightClickEnabled"><span class="small-toggle-slider"></span></label>
             </div>
 
+            <!-- Master Password -->
+            <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+              <div class="list-item-left" style="width: 100%;">
+                <div class="item-icon-box" style="color: var(--lock-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Universal Password</span>
+                  <span class="item-desc">Used for browser lock and domain-level session security.</span>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                <div style="display: flex; gap: 8px; width: 100%; flex-wrap: wrap;">
+                  <input type="password" id="browserLockPassword" placeholder="Enter password..." style="flex: 1; min-width: 130px;">
+                  <input type="password" id="browserLockPasswordConfirm" placeholder="Confirm password..." style="flex: 1; min-width: 130px;">
+                  <button id="savePasswordBtn" class="btn-save">Save</button>
+                  <button id="deletePasswordBtn" class="btn-danger" style="display: none;" title="Remove Password">Remove</button>
+                </div>
+                <span id="passwordFeedback" style="font-size: 11px; font-weight: 700; display: none; margin-top: 2px;"></span>
+              </div>
+            </div>
+
+            <!-- Domain Lock -->
+            <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                <div class="list-item-left">
+                  <div class="item-icon-box" style="color: var(--danger);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  </div>
+                  <div class="list-item-text">
+                    <span class="item-title">Domain Lock</span>
+                    <span class="item-desc">Require password to access specific domains.</span>
+                  </div>
+                </div>
+                <label class="small-toggle"><input type="checkbox" id="domainLockEnabled"><span class="small-toggle-slider"></span></label>
+              </div>
+              
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <input type="text" id="newLockedDomain" placeholder="e.g. reddit.com" style="flex: 1;" spellcheck="false">
+                <button id="addDomainBtn" class="btn-save">Add Domain</button>
+              </div>
+              <div id="lockedDomainsList" style="width: 100%; max-height: 130px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;"></div>
+            </div>
+
+            <!-- Keyboard Shortcut -->
             <div class="list-item">
-              <div class="list-item-text"><span class="item-title">Alt + S Shortcut</span></div>
+              <div class="list-item-left">
+                <div class="item-icon-box" style="color: var(--search-accent);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6" y2="8"></line><line x1="10" y1="8" x2="10" y2="8"></line><line x1="14" y1="8" x2="14" y2="8"></line><line x1="18" y1="8" x2="18" y2="8"></line><line x1="6" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="18" y2="12"></line><line x1="9" y1="16" x2="15" y2="16"></line></svg>
+                </div>
+                <div class="list-item-text">
+                  <span class="item-title">Alt + S Shortcut Action</span>
+                  <span class="item-desc">Action triggered when pressing the hotkey.</span>
+                </div>
+              </div>
               <select id="shortcutAction">
                 <option value="toggle_blur">Toggle Blur</option>
                 <option value="open_settings">Open Settings</option>
@@ -242,18 +942,47 @@
                 <option value="toggle_textspoof">Toggle Text Spoofing</option>
               </select>
             </div>
+
           </div>
         </div>
-        
+
+        <!-- Shortened Links & QR History -->
+        <div>
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            <span>Shortened Links & QR History</span>
+          </div>
+          <div class="card">
+            <div class="list-item" style="padding: 10px 14px; background: var(--card-inner);">
+              <span class="item-desc" style="font-weight: 700;">Recent URLs & Mobile QR Codes</span>
+              <button id="clearHistoryBtn" style="background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 11px; font-weight: 700; transition: opacity 0.2s;">Clear All</button>
+            </div>
+            <div id="historyContainer" style="max-height: 190px; overflow-y: auto;">
+            </div>
+          </div>
+        </div>
+
       </div>
+
     </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>MEDIABLOCK PRO</span>
+      <span>•</span>
+      <span>HIGH PERFORMANCE EXTENSION SUITE</span>
+      <span>•</span>
+      <span>ALL SITES PROTECTED</span>
+    </div>
+
   </div>
 
-  <div id="qrModal" style="display:none; position:fixed; inset:0; background:rgba(15,15,17,0.9); z-index:9999; align-items:center; justify-content:center; flex-direction:column; padding:20px;">
-    <div style="background:var(--off-card); padding:24px; border-radius:16px; border:1px solid var(--off-border); text-align:center; position:relative; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-       <button id="closeQrModal" style="position:absolute; top:12px; right:16px; background:transparent; border:none; color:var(--text-secondary); cursor:pointer; font-size:20px; transition: color 0.2s;">✕</button>
-       <h3 style="margin-bottom:20px; font-size:18px; color: var(--text-primary);">Scan to Open on Mobile</h3>
-       <img id="qrModalImg" src="" alt="Enlarged QR Code" style="width:250px; height:250px; border-radius:8px; background:#fff; padding:12px; display:block; margin: 0 auto;">
+  <!-- QR Enlarged Modal -->
+  <div id="qrModal">
+    <div class="qr-modal-card">
+      <button id="closeQrModal" class="qr-modal-close">✕</button>
+      <h3 style="margin-bottom: 16px; font-size: 16px; color: var(--text-primary); font-weight: 700;">Scan to Open on Mobile</h3>
+      <img id="qrModalImg" src="" alt="Enlarged QR Code" style="width: 220px; height: 220px; border-radius: 8px; background: #fff; padding: 10px; display: block; margin: 0 auto; box-shadow: 0 4px 16px rgba(0,0,0,0.5);">
     </div>
   </div>
 

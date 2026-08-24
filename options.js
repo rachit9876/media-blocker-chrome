@@ -32,7 +32,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   function updateIntensityLabel() {
-    document.getElementById('blurIntensityLabel').textContent = inputs.blurMode.value === 'pixelate' ? 'Mosaic Intensity' : 'Blur Intensity';
+    const isPixelate = inputs.blurMode.value === 'pixelate';
+    document.getElementById('blurIntensityLabel').textContent = isPixelate ? 'Mosaic Intensity' : 'Blur Intensity';
+    updateIntensityBadge();
+  }
+
+  function updateIntensityBadge() {
+    const badge = document.getElementById('blurIntensityVal');
+    if (!badge) return;
+    const val = inputs.blurIntensity ? inputs.blurIntensity.value : 25;
+    const isPixelate = inputs.blurMode && inputs.blurMode.value === 'pixelate';
+    badge.textContent = isPixelate ? `Lvl ${val}` : `${val}px`;
   }
 
   // --- Live Text Spoofing Preview Logic ---
@@ -181,9 +191,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       updateIntensityLabel();
+      updateIntensityBadge();
       updateSpoofPreview();
       renderHistory(state.urlHistory);
       renderLockedDomains(state.lockedDomains || []);
+      
+      const versionEl = document.getElementById("appVersion");
+      if (versionEl) versionEl.textContent = `v${chrome.runtime.getManifest().version}`;
       
       inputs.browserLockPassword.value = ""; inputs.browserLockPasswordConfirm.value = "";
       
@@ -238,7 +252,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   if (inputs.blurIntensity) {
-    inputs.blurIntensity.addEventListener('input', (e) => updateSetting('blurIntensity', parseInt(e.target.value)));
+    inputs.blurIntensity.addEventListener('input', (e) => {
+      updateSetting('blurIntensity', parseInt(e.target.value, 10));
+      updateIntensityBadge();
+    });
   }
 
   function showFeedback(msg, isError = false) {
@@ -304,7 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputs[key] && !['browserLockPassword', 'browserLockPasswordConfirm'].includes(key)) {
           if (['blurIntensity', 'shortcutAction', 'blurMode', 'audioEqMode', 'audioLufs', 'textSpoofingSeed'].includes(key)) {
             inputs[key].value = newValue;
-            if (key === 'blurMode') updateIntensityLabel();
+            if (key === 'blurMode' || key === 'blurIntensity') {
+              updateIntensityLabel();
+              updateIntensityBadge();
+            }
             if (key === 'textSpoofingSeed') updateSpoofPreview();
           } else {
             inputs[key].checked = newValue;
