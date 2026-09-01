@@ -17,73 +17,49 @@
 - **Smart Dark Mode:** Applies a dark-style inversion only when the current site appears light.
 - **Advanced Audio Tools:** Stable Volume compression, Mono Audio, dialogue boost, and heavy bass cut profiles.
 
-## Core Features
+## ⚡ Feature Matrix (TabMaxxing Suite)
 
-### Instagram Pro (`insta-dl` & Live Copier)
+### 📸 1. Instagram & Media Maxxing (`insta-dl`)
+| Feature | Icon | What It Does | Why It's Great |
+| :--- | :---: | :--- | :--- |
+| **1-Click Live Copier** | 📋 | Copies raw PNG images directly to your system clipboard | Paste (<kbd>Ctrl</kbd>+<kbd>V</kbd>) into Discord, WhatsApp Web, Slack, etc. without saving junk files. |
+| **Video Frame Snapshot** | 🖼️ | Captures the active playing frame of Reels & Videos as an image | Instant meme grabbing and high-definition frame copying. |
+| **Smart Story Downloader** | 📥 | Downloads stories as true `.jpg` photos or `.mp4` videos | Fixes the common bug where static photo stories were forced into `.mp4`. |
+| **Carousel & Reel Grabber** | 🎠 | Downloads single carousel slides, all slides, or full Reels | Highest available resolution directly from Instagram CDN. |
 
-- **One-Click Downloads:** Download single photos, carousel slides, reels, and stories in highest available quality.
-- **1-Click Live Clipboard Copier:** Copy full-resolution photos directly to your system clipboard as PNG images.
-- **Video Frame Snapshot:** On reels and videos, click "Frame" to capture the exact active video frame to your clipboard as an image.
-- **Accurate Media Typing:** True `.jpg` files for photo stories, `.mp4` for video stories and reels.
-- **Zero Bloat & Isolated:** Runs as a dedicated module on `*://*.instagram.com/*` with zero impact on other sites.
+### 🛡️ 2. Visual Privacy Maxxing
+| Feature | Icon | What It Does | Use Case |
+| :--- | :---: | :--- | :--- |
+| **Smart Blur & Pixelate** | 💧 | Applies Gaussian blur or retro mosaic filters to media | Browse in cafes, offices, or classrooms without screen snooping. |
+| **Total Media Block** | 🛑 | Zero-bandwidth network block using `declarativeNetRequest` | Extreme privacy and high-speed data saving. |
+| **Invert & Grayscale** | ☯️ | Inverts colors or converts all targeted media to black & white | Low-distraction reading and reduced eye strain. |
+| **Hover Reveal** | 👁️ | Temporarily un-blurs media only when your mouse hovers over it | Peek at images on demand without unmasking the whole page. |
+| **Target Selectors** | 🎯 | Filter only Images, only Videos, or both | Granular control over media rendering. |
 
-### Visual Privacy
+### 🔊 3. Audio Maxxing
+| Feature | Icon | What It Does | Use Case |
+| :--- | :---: | :--- | :--- |
+| **Stable Volume Engine** | 🔊 | Dynamic Web Audio compression & LUFS loudness leveling | Normalizes audio spikes (whispering dialogue vs deafening explosions). |
+| **Mono Audio Downmix** | 🎧 | Combines stereo channels into balanced unified mono | Listening with a single earbud or sharing headphones. |
+| **Smooth Volume Fade** | 📈 | Softly ramps up volume when media starts playing | Eliminates sudden loud ear-blasting autoplay audio. |
+| **Custom EQ Profiles** | 🎛️ | Flat, Dialogue Boost, Night Mode (Bass Cut), Cinema, Music | Crystal-clear voices in podcasts, lectures, and movies. |
 
-- **Total Media Block:** Blocks images and videos using Chrome's `declarativeNetRequest` rules.
-- **Smart Blur & Pixelation:** Applies blur or mosaic filters to images, videos, embeds, canvas content, and background images.
-- **Invert & Uniform Mode:** Inverts filtered media for lower-detail viewing or converts targeted media to grayscale.
-- **Hover Reveal:** Temporarily reveals filtered media when hovering.
-- **Target Controls:** Apply filtering to images, videos, or both.
+### 🔒 4. Security & Text Privacy Maxxing
+| Feature | Icon | What It Does | Use Case |
+| :--- | :---: | :--- | :--- |
+| **Text Spoofing (Typoglycemia)** | 🔤 | Scrambles inner letters of words using a deterministic seed | Protects confidential documents & chats from shoulder surfers while you can still read it. |
+| **Browser Master Lock** | 🔒 | Locks the browser popup behind a universal SHA-256 password | Prevents unauthorized tampering when stepping away from your laptop. |
+| **Domain Lock** | 🚫 | Requires password authentication before accessing selected domains | Block distracting or private sites (e.g. `reddit.com`, `youtube.com`). |
+| **Per-Tab Scoping** | 🗂️ | Switch between "ALL TABS" and "THIS TAB" | Apply extreme privacy or filters to one tab without affecting others. |
 
-### Text Privacy
-
-- **Seeded Text Spoofing:** Scrambles the inner letters of visible words while preserving the first and last letters.
-- **Deterministic Output:** The same seed always produces the same spoofed result, helping your brain adapt over time.
-- **Dynamic Page Support:** Newly added and updated DOM text is transformed automatically.
-
-### Media & Audio Behavior
-
-- **Stable Volume Engine:** Uses Web Audio compression to reduce loud spikes and boost quiet audio.
-- **Mono Audio Downmixer:** Combines stereo channels into mono for single-earbud listening.
-- **Audio Profiles:** Choose Flat, Dialogue Boost, or Heavy Bass Cut.
-
-### Security And Utilities
-
-- **Universal Password:** Used for browser lock and domain locks.
-- **Domain Lock List:** Add domains like `reddit.com` or `youtube.com` in Options.
-- **Force Right-Click And Copy:** Re-enables text selection, context menus, copy, paste, and drag behavior on restrictive sites.
-- **Short URL Generator:** Copy shortened links from popup or context menu.
-- **Visual Search by Image:** Context menu options to reverse image search via Google Lens, Yandex, and TinEye.
-- **Keyboard Shortcut:** `Alt+S` can toggle your chosen action.
-
-## Popup Controls
-
-The popup gives quick access to:
-
-- Scope Toggle (All Tabs vs This Tab)
-- Browser Lock
-- Instagram Pro (Downloader & Live Copy) Toggle
-- Media Block, Blur, Invert, Uniform Visuals, Hover Reveal
-- Force Right-Click
-- Dark Mode
-- Stable Volume & Mono Audio
-- Text Spoofing
-- URL Shortener & Custom QR Code Generator
-- Area Snipping Tool (Visual Search)
-- Image and video counters
-
-## Options Page
-
-The Options page includes:
-
-- Instagram Downloader & Live Copier toggles
-- Media targeting controls (Images vs Videos)
-- Blur mode (Blur/Pixelate) and blur intensity
-- Audio EQ profiles (Stable Volume target LUFS, Dialogue, Cinema, Bass cut/boost)
-- Text Spoofing seed & live preview
-- Universal password management & Domain Lock list
-- `Alt+S` shortcut action configuration
-- Short URL history and high-res QR previews
+### 🛠️ 5. Day-to-Day Utilities
+| Feature | Icon | What It Does | Use Case |
+| :--- | :---: | :--- | :--- |
+| **Area Snipping Search** | 🔍 | Snip any screen region for multi-engine reverse image search | Search directly with Google Lens, Yandex, or TinEye. |
+| **Force Right-Click & Copy** | 🔓 | Overrides restrictive website scripts that disable right-clicking | Enables text selection, context menus, and copy/paste anywhere. |
+| **QR Code Generator** | 📱 | Generates instant QR codes for any link, image, or custom text | Quick link transfer directly from your desktop to your phone. |
+| **Universal URL Shortener** | 🔗 | 1-click URL shortening with recent history tracking | Clean, short shareable links without opening external tools. |
+| **Smart Dark Mode** | 🌙 | Intelligent dark theme inversion for glaring white sites | Comfortable night-time reading with media color preservation. |
 
 ## Installation
 
