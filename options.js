@@ -18,7 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
     browserLockPasswordConfirm: document.getElementById('browserLockPasswordConfirm'),
     domainLockEnabled: document.getElementById('domainLockEnabled'),
     instaDlEnabled: document.getElementById('instaDlEnabled'),
-    instaDlCopyEnabled: document.getElementById('instaDlCopyEnabled')
+    instaDlCopyEnabled: document.getElementById('instaDlCopyEnabled'),
+    adBlockEnabled: document.getElementById('adBlockEnabled')
   };
   
   const historyContainer = document.getElementById('historyContainer');
@@ -199,6 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (inputs.instaDlCopyEnabled) {
         inputs.instaDlCopyEnabled.checked = state.instaDlCopyEnabled !== false;
       }
+      if (inputs.adBlockEnabled) {
+        inputs.adBlockEnabled.checked = state.adBlockEnabled !== false;
+      }
       
       updateIntensityLabel();
       updateIntensityBadge();
@@ -231,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value });
   }
 
-  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'monoAudioEnabled', 'smoothVolumeEnabled', 'darkModeEnabled', 'textSpoofingEnabled', 'domainLockEnabled', 'instaDlEnabled', 'instaDlCopyEnabled'].forEach(key => {
+  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'monoAudioEnabled', 'smoothVolumeEnabled', 'darkModeEnabled', 'textSpoofingEnabled', 'domainLockEnabled', 'instaDlEnabled', 'instaDlCopyEnabled', 'adBlockEnabled'].forEach(key => {
     if (inputs[key]) {
       inputs[key].addEventListener('change', (e) => {
         updateSetting(key, e.target.checked);

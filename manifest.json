@@ -66,6 +66,11 @@
   "declarative_net_request": {
     "rule_resources": [
       {
+        "id": "block_ads",
+        "enabled": true,
+        "path": "rules/block_ads.json"
+      },
+      {
         "id": "block_images",
         "enabled": false,
         "path": "rules/block_images.json"

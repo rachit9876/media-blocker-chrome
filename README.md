@@ -47,6 +47,7 @@
 ### 🔒 4. Security & Text Privacy Maxxing
 | Feature | Icon | What It Does | Use Case |
 | :--- | :---: | :--- | :--- |
+| **Ad & Tracker Shield** | 🛡️ | Zero-overhead native Chromium DeclarativeNetRequest ad blocker | Drops ads, popups, and tracking beacons with 0ms latency and 0 telemetry. |
 | **Text Spoofing (Typoglycemia)** | 🔤 | Scrambles inner letters of words using a deterministic seed | Protects confidential documents & chats from shoulder surfers while you can still read it. |
 | **Browser Master Lock** | 🔒 | Locks the browser popup behind a universal SHA-256 password | Prevents unauthorized tampering when stepping away from your laptop. |
 | **Domain Lock** | 🚫 | Requires password authentication before accessing selected domains | Block distracting or private sites (e.g. `reddit.com`, `youtube.com`). |

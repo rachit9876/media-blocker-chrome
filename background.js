@@ -7,7 +7,8 @@ const DEFAULTS = {
   shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
   textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
   domainLockEnabled: false, lockedDomains: [],
-  instaDlEnabled: true, instaDlCopyEnabled: true
+  instaDlEnabled: true, instaDlCopyEnabled: true,
+  adBlockEnabled: true
 };
 
 // Search engine endpoints for context menu and snippet area visual search
@@ -38,18 +39,20 @@ init();
 
 async function updateDNR() {
   try {
-    const data = await chrome.storage.local.get(['mediaBlockEnabled', 'targetImgEnabled', 'targetVidEnabled']);
+    const data = await chrome.storage.local.get(['mediaBlockEnabled', 'targetImgEnabled', 'targetVidEnabled', 'adBlockEnabled']);
     const blockOn = Boolean(data.mediaBlockEnabled);
+    const adBlockOn = data.adBlockEnabled !== false;
     
     const enableRulesetIds = [];
+    if (adBlockOn) enableRulesetIds.push("block_ads");
     if (blockOn && data.targetImgEnabled !== false) enableRulesetIds.push("block_images");
     if (blockOn && data.targetVidEnabled !== false) enableRulesetIds.push("block_videos");
     
-    const disableRulesetIds = ["block_images", "block_videos"].filter(id => !enableRulesetIds.includes(id));
+    const disableRulesetIds = ["block_ads", "block_images", "block_videos"].filter(id => !enableRulesetIds.includes(id));
     
     await chrome.declarativeNetRequest.updateEnabledRulesets({ enableRulesetIds, disableRulesetIds });
   } catch (error) {
-    console.error("MediaBlock Pro: DNR Update Failed", error);
+    console.error("TabMaxxing: DNR Update Failed", error);
   }
 }
 
@@ -65,6 +68,7 @@ async function updateBadge() {
 
     const activeEmojis = [];
     
+    if (data.adBlockEnabled) activeEmojis.push("🛡️");
     if (data.mediaBlockEnabled) activeEmojis.push("🛑");
     if (data.mediaBlurEnabled) activeEmojis.push("💧");
     if (data.mediaInvertEnabled) activeEmojis.push("☯️");
@@ -84,13 +88,13 @@ async function updateBadge() {
     chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
     
   } catch (error) {
-    console.error("MediaBlock Pro: Badge Update Failed", error);
+    console.error("TabMaxxing: Badge Update Failed", error);
   }
 }
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local') {
-    if (changes.mediaBlockEnabled || changes.targetImgEnabled || changes.targetVidEnabled) {
+    if (changes.mediaBlockEnabled || changes.targetImgEnabled || changes.targetVidEnabled || changes.adBlockEnabled) {
       updateDNR();
     }
     updateBadge();

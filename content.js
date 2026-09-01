@@ -34,6 +34,34 @@
       }, true);
   });
 
+  const COSMETIC_ADBLOCK_CSS = `
+    .adsbygoogle, [id^="google_ads"], [id*="gpt-ad"], [class*="ad-banner"], 
+    [class*="sponsored-post"], [class*="ad-container"], div[id*="taboola"], 
+    div[id*="outbrain"], div[class*="zergnet"], .trc_related_container,
+    [aria-label="advertisement"], [data-ad-unit], [data-ad-client] {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  `;
+
+  function toggleCosmeticAdBlock(enabled) {
+    let styleEl = document.getElementById("__tabmax_adblock_cosmetic__");
+    if (enabled) {
+      if (!styleEl) {
+        styleEl = document.createElement("style");
+        styleEl.id = "__tabmax_adblock_cosmetic__";
+        styleEl.textContent = COSMETIC_ADBLOCK_CSS;
+        (document.head || document.documentElement).appendChild(styleEl);
+      }
+    } else {
+      if (styleEl) styleEl.remove();
+    }
+  }
+
   function toggleForceRightClickStyle(enabled) {
       let styleEl = document.getElementById("__mb_frc_style__");
       if (enabled) {
@@ -544,6 +572,7 @@
     else if (key === "darkModeEnabled") { toggleDarkMode(value); }
     else if (key === "textSpoofingEnabled") { toggleTextSpoofing(value); }
     else if (key === "textSpoofingSeed") { updateTextSpoofSeed(value); }
+    else if (key === "adBlockEnabled") { toggleCosmeticAdBlock(value); }
     else if (key === "browserLockEnabled") { value ? showLockScreen() : document.getElementById('mb-lock-screen')?.remove(); }
     else if (key === "domainLockEnabled") { if (!value) document.getElementById('mb-domain-lock')?.remove(); }
     else if (STATE_MAP[key]) { value ? root.setAttribute(STATE_MAP[key], "true") : root.removeAttribute(STATE_MAP[key]); }
@@ -650,7 +679,8 @@
     blurIntensity: 25, blurMode: "blur", audioEqMode: "stable", audioLufs: "-12",
     shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
     textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
-    domainLockEnabled: false, lockedDomains: []
+    domainLockEnabled: false, lockedDomains: [],
+    adBlockEnabled: true
   };
 
   function init() {

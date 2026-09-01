@@ -15,7 +15,8 @@
     darkModeEnabled: { color: "var(--dark-accent)", labelPrefix: "DARK MODE" },
     textSpoofingEnabled: { color: "var(--textspoof-accent)", labelPrefix: "TEXT SPOOF" },
     browserLockEnabled: { color: "var(--lock-accent)", labelPrefix: "LOCK" },
-    instaDlEnabled: { color: "var(--insta-accent)", labelPrefix: "INSTA DL" }
+    instaDlEnabled: { color: "var(--insta-accent)", labelPrefix: "INSTA DL" },
+    adBlockEnabled: { color: "var(--adblock-accent)", labelPrefix: "SHIELD" }
   };
 
   function updateSubUI(key, enabled) {
