@@ -1,4 +1,4 @@
-// MediaBlock Pro - Popup Script
+// TabMaxxing - Popup Script
 (function () {
   "use strict";
 

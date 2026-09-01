@@ -1,4 +1,4 @@
-// MediaBlock Pro - Instagram Downloader & 1-Click Live Copier (insta-dl)
+// TabMaxxing - Instagram Downloader & 1-Click Live Copier (insta-dl)
 (function () {
   "use strict";
   if (window.__INSTA_DL_LOADED) return;

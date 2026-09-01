@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "MediaBlock Pro - Image & Video Shield",
-  "version": "4.4.0",
-  "description": "Instantly block, blur, or invert all images and videos. High performance and layout-safe.",
+  "name": "TabMaxxing - Supercharge Your Browser Tabs",
+  "version": "5.0.0",
+  "description": "Max out your tabs: Visual privacy, audio leveling, 1-click clipboard copier, text spoofing, area search, and browser tools.",
   "permissions": [
     "storage",
     "declarativeNetRequest",
@@ -49,7 +49,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "MediaBlock Pro"
+    "default_title": "TabMaxxing"
   },
   "options_ui": {
     "page": "options.html",
@@ -60,7 +60,7 @@
       "suggested_key": {
         "default": "Alt+S"
       },
-      "description": "Customizable MediaBlock Shortcut"
+      "description": "Customizable TabMaxxing Shortcut"
     }
   },
   "declarative_net_request": {

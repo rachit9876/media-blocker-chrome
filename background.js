@@ -1,4 +1,4 @@
-// MediaBlock Pro - Background Service Worker
+// TabMaxxing - Background Service Worker
 const DEFAULTS = {
   mediaBlockEnabled: false, mediaInvertEnabled: false, mediaBlurEnabled: false,
   mediaHoverEnabled: false, mediaUniformEnabled: false, forceRightClickEnabled: false,

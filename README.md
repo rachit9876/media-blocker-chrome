@@ -1,6 +1,6 @@
-# MediaBlock Pro
+# TabMaxxing ⚡
 
-MediaBlock Pro is a Manifest V3 Chrome extension for screen privacy, media filtering, and safer browsing in public or shared spaces. It can block, blur, invert, grayscale, or reveal media on hover. It also includes seeded Text Spoofing to protect your screen from shoulder surfers, Visual Image Search, QR code generation, and more.
+**TabMaxxing** is the ultimate PowerTools & privacy utility suite for Chromium browsers. Max out your daily browsing stats with visual privacy (blur, block, pixelate, invert), audio leveling (stable volume compressor, mono downmix), 1-click live clipboard copying, Instagram high-res downloads (`insta-dl`), shoulder-surfing text spoofing, area snipping visual search, master password locks, and daily tab productivity tools.
 
 [Download the latest ZIP](https://github.com/rachit9876/media-blocker-chrome/archive/refs/heads/main.zip)
 
@@ -93,7 +93,7 @@ The Options page includes:
 4. Enable **Developer mode**.
 5. Click **Load unpacked**.
 6. Select the extracted extension folder.
-7. Pin MediaBlock Pro to your toolbar for quick access.
+7. Pin **TabMaxxing** to your toolbar for quick access.
 
 ## Permissions Used
 
@@ -122,4 +122,4 @@ The Options page includes:
 
 ## Version
 
-Current manifest version: `4.4.0`.
+Current manifest version: `5.0.0`.

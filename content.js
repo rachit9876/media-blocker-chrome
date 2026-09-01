@@ -1,4 +1,4 @@
-// MediaBlock Pro Content Script
+// TabMaxxing Content Script
 (function () {
   "use strict";
   if (window.__MB_LOADED) return;
