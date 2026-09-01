@@ -34,6 +34,7 @@
       --lock-accent: #f43f5e;
       --short-accent: #8b5cf6;
       --search-accent: #eab308;
+      --insta-accent: #e1306c;
       
       --text-primary: #f3f3f8;
       --text-secondary: #858598;
@@ -736,6 +737,16 @@
       border-color: rgba(244, 63, 94, 0.3);
       background: rgba(244, 63, 94, 0.12);
     }
+
+    .status-card.active-instaDlEnabled {
+      border-color: var(--insta-accent);
+      background: rgba(225, 48, 108, 0.07);
+    }
+    .status-card.active-instaDlEnabled .feature-icon-wrap {
+      color: var(--insta-accent);
+      border-color: rgba(225, 48, 108, 0.3);
+      background: rgba(225, 48, 108, 0.12);
+    }
   </style>
 </head>
 <body>
@@ -994,6 +1005,20 @@
             </div>
           </div>
           <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="textSpoofingEnabled" /><label class="toggle-label" for="textSpoofingEnabled"><div class="toggle-track" id="textSpoofingEnabledTrack"><div class="toggle-thumb" id="textSpoofingEnabledThumb"></div></div></label></div>
+        </div>
+
+        <!-- Instagram Pro (Downloader & Live Copy) -->
+        <div class="status-card" id="instaDlEnabledCard" style="grid-column: span 2;">
+          <div class="status-meta">
+            <div class="feature-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </div>
+            <div class="status-text-block">
+              <span class="status-label">Instagram Pro (DL & Live Copy)</span>
+              <span class="status-badge" id="instaDlEnabledLabel">OFF</span>
+            </div>
+          </div>
+          <div class="toggle-wrapper"><input type="checkbox" class="toggle-input" id="instaDlEnabled" /><label class="toggle-label" for="instaDlEnabled"><div class="toggle-track" id="instaDlEnabledTrack"><div class="toggle-thumb" id="instaDlEnabledThumb"></div></div></label></div>
         </div>
       </div>
     </div>

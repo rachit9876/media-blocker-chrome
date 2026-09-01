@@ -6,6 +6,8 @@ MediaBlock Pro is a Manifest V3 Chrome extension for screen privacy, media filte
 
 ## What's New
 
+- **Instagram Pro (Downloader & 1-Click Live Copier `insta-dl`):** Download highest-resolution photos, videos, stories, and reels on Instagram. Features an instant **1-Click Live Copy** button to copy full-resolution PNG images directly to your system clipboard for instant pasting (<kbd>Ctrl</kbd>+<kbd>V</kbd>) into Discord, WhatsApp Web, Slack, etc. without downloading any files!
+- **Accurate Story Media Handling:** Automatically distinguishes between still photo stories (`.jpg`) and video stories (`.mp4`), fixing the common bug in other downloaders where static photo stories were forced into video format.
 - **Visual Image Search & Snipping Tool:** Right-click to search images via Google Lens, Yandex, or TinEye. Use the "Search Area" tool in the popup to snip and search any part of your screen!
 - **Tab Scoped Settings:** Click "ALL TABS / THIS TAB" in the popup to apply filters and privacy modes to only the currently active tab without affecting the rest of your browser.
 - **QR Code Generator:** Right-click to generate a QR code for the current page, link, or media. A custom QR generator is also available in the popup.
@@ -16,6 +18,14 @@ MediaBlock Pro is a Manifest V3 Chrome extension for screen privacy, media filte
 - **Advanced Audio Tools:** Stable Volume compression, Mono Audio, dialogue boost, and heavy bass cut profiles.
 
 ## Core Features
+
+### Instagram Pro (`insta-dl` & Live Copier)
+
+- **One-Click Downloads:** Download single photos, carousel slides, reels, and stories in highest available quality.
+- **1-Click Live Clipboard Copier:** Copy full-resolution photos directly to your system clipboard as PNG images.
+- **Video Frame Snapshot:** On reels and videos, click "Frame" to capture the exact active video frame to your clipboard as an image.
+- **Accurate Media Typing:** True `.jpg` files for photo stories, `.mp4` for video stories and reels.
+- **Zero Bloat & Isolated:** Runs as a dedicated module on `*://*.instagram.com/*` with zero impact on other sites.
 
 ### Visual Privacy
 
@@ -52,6 +62,7 @@ The popup gives quick access to:
 
 - Scope Toggle (All Tabs vs This Tab)
 - Browser Lock
+- Instagram Pro (Downloader & Live Copy) Toggle
 - Media Block, Blur, Invert, Uniform Visuals, Hover Reveal
 - Force Right-Click
 - Dark Mode
@@ -65,6 +76,7 @@ The popup gives quick access to:
 
 The Options page includes:
 
+- Instagram Downloader & Live Copier toggles
 - Media targeting controls (Images vs Videos)
 - Blur mode (Blur/Pixelate) and blur intensity
 - Audio EQ profiles (Stable Volume target LUFS, Dialogue, Cinema, Bass cut/boost)
@@ -86,23 +98,26 @@ The Options page includes:
 ## Permissions Used
 
 - `storage`: Save extension settings, password hash, domain locks, and URL history.
+- `downloads`: Save high-resolution Instagram photos, videos, and reels.
 - `declarativeNetRequest`: Block image and video requests efficiently.
 - `declarativeNetRequestWithHostAccess`: Apply network rules across allowed sites.
 - `scripting`: Run small page scripts for counters, snipping tools, clipboard writes, and alerts.
 - `tabs`: Read the active tab URL for counters, screenshots, and URL shortening.
 - `activeTab`: Interact with the currently active page.
-- `clipboardWrite`: Copy shortened URLs.
+- `clipboardWrite`: Direct copy of images, frames, and shortened URLs to the clipboard.
 - `contextMenus`: Add right-click URL shortening, QR generation, and image search actions.
 - `<all_urls>` host access: Apply media filtering, text spoofing, locks, and page protections across websites.
 
 ## Project Files
 
 - `manifest.json`: Chrome extension manifest.
-- `background.js`: State management, DNR rules, shortcut handling, context menus, URL shortening, visual search uploaders, password checks.
+- `background.js`: State management, DNR rules, shortcut handling, context menus, URL shortening, visual search uploaders, password checks, download handlers.
 - `content.js`: Page-side media filters, smart dark mode, lock overlays, Web Audio API processing, force right-click, Text Spoofing observer.
+- `insta-dl.js`: Instagram media resolver, story handler, 1-click clipboard copier, and post/reel/story UI injector.
+- `insta-dl.css`: Styling for Instagram action bars, buttons, dropdowns, and toast notifications.
 - `selector.js`: Screen area selection and snipping tool UI for Visual Search.
-- `popup.html` / `popup.js`: Quick controls, URL shortener, QR generator, snipping tool trigger, and tab scoping logic.
-- `options.html` / `options.js`: Advanced settings, domain locks, history, and live previews.
+- `popup.html` / `popup.js`: Quick controls, URL shortener, QR generator, snipping tool trigger, Instagram Pro toggle, and tab scoping logic.
+- `options.html` / `options.js`: Advanced settings, Instagram configuration, domain locks, history, and live previews.
 - `rules/`: Declarative network request rules for media blocking.
 
 ## Version

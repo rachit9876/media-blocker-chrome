@@ -6,7 +6,8 @@ const DEFAULTS = {
   blurIntensity: 25, blurMode: "blur", audioEqMode: "stable", audioLufs: "-12",
   shortcutAction: "toggle_blur", browserLockEnabled: false, browserLockPassword: "", urlHistory: [],
   textSpoofingEnabled: false, textSpoofingSeed: "mediablock",
-  domainLockEnabled: false, lockedDomains: []
+  domainLockEnabled: false, lockedDomains: [],
+  instaDlEnabled: true, instaDlCopyEnabled: true
 };
 
 // Search engine endpoints for context menu and snippet area visual search
@@ -95,6 +96,44 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Direct Instagram / Media Downloader API
+  if (message.action === "DOWNLOAD_MEDIA") {
+    try {
+      chrome.downloads.download({
+        url: message.url,
+        filename: message.filename || "instagram_media",
+        conflictAction: "uniquify",
+        saveAs: false
+      }, (downloadId) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+        } else {
+          sendResponse({ success: true, downloadId });
+        }
+      });
+    } catch (err) {
+      sendResponse({ success: false, error: err.toString() });
+    }
+    return true;
+  }
+
+  // Cross-origin image fetcher for Live Clipboard Copier
+  if (message.action === "FETCH_MEDIA_AS_BASE64") {
+    fetch(message.url)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.blob();
+      })
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => sendResponse({ success: true, dataUrl: reader.result, type: blob.type });
+        reader.onerror = () => sendResponse({ success: false, error: "Reader error" });
+        reader.readAsDataURL(blob);
+      })
+      .catch(err => sendResponse({ success: false, error: err.toString() }));
+    return true;
+  }
+
   // Capture visible viewport for area snipping tool
   if (message.action === "capture_visible_tab") {
     const windowId = sender.tab?.windowId ?? chrome.windows.WINDOW_ID_CURRENT;

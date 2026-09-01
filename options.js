@@ -16,7 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     textSpoofingSeed: document.getElementById('textSpoofingSeed'),
     browserLockPassword: document.getElementById('browserLockPassword'),
     browserLockPasswordConfirm: document.getElementById('browserLockPasswordConfirm'),
-    domainLockEnabled: document.getElementById('domainLockEnabled')
+    domainLockEnabled: document.getElementById('domainLockEnabled'),
+    instaDlEnabled: document.getElementById('instaDlEnabled'),
+    instaDlCopyEnabled: document.getElementById('instaDlCopyEnabled')
   };
   
   const historyContainer = document.getElementById('historyContainer');
@@ -191,6 +193,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (inputs.domainLockEnabled) {
         inputs.domainLockEnabled.checked = state.domainLockEnabled || false;
       }
+      if (inputs.instaDlEnabled) {
+        inputs.instaDlEnabled.checked = state.instaDlEnabled !== false;
+      }
+      if (inputs.instaDlCopyEnabled) {
+        inputs.instaDlCopyEnabled.checked = state.instaDlCopyEnabled !== false;
+      }
       
       updateIntensityLabel();
       updateIntensityBadge();
@@ -223,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: "UPDATE_SETTING", key, value });
   }
 
-  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'monoAudioEnabled', 'smoothVolumeEnabled', 'darkModeEnabled', 'textSpoofingEnabled', 'domainLockEnabled'].forEach(key => {
+  ['targetImgEnabled', 'targetVidEnabled', 'forceRightClickEnabled', 'stableVolumeEnabled', 'monoAudioEnabled', 'smoothVolumeEnabled', 'darkModeEnabled', 'textSpoofingEnabled', 'domainLockEnabled', 'instaDlEnabled', 'instaDlCopyEnabled'].forEach(key => {
     if (inputs[key]) {
       inputs[key].addEventListener('change', (e) => {
         updateSetting(key, e.target.checked);

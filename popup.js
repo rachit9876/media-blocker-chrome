@@ -14,7 +14,8 @@
     smoothVolumeEnabled: { color: "var(--search-accent)", labelPrefix: "SMOOTH VOL" },
     darkModeEnabled: { color: "var(--dark-accent)", labelPrefix: "DARK MODE" },
     textSpoofingEnabled: { color: "var(--textspoof-accent)", labelPrefix: "TEXT SPOOF" },
-    browserLockEnabled: { color: "var(--lock-accent)", labelPrefix: "LOCK" }
+    browserLockEnabled: { color: "var(--lock-accent)", labelPrefix: "LOCK" },
+    instaDlEnabled: { color: "var(--insta-accent)", labelPrefix: "INSTA DL" }
   };
 
   function updateSubUI(key, enabled) {
