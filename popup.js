@@ -127,6 +127,22 @@
     });
   }
 
+  function initFullPageCapture() {
+    const btn = document.getElementById('capturePageBtn');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.url || !tab.url.startsWith("http")) {
+        alert("Full page capture is available on standard HTTP/HTTPS pages.");
+        return;
+      }
+
+      await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["capture.css"] });
+      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["capture.js"] });
+      window.close();
+    });
+  }
+
   function initImageSearch() {
     const btn = document.getElementById('searchImageBtn');
     btn.addEventListener('click', async () => {
@@ -301,6 +317,7 @@
 
     fetchMediaCounts();
     initUrlShortener();
+    initFullPageCapture();
     initImageSearch();
     initQrGenerator(); 
 

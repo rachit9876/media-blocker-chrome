@@ -17,6 +17,8 @@ const ENGINES = {
   tineye: { name: "TinEye", url: "https://www.tineye.com/search/?url=" }
 };
 
+let latestCapturePayload = null;
+
 async function hashPassword(password) {
   if (!password) return "";
   const msgBuffer = new TextEncoder().encode(password);
@@ -143,6 +145,42 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  // Full-Page Scrolling Slice Capture
+  if (message.action === "CAPTURE_VISIBLE_TAB_SLICE") {
+    const windowId = sender.tab?.windowId ?? chrome.windows.WINDOW_ID_CURRENT;
+    chrome.tabs.captureVisibleTab(windowId, { format: 'png' })
+      .then(dataUrl => sendResponse({ dataUrl }))
+      .catch(err => sendResponse({ error: err ? err.message : "Slice capture failed" }));
+    return true;
+  }
+
+  // Launch Full-Page Capture Viewer
+  if (message.action === "OPEN_CAPTURE_VIEWER") {
+    latestCapturePayload = message.payload;
+    chrome.tabs.create({ url: chrome.runtime.getURL("capture-viewer.html") });
+    sendResponse({ success: true });
+    return true;
+  }
+
+  // Retrieve Stitched Capture Payload
+  if (message.action === "GET_LATEST_CAPTURE_PAYLOAD") {
+    sendResponse({ payload: latestCapturePayload });
+    return true;
+  }
+
+  // Trigger Full-Page Capture on Tab
+  if (message.action === "START_FULL_PAGE_CAPTURE") {
+    const tabId = message.tabId || sender.tab?.id;
+    if (tabId) {
+      chrome.scripting.executeScript({
+        target: { tabId },
+        files: ["capture.js"]
+      });
+    }
+    sendResponse({ success: true });
+    return true;
+  }
+
   // Visual Image Search API Engine
   if (message.action === "search_image") {
     searchImage(message.imgUrl, sender.tab, "all"); 
@@ -241,6 +279,9 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
+  // Full Page Capture Context Menu
+  chrome.contextMenus.create({ id: "capture_full_page", title: "📸 Capture Full Page Screenshot", contexts: ["page"] });
+
   // Shortener Context Menus
   chrome.contextMenus.create({ id: "shorten_page", title: "Copy Short URL (Current Page)", contexts: ["page"] });
   chrome.contextMenus.create({ id: "shorten_media", title: "Copy Short URL (This Media)", contexts: ["image", "video", "audio"] });
@@ -261,6 +302,19 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
+  // Handle Full Page Capture
+  if (info.menuItemId === "capture_full_page" && tab?.id) {
+    if (!tab.url || !tab.url.startsWith("http")) {
+      chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => alert("Full page capture is available on standard HTTP/HTTPS pages.") });
+      return;
+    }
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ["capture.js"]
+    });
+    return;
+  }
+
   // Handle Search by Image
   if (info.menuItemId.toString().startsWith("sbi-")) {
     if (info.menuItemId === "sbi-parent" || info.menuItemId === "sbi-separator") return;

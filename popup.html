@@ -535,6 +535,15 @@
     .action-btn-compact.btn-search:hover .action-icon-wrap {
       color: var(--search-accent);
     }
+
+    .action-btn-compact.btn-capture:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
+    }
+    .action-btn-compact.btn-capture:hover .action-title,
+    .action-btn-compact.btn-capture:hover .action-icon-wrap {
+      color: #60a5fa;
+    }
     
     .action-arrow-icon {
       width: 12px;
@@ -1031,6 +1040,19 @@
       </div>
       
       <!-- Actions Row -->
+      <div class="actions-row" style="margin-bottom: 6px;">
+        <div class="action-btn-compact btn-capture" id="capturePageBtn" style="grid-column: span 2;">
+          <div class="action-left">
+            <div class="action-icon-wrap" style="color: #60a5fa;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+            </div>
+            <span class="action-title" id="capturePageStatusLabel">Full Page Screenshot & PDF</span>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-arrow-icon"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      </div>
+
+      <!-- Actions Row 2 -->
       <div class="actions-row" style="margin-bottom: 8px;">
         <div class="action-btn-compact btn-shorten" id="shortenUrlBtn">
           <div class="action-left">

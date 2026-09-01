@@ -55,6 +55,7 @@
 ### 🛠️ 5. Day-to-Day Utilities
 | Feature | Icon | What It Does | Use Case |
 | :--- | :---: | :--- | :--- |
+| **Full Page Screenshot & PDF** | 📸 | Auto-scrolls and stitches entire webpages into high-res PNG or PDF | Capture long articles, receipts, and full design mockups with 1 click. |
 | **Area Snipping Search** | 🔍 | Snip any screen region for multi-engine reverse image search | Search directly with Google Lens, Yandex, or TinEye. |
 | **Force Right-Click & Copy** | 🔓 | Overrides restrictive website scripts that disable right-clicking | Enables text selection, context menus, and copy/paste anywhere. |
 | **QR Code Generator** | 📱 | Generates instant QR codes for any link, image, or custom text | Quick link transfer directly from your desktop to your phone. |
@@ -91,6 +92,8 @@
 - `content.js`: Page-side media filters, smart dark mode, lock overlays, Web Audio API processing, force right-click, Text Spoofing observer.
 - `insta-dl.js`: Instagram media resolver, story handler, 1-click clipboard copier, and post/reel/story UI injector.
 - `insta-dl.css`: Styling for Instagram action bars, buttons, dropdowns, and toast notifications.
+- `capture.js` / `capture.css`: Full-page scrolling screenshot orchestrator and sticky header suppressor.
+- `capture-viewer.html` / `capture-viewer.js`: High-resolution stitched canvas viewer, PNG/JPEG download, PDF exporter, and 1-click clipboard copier.
 - `selector.js`: Screen area selection and snipping tool UI for Visual Search.
 - `popup.html` / `popup.js`: Quick controls, URL shortener, QR generator, snipping tool trigger, Instagram Pro toggle, and tab scoping logic.
 - `options.html` / `options.js`: Advanced settings, Instagram configuration, domain locks, history, and live previews.

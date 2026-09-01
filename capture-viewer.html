@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TabMaxxing - Full Page Capture Viewer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Alata&display=swap');
+    
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Alata', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+
+    :root {
+      --bg: #0c0c11;
+      --panel-bg: rgba(20, 20, 28, 0.85);
+      --border: rgba(255, 255, 255, 0.12);
+      --border-hover: rgba(255, 255, 255, 0.25);
+      --accent-blue: #3b82f6;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --text-primary: #f3f3f8;
+      --text-secondary: #8b8b9e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Sticky Action Toolbar */
+    .top-toolbar {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #181822;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-logo img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-badge {
+      font-size: 10px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .page-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      max-width: 340px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Center Actions */
+    .center-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      text-decoration: none;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: var(--border-hover);
+      transform: translateY(-1px);
+    }
+
+    .action-btn:active {
+      transform: scale(0.97);
+    }
+
+    .action-btn svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(168, 85, 247, 0.3));
+      border-color: rgba(168, 85, 247, 0.4);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(168, 85, 247, 0.5));
+      border-color: rgba(168, 85, 247, 0.6);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.3);
+    }
+
+    .btn-copy {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: #86efac;
+    }
+
+    .btn-copy:hover {
+      background: rgba(34, 197, 94, 0.28);
+      border-color: rgba(34, 197, 94, 0.5);
+      color: #bbf7d0;
+    }
+
+    /* Zoom Controls */
+    .zoom-group {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px;
+    }
+
+    .zoom-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 50%;
+      font-size: 14px;
+      transition: all 0.15s ease;
+    }
+
+    .zoom-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .zoom-val {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 0 8px;
+      min-width: 44px;
+      text-align: center;
+    }
+
+    /* Workspace Canvas View */
+    .workspace {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 32px 20px 64px 20px;
+      overflow: auto;
+    }
+
+    .canvas-container {
+      position: relative;
+      border-radius: 12px;
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      background: #181822;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transform-origin: top center;
+    }
+
+    #captureCanvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Loading Spinner */
+    .loading-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 80px 20px;
+    }
+
+    .spinner-large {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      border-top-color: var(--accent-purple);
+      border-radius: 50%;
+      animation: tabmaxSpin 0.8s linear infinite;
+    }
+
+    /* Toast */
+    .viewer-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #121218;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .viewer-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @keyframes tabmaxSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Crop Tool Overlay */
+    .crop-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      cursor: crosshair;
+      user-select: none;
+      z-index: 50;
+    }
+
+    .crop-box {
+      position: absolute;
+      border: 2px dashed #3b82f6;
+      background: rgba(59, 130, 246, 0.08);
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+      cursor: move;
+      min-width: 30px;
+      min-height: 30px;
+    }
+
+    .crop-handle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #ffffff;
+      border: 2px solid #3b82f6;
+      border-radius: 2px;
+    }
+
+    .handle-tl { top: -5px; left: -5px; cursor: nwse-resize; }
+    .handle-tr { top: -5px; right: -5px; cursor: nesw-resize; }
+    .handle-bl { bottom: -5px; left: -5px; cursor: nesw-resize; }
+    .handle-br { bottom: -5px; right: -5px; cursor: nwse-resize; }
+
+    .crop-actions-pill {
+      position: absolute;
+      bottom: -44px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #181822;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+      white-space: nowrap;
+      z-index: 60;
+    }
+
+    .crop-dim-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #93c5fd;
+    }
+
+    .crop-action-btn {
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: none;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .crop-btn-apply {
+      background: #22c55e;
+      color: #ffffff;
+    }
+    .crop-btn-apply:hover {
+      background: #16a34a;
+    }
+
+    .crop-btn-cancel {
+      background: rgba(255, 255, 255, 0.12);
+      color: #f3f3f8;
+    }
+    .crop-btn-cancel:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    /* Print Styles for PDF Export */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .top-toolbar, .viewer-toast, .crop-overlay {
+        display: none !important;
+      }
+      .workspace {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .canvas-container {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+      }
+      #captureCanvas {
+        width: 100% !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Action Toolbar -->
+  <header class="top-toolbar">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <img src="icons/icon32.png" alt="TabMaxxing" />
+      </div>
+      <div>
+        <div class="brand-title">
+          <span>TabMaxxing</span>
+          <span class="brand-badge">CAPTURE</span>
+        </div>
+        <div class="page-meta" id="pageMetaLabel">Loading capture metadata...</div>
+      </div>
+    </div>
+
+    <!-- Center Actions -->
+    <div class="center-tools">
+      <button class="action-btn" id="cropToggleBtn" title="Crop Screenshot">
+        <svg viewBox="0 0 24 24"><path d="M17 15h2V7c0-1.1-.9-2-2-2H9v2h8v8zM7 17V1H5v4H1v2h4v10c0 1.1.9 2 2 2h10v4h2v-4h4v-2H7z"/></svg>
+        <span>Crop</span>
+      </button>
+
+      <button class="action-btn" id="undoCropBtn" style="display: none;" title="Reset / Undo Crop">
+        <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C20.95 11.03 17.07 8 12.5 8z"/></svg>
+        <span>Undo Crop</span>
+      </button>
+
+      <button class="action-btn btn-primary" id="downloadPngBtn" title="Download High-Resolution PNG">
+        <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+        <span>Download PNG</span>
+      </button>
+
+      <button class="action-btn btn-copy" id="copyClipboardBtn" title="1-Click Copy Full Screenshot to Clipboard">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy Image</span>
+      </button>
+
+      <button class="action-btn" id="exportPdfBtn" title="Export as PDF Document">
+        <svg viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v4zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>
+        <span>Export PDF</span>
+      </button>
+
+      <!-- Zoom Controls -->
+      <div class="zoom-group">
+        <button class="zoom-btn" id="zoomOutBtn" title="Zoom Out">-</button>
+        <span class="zoom-val" id="zoomValLabel">Fit</span>
+        <button class="zoom-btn" id="zoomInBtn" title="Zoom In">+</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Workspace Canvas View -->
+  <main class="workspace">
+    <div class="loading-wrap" id="loadingWrap">
+      <div class="spinner-large"></div>
+      <span style="font-size: 14px; color: var(--text-secondary);">Stitching high-resolution full page canvas...</span>
+    </div>
+
+    <div class="canvas-container" id="canvasContainer" style="display: none;">
+      <canvas id="captureCanvas"></canvas>
+      
+      <!-- Crop Interactive Overlay -->
+      <div id="cropOverlay" class="crop-overlay" style="display: none;">
+        <div id="cropBox" class="crop-box" style="display: none;">
+          <div class="crop-handle handle-tl"></div>
+          <div class="crop-handle handle-tr"></div>
+          <div class="crop-handle handle-bl"></div>
+          <div class="crop-handle handle-br"></div>
+          <div class="crop-actions-pill">
+            <span class="crop-dim-badge" id="cropDimBadge">0 × 0</span>
+            <button class="crop-action-btn crop-btn-apply" id="applyCropBtn">✓ Apply Crop</button>
+            <button class="crop-action-btn crop-btn-cancel" id="cancelCropBtn">✕ Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="viewer-toast" id="viewerToast">
+    <span>✨</span>
+    <span id="viewerToastMsg">Copied full page to clipboard!</span>
+  </div>
+
+  <script src="capture-viewer.js"></script>
+</body>
+</html>
